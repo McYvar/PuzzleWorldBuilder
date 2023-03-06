@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 
+#if UNITY_EDITOR
 [CustomEditor(typeof(DropDownMenu))]
 public class DropDownMenuCustomInspector : Editor
 {
@@ -27,3 +28,4 @@ public class DropDownMenuCustomInspector : Editor
         }
     }
 }
+#endif

@@ -8,18 +8,34 @@ using UnityEditor;
 [ExecuteAlways]
 public class DropDownMenu : MonoBehaviour
 {
+    /// <summary>
+    /// Date: 03/05/2023, By: Yvar
+    /// Script for creating dropdown menu's easier
+    /// Not very sophisticated yet. Somethings might not work, then you just have to re-enable the gameobject this script is
+    /// on in the editor. Script essentially creates options for a dropdown menu that scales with the amount of options. 
+    /// Unfortunately only deletes the last one created, so might work on that problem later on.
+    /// </summary>
+
     [SerializeField] GameObject dropDownObject;
     RectTransform dropDownRect;
-    [SerializeField] float dropDownHeight;
 
     [SerializeField] List<Button> buttons = new List<Button>();
     [SerializeField] Sprite dropDownImage;
     [SerializeField] float buttonWidth;
     [SerializeField] float buttonHeight;
 
+    [SerializeField] float textOffset;
+    [SerializeField] List<TextMeshProUGUI> buttonTexts = new List<TextMeshProUGUI>();
+
     bool display = false;
     RectTransform rectTransform;
     [SerializeField] GameObject emptyGameObj;
+    [SerializeField] bool visibleOnEdit = false;
+    [SerializeField] bool hideMainButtonText;
+    [SerializeField] TextMeshProUGUI mainButtonText;
+
+    [SerializeField] Canvas ParentCanvas;
+    float canvasScale;
 
     private void OnEnable()
     {
@@ -36,15 +52,25 @@ public class DropDownMenu : MonoBehaviour
         DestroyImmediate(emptyGameObj);
     }
 
+    /// <summary>
+    /// The script has to scale with the amount of option entries, also the text length is included in a seperate
+    /// list to scale along aswell.
+    /// </summary>
     private void Update()
     {
         if (!display)
         {
             dropDownObject.SetActive(false);
+            if (hideMainButtonText && mainButtonText != null) mainButtonText.enabled = false;
+            
+            #if UNITY_EDITOR
             if (EditorApplication.isPlaying) return;
+            #endif
+            if (!visibleOnEdit) return;
         }
 
         dropDownObject.SetActive(true);
+        if (mainButtonText != null) mainButtonText.enabled = true;
 
         int iterator = 0;
         foreach (var button in buttons)
@@ -53,8 +79,12 @@ public class DropDownMenu : MonoBehaviour
             button.targetGraphic.rectTransform.localPosition = dropDownRect.localPosition + new Vector3(1,  (-(buttonHeight + 1) * iterator) - (rectTransform.sizeDelta.y + 3));
             iterator++;
         }
+        foreach (var text in buttonTexts)
+        {
+            text.rectTransform.localPosition = new Vector2(textOffset, text.rectTransform.localPosition.y);
+        }
 
-        dropDownRect.sizeDelta = new Vector2(buttonWidth + 2, (buttonHeight + 2) * (iterator + 0.5f));
+        dropDownRect.sizeDelta = new Vector2(buttonWidth + 2, (buttonHeight + 1) * (buttons.Count + 1));
     }
 
     public void DisplayMenu()
@@ -86,34 +116,55 @@ public class DropDownMenu : MonoBehaviour
         GameObject obj = Instantiate(emptyGameObj, dropDownObject.transform);
         obj.name = "Button" + buttons.Count;
         Button button = obj.AddComponent<Button>();
+        button = CopyBaseButton(GetComponent<Button>(), button);
         buttons.Add(button);
         Image image = obj.AddComponent<Image>();
         image.sprite = dropDownImage;
         button.targetGraphic = image;
-        button.onClick.AddListener(() => HideMenu());
-        image.rectTransform.pivot = rectTransform.pivot + new Vector2(dropDownRect.localPosition.x, 0);
+        image.rectTransform.pivot = new Vector2(0f, 1f);
 
         GameObject textObj = Instantiate(emptyGameObj, obj.transform);
         textObj.name = "Text (TMP) custom";
 
         textObj.AddComponent<CanvasRenderer>();
         TextMeshProUGUI text = textObj.AddComponent<TextMeshProUGUI>();
+        text.alignment = TextAlignmentOptions.Left;
         text.rectTransform.pivot = new Vector2(0.5f, 0.5f);
         text.rectTransform.sizeDelta = new Vector2(buttonWidth, buttonHeight);
         text.fontSize = 12;
-        text.alignment = TextAlignmentOptions.Center;
         text.text = "button" + buttons.Count.ToString();
         text.color = Color.black;
+        buttonTexts.Add(text);
     }
 
     public void RemoveButtonFromMenu()
     {
         DestroyImmediate(buttons[buttons.Count - 1].gameObject);
         buttons.RemoveAt(buttons.Count - 1);
+        buttonTexts.RemoveAt(buttonTexts.Count - 1);
     }
 
     public void ClearButtons()
     {
         buttons.Clear();
+        buttonTexts.Clear();
+    }
+
+    public Button CopyBaseButton(Button parent, Button copy)
+    {
+        copy.colors = parent.colors;
+        return copy;
+    }
+
+    public void DisplayDropDownOnLocation(float x, float y)
+    {
+        BackGroundLayerOptions.ClearDropdowns();
+        display = true;
+
+        if (ParentCanvas != null) canvasScale = ParentCanvas.scaleFactor;
+        if (x + dropDownRect.sizeDelta.x * canvasScale > Screen.width) x -= dropDownRect.sizeDelta.x * canvasScale;
+        if (y - dropDownRect.sizeDelta.y * canvasScale < 0) y += dropDownRect.sizeDelta.y * canvasScale;
+
+        rectTransform.position = new Vector2(x, y);
     }
 }
