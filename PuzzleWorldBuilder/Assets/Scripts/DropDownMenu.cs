@@ -1,9 +1,8 @@
-using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
 using TMPro;
-using UnityEngine.UI;
 using UnityEditor;
+using UnityEngine;
+using UnityEngine.UI;
 
 [ExecuteAlways]
 public class DropDownMenu : MonoBehaviour
@@ -62,10 +61,10 @@ public class DropDownMenu : MonoBehaviour
         {
             dropDownObject.SetActive(false);
             if (hideMainButtonText && mainButtonText != null) mainButtonText.enabled = false;
-            
-            #if UNITY_EDITOR
+
+#if UNITY_EDITOR
             if (EditorApplication.isPlaying) return;
-            #endif
+#endif
             if (!visibleOnEdit) return;
         }
 
@@ -76,7 +75,7 @@ public class DropDownMenu : MonoBehaviour
         foreach (var button in buttons)
         {
             button.targetGraphic.rectTransform.sizeDelta = new Vector2(buttonWidth, buttonHeight);
-            button.targetGraphic.rectTransform.localPosition = dropDownRect.localPosition + new Vector3(1,  (-(buttonHeight + 1) * iterator) - (rectTransform.sizeDelta.y + 3));
+            button.targetGraphic.rectTransform.localPosition = dropDownRect.localPosition + new Vector3(1, (-(buttonHeight + 1) * iterator) - (rectTransform.sizeDelta.y + 3));
             iterator++;
         }
         foreach (var text in buttonTexts)
