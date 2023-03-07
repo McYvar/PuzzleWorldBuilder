@@ -3,13 +3,15 @@ using UnityEngine;
 
 public class CommandManager
 {
-    private List<ICommand> commandListStack = new List<ICommand>();
+    private List<ICommand> undoListStack = new List<ICommand>();
     private Stack<ICommand> redoStack = new Stack<ICommand>();
     private int maxUndoAmount;
+    public static int globalMaxUndoAmount = 0;
 
     public CommandManager(int maxUndoAmount)
     {
         this.maxUndoAmount = maxUndoAmount;
+        globalMaxUndoAmount = maxUndoAmount;
     }
 
     public void ExecuteCommand(ICommand command)
@@ -18,7 +20,7 @@ public class CommandManager
         Push(command);
         redoStack.Clear();
 
-        if (commandListStack.Count > maxUndoAmount)
+        if (undoListStack.Count > maxUndoAmount)
         {
             RemoveAtBottom();
         }
@@ -26,7 +28,7 @@ public class CommandManager
 
     public void UndoCommand()
     {
-        if (commandListStack.Count > 0)
+        if (undoListStack.Count > 0)
         {
             ICommand command = Pop();
             command.Undo();
@@ -43,7 +45,7 @@ public class CommandManager
         if (redoStack.Count > 0)
         {
             ICommand command = redoStack.Pop();
-            command.Execute();
+            command.Redo();
             Push(command);
         }
         else
@@ -54,15 +56,15 @@ public class CommandManager
 
     public void Push(ICommand item)
     {
-        commandListStack.Add(item);
+        undoListStack.Add(item);
     }
 
     public ICommand Pop()
     {
-        if (commandListStack.Count > 0)
+        if (undoListStack.Count > 0)
         {
-            ICommand temp = commandListStack[commandListStack.Count - 1];
-            commandListStack.RemoveAt(commandListStack.Count - 1);
+            ICommand temp = undoListStack[undoListStack.Count - 1];
+            undoListStack.RemoveAt(undoListStack.Count - 1);
             return temp;
         }
         return null;
@@ -70,7 +72,7 @@ public class CommandManager
 
     public void RemoveAtBottom()
     {
-        commandListStack.RemoveAt(0);
+        undoListStack.RemoveAt(0);
     }
 }
 

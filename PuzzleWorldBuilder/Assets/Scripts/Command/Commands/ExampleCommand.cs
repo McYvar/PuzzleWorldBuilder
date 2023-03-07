@@ -17,4 +17,9 @@ public class ExampleCommand : MonoBehaviour, ICommand
         Debug.Log("Undo!");
         transform.position -= Vector3.right;
     }
+
+    public void Redo()
+    {
+        Execute();
+    }
 }
