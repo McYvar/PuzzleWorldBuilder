@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public class ExampleCommand : MonoBehaviour, ICommand
+public class ExampleCommand : GameEditor, ICommand
 {
     [SerializeField] KeyCode exampleKey;
 
@@ -21,5 +21,9 @@ public class ExampleCommand : MonoBehaviour, ICommand
     public void Redo()
     {
         Execute();
+    }
+
+    public override void EditorUpdate()
+    {
     }
 }

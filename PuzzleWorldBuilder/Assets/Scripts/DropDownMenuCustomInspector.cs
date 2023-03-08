@@ -5,7 +5,7 @@ using UnityEditor;
 
 #if UNITY_EDITOR
 [CustomEditor(typeof(DropDownMenu))]
-public class DropDownMenuCustomInspector : Editor
+public class DropDownMenuCustomInspector : UnityEditor.Editor
 {
     public override void OnInspectorGUI()
     {

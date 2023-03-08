@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class InputCommands : MonoBehaviour
+public class InputCommands : GameEditor
 {
     /// <summary>
     /// Date: 03/08/2023, By: Yvar
@@ -18,7 +18,7 @@ public class InputCommands : MonoBehaviour
         commandManager = new CommandManager(maxUndoAmount);
     }
 
-    private void Update()
+    public override void EditorUpdate()
     {
         foreach (KeyCode keyCode in keyCommands.Keys)
         {
@@ -104,16 +104,23 @@ public class InputCommands : MonoBehaviour
 
     public void Copy()
     {
-
+        /// Copy some object, when making a copy of an object instantiate some invisible copy of it and put in on the "clipboard".
+        /// When there is an object already on the "clipboard", delte this object, and replace it with the new copy.
+        /// Upon copying a bigger group of objects, I was thinking of parenting it under one gameobject so the object creation class
+        /// doesn't have to be rewritten
+        /// 03/08/2023 Update: did that anyway
     }
 
     public void Paste()
     {
-
+        /// Paste some object, before you can paste a copy has to exist, otherwise nothing happens.
+        /// When pasting a copy, the creation of this copy has to go trough the class handling the creation of objects
+        /// in the level editor so the creation of it can be undone.
     }
 
     public void Cut()
     {
-
+        /// Cut some object, upon cutting the object should be removed trough the class handling the deletion of objects
+        /// so this action can be undone. Also when cutting, an invisible copy of this object is made and put on the "clipboard".
     }
 }

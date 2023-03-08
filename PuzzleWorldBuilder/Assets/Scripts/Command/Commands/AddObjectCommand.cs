@@ -2,28 +2,28 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ModifyObjectCommand : MonoBehaviour, ICommand
+public class AddObjectCommand : BaseCommand, ICommand
 {
     /// <summary>
-    /// 03/07/2023 A script that enherits the ICommand interface, thus making it a command.
+    /// Date: 03/07/2023, By: Yvar
+    /// A script that enherits the ICommand interface, thus making it a command.
     /// This command is able to add certain assets to the puzzle by (hopefully later dragging
     /// and dropping) pressing a button
     /// </summary>
     // now a key, later a drag and drop
-    [SerializeField] KeyCode addObjectKey;
-
     [SerializeField] GameObject myObjectPrefab;
-    [SerializeField] Transform ObjectList;
-    
-    // This linked list is static because if there only exists one instance of it which can only
-    // consist of a max amount of elements instead of multiple per command
-    public static LinkedList<GameObject> globalObjectUndoList = new LinkedList<GameObject>();
+
+    Transform parent;
+
     Stack<GameObject> redoObjectStack = new Stack<GameObject>();
 
-    public void OnEnable() => InputCommands.AddKeyCommand(addObjectKey, this);
-    public void OnDisable() => InputCommands.RemoveCommand(addObjectKey);
+    public override void OnEnable() 
+    {
+        base.OnEnable();
+        parent = FindObjectOfType<ObjectList>().transform; // ugly... but only once I suppose
+    }
 
-    public void Execute()
+    public override void Execute()
     {
         /// Add object, link last object as previous to this one
         while (redoObjectStack.Count > 0)
@@ -33,15 +33,15 @@ public class ModifyObjectCommand : MonoBehaviour, ICommand
         AddObjectToLinkedList(CreateObject(myObjectPrefab));
     }
 
-    public void Undo()
+    public override void Undo()
     {
         /// Undo adding this object, link this object as next to last object
-        DeleteObject(globalObjectUndoList.Last.Value);
-        redoObjectStack.Push(globalObjectUndoList.Last.Value);
-        globalObjectUndoList.RemoveLast();
+        DeleteObject(ObjectList.globalObjectUndoList.Last.Value);
+        redoObjectStack.Push(ObjectList.globalObjectUndoList.Last.Value);
+        ObjectList.globalObjectUndoList.RemoveLast();
     }
 
-    public void Redo() 
+    public override void Redo() 
     {
         /// In this redo an instance of a destroyed game object should be instantiated again,
         /// however doing so is pretty hard since the information for it is delete thus should be
@@ -55,7 +55,7 @@ public class ModifyObjectCommand : MonoBehaviour, ICommand
 
     public GameObject CreateObject(GameObject objectToCreate)
     {
-        GameObject newObject = Instantiate(objectToCreate, ObjectList);
+        GameObject newObject = Instantiate(objectToCreate, parent);
         newObject.name = objectToCreate.name;
 
         newObject.AddComponent<AddedObject>().OnCreation();
@@ -72,18 +72,17 @@ public class ModifyObjectCommand : MonoBehaviour, ICommand
 
     public void AddObjectToLinkedList(GameObject objectToAdd)
     {
-        if (globalObjectUndoList.Count > CommandManager.globalMaxUndoAmount)
+        if (ObjectList.globalObjectUndoList.Count > CommandManager.globalMaxUndoAmount)
         {
-            Destroy(globalObjectUndoList.First.Value);
-            globalObjectUndoList.RemoveFirst();
+            ObjectList.globalObjectUndoList.RemoveFirst();
         }
 
-        globalObjectUndoList.AddLast(objectToAdd);
+        ObjectList.globalObjectUndoList.AddLast(objectToAdd);
     }
 }
 
 [RequireComponent(typeof(MeshRenderer))]
-public class AddedObject : MonoBehaviour
+public class AddedObject : GameEditor
 {
     MeshRenderer meshRenderer;
 
@@ -100,5 +99,9 @@ public class AddedObject : MonoBehaviour
     public void OnDeletion()
     {
         meshRenderer.enabled = false;
+    }
+
+    public override void EditorUpdate()
+    {
     }
 }
