@@ -72,4 +72,14 @@ public class InputCommands : MonoBehaviour
     {
         commandManager.RedoCommand();
     }
+
+    public void Copy()
+    {
+
+    }
+
+    public void Paste()
+    {
+
+    }
 }
