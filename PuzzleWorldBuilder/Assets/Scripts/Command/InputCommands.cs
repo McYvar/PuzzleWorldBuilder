@@ -27,20 +27,20 @@ public class InputCommands : MonoBehaviour
 #if UNITY_EDITOR
         if (Input.GetKeyDown(KeyCode.Z))
         {
-            commandManager.UndoCommand();
+            Undo();
         }
         else if (Input.GetKeyDown(KeyCode.Y))
         {
-            commandManager.RedoCommand();
+            Redo();
         }
 #else
         if (Input.GetKeyDown(KeyCode.Z) && (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl)))
         {
-            commandManager.UndoCommand();
+            Undo();
         }
         else if (Input.GetKeyDown(KeyCode.Y) && (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl)))
         {
-            commandManager.RedoCommand();
+            Redo();
         }
 #endif
     }
@@ -61,5 +61,15 @@ public class InputCommands : MonoBehaviour
     public static void RemoveCommand(KeyCode keyCode)
     {
         keyCommands.Remove(keyCode);
+    }
+
+    public void Undo()
+    {
+        commandManager.UndoCommand();
+    }
+
+    public void Redo()
+    {
+        commandManager.RedoCommand();
     }
 }

@@ -4,6 +4,11 @@ using UnityEngine;
 
 public class AddObjectCommand : MonoBehaviour, ICommand
 {
+    /// <summary>
+    /// 03/07/2023 A script that enherits the ICommand interface, thus making it a command.
+    /// This command is able to add certain assets to the puzzle by (hopefully later dragging
+    /// and dropping) pressing a button
+    /// </summary>
     // now a key, later a drag and drop
     [SerializeField] KeyCode addObjectKey;
 
@@ -57,7 +62,9 @@ public class AddObjectCommand : MonoBehaviour, ICommand
 
         return newObject;
     }
-
+    
+    /// Maybe by deleting a selection of objects in the future, parent them under a new game object,
+    /// then upon undo, unparent them again...
     public void DeleteObject(GameObject objectToDelete)
     {
         objectToDelete.GetComponent<AddedObject>().OnDeletion();
