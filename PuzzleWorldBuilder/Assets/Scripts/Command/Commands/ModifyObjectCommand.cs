@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class AddObjectCommand : MonoBehaviour, ICommand
+public class ModifyObjectCommand : MonoBehaviour, ICommand
 {
     /// <summary>
     /// 03/07/2023 A script that enherits the ICommand interface, thus making it a command.

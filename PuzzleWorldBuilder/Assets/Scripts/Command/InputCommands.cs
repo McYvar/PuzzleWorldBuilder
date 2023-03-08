@@ -4,6 +4,11 @@ using UnityEngine;
 
 public class InputCommands : MonoBehaviour
 {
+    /// <summary>
+    /// Date: 03/08/2023, By: Yvar
+    /// A Class that handles the input from the user, things such as the use of the dropdown menu's,
+    /// but also like copy, paste, undo and redo using the keyboard
+    /// </summary>
     [SerializeField] int maxUndoAmount = 10;
     private CommandManager commandManager;
     public static Dictionary<KeyCode, ICommand> keyCommands = new Dictionary<KeyCode, ICommand>();
@@ -33,6 +38,18 @@ public class InputCommands : MonoBehaviour
         {
             Redo();
         }
+        else if (Input.GetKeyDown(KeyCode.C))
+        {
+            Copy();
+        }
+        else if (Input.GetKeyDown(KeyCode.V))
+        {
+            Paste();
+        }
+        else if (Input.GetKeyDown(KeyCode.X))
+        {
+            Cut();
+        }
 #else
         if (Input.GetKeyDown(KeyCode.Z) && (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl)))
         {
@@ -41,6 +58,18 @@ public class InputCommands : MonoBehaviour
         else if (Input.GetKeyDown(KeyCode.Y) && (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl)))
         {
             Redo();
+        }
+        else if (Input.GetKeyDown(KeyCode.C) && (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl)))
+        {
+            Copy();
+        }
+        else if (Input.GetKeyDown(KeyCode.V) && (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl)))
+        {
+            Paste();
+        }
+        else if (Input.GetKeyDown(KeyCode.X) && (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl)))
+        {
+            Cut();
         }
 #endif
     }
@@ -79,6 +108,11 @@ public class InputCommands : MonoBehaviour
     }
 
     public void Paste()
+    {
+
+    }
+
+    public void Cut()
     {
 
     }
