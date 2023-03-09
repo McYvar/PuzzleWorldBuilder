@@ -16,9 +16,10 @@ public class CommandManager
 
     public void ExecuteCommand(ICommand command)
     {
-        command.Execute();
         Push(command);
+        command.Execute();
         redoStack.Clear();
+        Debug.Log("Executed: " + command.GetType());
 
         if (undoListStack.Count > maxUndoAmount)
         {
@@ -33,6 +34,7 @@ public class CommandManager
             ICommand command = Pop();
             command.Undo();
             redoStack.Push(command);
+            Debug.Log("Undo: " + command.GetType());
         }
         else
         {
@@ -47,6 +49,7 @@ public class CommandManager
             ICommand command = redoStack.Pop();
             command.Redo();
             Push(command);
+            Debug.Log("Redo: " + command.GetType());
         }
         else
         {
@@ -73,6 +76,11 @@ public class CommandManager
     public void RemoveAtBottom()
     {
         undoListStack.RemoveAt(0);
+    }
+
+    public void RemoveAtTop()
+    {
+        undoListStack.RemoveAt(undoListStack.Count - 1);
     }
 }
 

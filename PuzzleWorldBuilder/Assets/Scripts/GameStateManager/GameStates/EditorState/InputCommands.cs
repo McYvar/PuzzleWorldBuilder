@@ -1,8 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
-public class InputCommands : AbstractGameEditor
+public class InputCommands : AbstractGameEditor, IPointerDownHandler, IPointerUpHandler
 {
     /// <summary>
     /// Date: 03/08/2023, By: Yvar
@@ -10,10 +11,26 @@ public class InputCommands : AbstractGameEditor
     /// but also like copy, paste, undo and redo using the keyboard
     /// </summary>
     [SerializeField] int maxUndoAmount = 10;
-    private CommandManager commandManager;
+    CommandManager commandManager;
     public static Dictionary<KeyCode, ICommand> keyCommands = new Dictionary<KeyCode, ICommand>();
+    public static List<SceneObject> selectedObjects = new List<SceneObject>();
 
-    [SerializeField] DeleteObjectCommand DeleteCommand;
+    [SerializeField] DeleteObjectCommand deleteCommand;
+    [SerializeField] SelectObjectCommand selectCommand;
+    [SerializeField] DeSelectCommand deSelectCommand;
+
+    [SerializeField] Canvas mainCanvas;
+    [SerializeField] RectTransform selectionLineTop;
+    [SerializeField] RectTransform selectionLineBottom;
+    [SerializeField] RectTransform selectionLineLeft;
+    [SerializeField] RectTransform selectionLineRight;
+    [SerializeField] float selectionWidth;
+
+    [SerializeField] Camera mainCamera;
+
+    Vector2 selectionStartingPoint;
+    Vector2 selectionEndingPoint;
+    bool isSelecting;
 
     private void Start()
     {
@@ -21,6 +38,18 @@ public class InputCommands : AbstractGameEditor
     }
 
     public override void EditorUpdate()
+    {
+        CommandManagerUpdater();
+        BasicKeys();
+        SelectionProcess();
+    }
+
+    public CommandManager GetCommandManager()
+    {
+        return commandManager;
+    }
+
+    void CommandManagerUpdater()
     {
         foreach (KeyCode keyCode in keyCommands.Keys)
         {
@@ -30,7 +59,10 @@ public class InputCommands : AbstractGameEditor
                 commandManager.ExecuteCommand(command);
             }
         }
+    }
 
+    void BasicKeys()
+    {
 #if UNITY_EDITOR
         if (Input.GetKeyDown(KeyCode.Z))
         {
@@ -52,6 +84,46 @@ public class InputCommands : AbstractGameEditor
 #endif
     }
 
+    void SelectionProcess()
+    {
+
+        if (isSelecting)
+        {
+            // draw selection
+            selectionEndingPoint = Input.mousePosition;
+            if (selectionStartingPoint.x < selectionEndingPoint.x)
+            {
+                selectionLineTop.position = selectionStartingPoint;
+            }
+            else
+            {
+                selectionLineTop.position = selectionStartingPoint + new Vector2(selectionEndingPoint.x - selectionStartingPoint.x, 0);
+            }
+
+            if (selectionStartingPoint.y > selectionEndingPoint.y)
+            {
+                selectionLineLeft.position = selectionStartingPoint;
+            }
+            else
+            {
+                selectionLineLeft.position = selectionStartingPoint + new Vector2(0, selectionEndingPoint.y - selectionStartingPoint.y);
+            }
+            selectionLineBottom.position = new Vector2(selectionLineTop.position.x, selectionEndingPoint.y);
+            selectionLineRight.position = new Vector2(selectionEndingPoint.x, selectionLineLeft.position.y);
+            selectionLineTop.sizeDelta = new Vector2(Mathf.Abs((selectionEndingPoint.x - selectionStartingPoint.x) / mainCanvas.scaleFactor) + selectionWidth, selectionWidth);
+            selectionLineBottom.sizeDelta = selectionLineTop.sizeDelta;
+            selectionLineLeft.sizeDelta = new Vector2(selectionWidth, Mathf.Abs((selectionEndingPoint.y - selectionStartingPoint.y) / mainCanvas.scaleFactor) + selectionWidth);
+            selectionLineRight.sizeDelta = selectionLineLeft.sizeDelta;
+        }
+        else
+        {
+            selectionLineLeft.sizeDelta = Vector2.zero;
+            selectionLineRight.sizeDelta = Vector2.zero;
+            selectionLineTop.sizeDelta = Vector2.zero;
+            selectionLineBottom.sizeDelta = Vector2.zero;
+        }
+    }
+
     public static void AddKeyCommand(KeyCode keyCode, ICommand command)
     {
         if (!keyCommands.ContainsKey(keyCode))
@@ -68,11 +140,6 @@ public class InputCommands : AbstractGameEditor
     public static void RemoveKeyCommand(KeyCode keyCode)
     {
         keyCommands.Remove(keyCode);
-    }
-
-    public void ExecuteCommand(ICommand command)
-    {
-        commandManager.ExecuteCommand(command);
     }
 
     public void Undo()
@@ -109,9 +176,103 @@ public class InputCommands : AbstractGameEditor
 
     public void Delete()
     {
-        if (SelectObjectCommand.selectedObjects.Count > 0)
-            commandManager.ExecuteCommand(DeleteCommand);
+        if (selectedObjects.Count > 0)
+            commandManager.ExecuteCommand(deleteCommand);
+    }
+
+    private void StartSelection(Vector2 mouseLocation)
+    {
+        selectionStartingPoint = mouseLocation;
+        isSelecting = true;
+    }
+
+    private void FinishSelection()
+    {
+        isSelecting = false;
+
+        Rect selectionBox = new Rect(selectionStartingPoint, selectionEndingPoint - selectionStartingPoint);
+        if (selectionBox.size.magnitude < 5)
+        {
+            RaycastHit hit;
+            Vector3 camForward = mainCamera.ScreenToWorldPoint(new Vector3(selectionBox.center.x, selectionBox.center.y, mainCamera.nearClipPlane));
+            Physics.Raycast(mainCamera.transform.position,
+                camForward - mainCamera.transform.position,
+                out hit);
+
+            if (hit.collider != null)
+            {
+                SceneObject sceneObject = hit.collider.GetComponent<SceneObject>();
+                if (sceneObject != null)
+                {
+                    foreach (SceneObject obj in selectedObjects)
+                    {
+                        obj.OnDeselection();
+                    }
+                    selectedObjects.Clear();
+                    selectedObjects.Add(sceneObject);
+                    commandManager.ExecuteCommand(selectCommand);
+                }
+                return;
+            }
+        }
+
+        List<SceneObject> temp = new List<SceneObject>();
+        foreach (SceneObject sceneObject in SceneObject.sceneObjects)
+        {
+            Vector3 screenPosition = mainCamera.WorldToScreenPoint(sceneObject.transform.position);
+            if (selectionBox.Contains(screenPosition, true))
+            {
+                temp.Add(sceneObject);
+            }
+        }
+        
+        if (temp.Count > 0)
+        {
+            foreach (SceneObject obj in selectedObjects)
+            {
+                obj.OnDeselection();
+            }
+            selectedObjects = temp;
+            commandManager.ExecuteCommand(selectCommand);
+        }
+        else if (selectedObjects.Count > 0)
+        {
+            commandManager.ExecuteCommand(deSelectCommand);
+        }
+    }
+
+    private void AbortSelection()
+    {
+        isSelecting = false;
+        if (selectedObjects.Count == 0) return;
+        else commandManager.ExecuteCommand(deSelectCommand);
+    }
+
+    public void OnPointerDown(PointerEventData eventData)
+    {
+        if (eventData.button == PointerEventData.InputButton.Left)
+        {
+            StartSelection(eventData.position);
+        }
+        else if (eventData.button == PointerEventData.InputButton.Right && isSelecting)
+        {
+            AbortSelection();
+        }
+    }
+
+    public void OnPointerUp(PointerEventData eventData)
+    {
+        if (eventData.button == PointerEventData.InputButton.Left)
+        {
+            FinishSelection();
+        }
+    }
+
+    private void OnDrawGizmos()
+    {
+        Gizmos.color = Color.green;
+        Rect selectionBox = new Rect(selectionStartingPoint, selectionEndingPoint - selectionStartingPoint);
+        Vector3 camForward = mainCamera.ScreenToWorldPoint(new Vector3(selectionBox.center.x, selectionBox.center.y, mainCamera.nearClipPlane));
+        Gizmos.DrawLine(mainCamera.transform.position, mainCamera.transform.position + (camForward - mainCamera.transform.position) * 100);
     }
 }
-
-// key struct for multiple key support

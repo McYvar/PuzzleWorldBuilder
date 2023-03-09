@@ -4,8 +4,8 @@ using UnityEngine;
 
 public class BaseEditorCommand : AbstractGameEditor, ICommand
 {
-    [SerializeField] protected InputCommands inputCommands;
     [SerializeField] KeyCode baseKey;
+    [SerializeField] protected InputCommands inputCommands;
 
     protected override void OnEnable()
     {

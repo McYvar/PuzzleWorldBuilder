@@ -36,6 +36,11 @@ public class SceneObject : AbstractGameEditor
         meshRenderer.material.SetInt("_UseShader", 0);
     }
 
+    public bool IsAlive()
+    {
+        return meshRenderer.enabled;
+    }
+
     public override void EditorUpdate()
     {
     }

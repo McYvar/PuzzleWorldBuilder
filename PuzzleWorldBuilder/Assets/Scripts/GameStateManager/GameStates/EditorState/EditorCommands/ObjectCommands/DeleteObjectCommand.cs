@@ -21,11 +21,31 @@ public class DeleteObjectCommand : BaseObjectCommands
 
     public override void Execute()
     {
-        GameObject[] selectedObjects = new GameObject[SelectObjectCommand.selectedObjects.Count];
+        // When we delete an object in the puzzlemaker that is selected, we should also remove it from the selected objects list
+        if (InputCommands.selectedObjects.Count > 0)
+        {
+            if (InputCommands.selectedObjects[0] != null)
+            {
+                if (!InputCommands.selectedObjects[0].IsAlive())
+                {
+                    Debug.Log("Nothing to delete!");
+                    inputCommands.GetCommandManager().RemoveAtTop();
+                    return;
+                }
+            }
+        }
+        else
+        {
+            Debug.Log("Nothing to delete!");
+            inputCommands.GetCommandManager().RemoveAtTop();
+            return;
+        }
+
+        GameObject[] selectedObjects = new GameObject[InputCommands.selectedObjects.Count];
         // For an object to be removed it first needs to be selected, if none is selected, we add a null object to the undo list
         for (int i = 0; i < selectedObjects.Length; i++)
         {
-            selectedObjects[i] = SelectObjectCommand.selectedObjects[i].gameObject;
+            selectedObjects[i] = InputCommands.selectedObjects[i].gameObject;
         }
 
         foreach (GameObject obj in selectedObjects)
@@ -34,6 +54,7 @@ public class DeleteObjectCommand : BaseObjectCommands
         }
 
         AddObjectToLinkedList(selectedObjects);
+
     }
 
     public override void Undo()

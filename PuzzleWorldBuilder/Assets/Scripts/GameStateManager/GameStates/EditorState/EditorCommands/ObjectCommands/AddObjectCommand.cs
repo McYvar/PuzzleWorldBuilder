@@ -37,8 +37,8 @@ public class AddObjectCommand : BaseObjectCommands
     public override void Undo()
     {
         /// Undo adding this object, link this object as next to last object
-        DeleteObject(ObjectList.list.Last.Value[0]);
         redoObjectStack.Push(ObjectList.list.Last.Value[0]);
+        DeleteObject(ObjectList.list.Last.Value[0]);
         ObjectList.list.RemoveLast();
     }
 
