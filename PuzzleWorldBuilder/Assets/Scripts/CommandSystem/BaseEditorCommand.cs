@@ -1,0 +1,36 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class BaseEditorCommand : AbstractGameEditor, ICommand
+{
+    [SerializeField] protected InputCommands inputCommands;
+    [SerializeField] KeyCode baseKey;
+
+    protected override void OnEnable()
+    {
+        base.OnEnable();
+        InputCommands.AddKeyCommand(baseKey, this);
+    }
+    protected override void OnDisable()
+    {
+        base.OnDisable();
+        InputCommands.RemoveKeyCommand(baseKey);
+    }
+
+    public virtual void Execute()
+    {
+    }
+
+    public virtual void Undo()
+    {
+    }
+
+    public virtual void Redo()
+    {
+    }
+
+    public override void EditorUpdate()
+    {
+    }
+}
