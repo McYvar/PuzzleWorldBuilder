@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-public class DeSelectCommand : BaseEditorCommand
+public class DeSelectObjectCommand : BaseEditorCommand
 {
     Stack<SceneObject[]> redoStack;
     Stack<SceneObject[]> undoStack;
@@ -22,6 +22,7 @@ public class DeSelectCommand : BaseEditorCommand
         }
         InputCommands.selectedObjects.Clear();
         undoStack.Push(sceneObjects);
+        redoStack.Clear();
     }
 
     public override void Undo()

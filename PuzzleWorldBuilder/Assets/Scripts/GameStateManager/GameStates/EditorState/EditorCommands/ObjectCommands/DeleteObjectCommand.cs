@@ -12,11 +12,15 @@ public class DeleteObjectCommand : BaseObjectCommands
     /// </summary>
 
     Stack<GameObject[]> redoObjectsStack;
+    Stack<SceneObject[]> previouslySelectedObjects;
+    [SerializeField] DeSelectObjectCommand deSelectCommand;
+    [SerializeField] SelectObjectCommand selectCommand;
 
     protected override void OnEnable()
     {
         base.OnEnable();
         redoObjectsStack = new Stack<GameObject[]>();
+        previouslySelectedObjects = new Stack<SceneObject[]>();
     }
 
     public override void Execute()
@@ -29,7 +33,7 @@ public class DeleteObjectCommand : BaseObjectCommands
                 if (!InputCommands.selectedObjects[0].IsAlive())
                 {
                     Debug.Log("Nothing to delete!");
-                    inputCommands.GetCommandManager().RemoveAtTop();
+                    addToUndo = false;
                     return;
                 }
             }
@@ -37,16 +41,19 @@ public class DeleteObjectCommand : BaseObjectCommands
         else
         {
             Debug.Log("Nothing to delete!");
-            inputCommands.GetCommandManager().RemoveAtTop();
+            addToUndo = false;
             return;
         }
 
+        addToUndo = true;
         GameObject[] selectedObjects = new GameObject[InputCommands.selectedObjects.Count];
         // For an object to be removed it first needs to be selected, if none is selected, we add a null object to the undo list
         for (int i = 0; i < selectedObjects.Length; i++)
         {
             selectedObjects[i] = InputCommands.selectedObjects[i].gameObject;
         }
+        previouslySelectedObjects.Push(InputCommands.selectedObjects.ToArray());
+        deSelectCommand.Execute();
 
         foreach (GameObject obj in selectedObjects)
         {
@@ -54,13 +61,16 @@ public class DeleteObjectCommand : BaseObjectCommands
         }
 
         AddObjectToLinkedList(selectedObjects);
-
+        redoObjectsStack.Clear();
     }
 
     public override void Undo()
     {
-        GameObject[] undoObjects = ObjectList.list.Last.Value;
-        ObjectList.list.RemoveLast();
+        InputCommands.selectedObjects = new List<SceneObject>(previouslySelectedObjects.Pop());
+        selectCommand.Execute();
+
+        GameObject[] undoObjects = ObjectList.allGOList.Last.Value;
+        ObjectList.allGOList.RemoveLast();
         foreach(GameObject obj in undoObjects)
         {
             obj.GetComponent<SceneObject>().OnCreation();
@@ -70,6 +80,9 @@ public class DeleteObjectCommand : BaseObjectCommands
 
     public override void Redo()
     {
+        previouslySelectedObjects.Push(InputCommands.selectedObjects.ToArray());
+        deSelectCommand.Execute();
+
         GameObject[] redoObjects = redoObjectsStack.Pop();
         foreach(GameObject obj in redoObjects)
         {

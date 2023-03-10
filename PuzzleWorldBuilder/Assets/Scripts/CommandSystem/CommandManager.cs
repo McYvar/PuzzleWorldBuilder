@@ -16,9 +16,12 @@ public class CommandManager
 
     public void ExecuteCommand(ICommand command)
     {
-        Push(command);
         command.Execute();
-        redoStack.Clear();
+        if (command.addToUndo)
+        {
+            Push(command);
+            redoStack.Clear();
+        }
         Debug.Log("Executed: " + command.GetType());
 
         if (undoListStack.Count > maxUndoAmount)

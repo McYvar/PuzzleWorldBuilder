@@ -4,9 +4,13 @@ public class ExampleCommand : AbstractGameEditor, ICommand
 {
     [SerializeField] KeyCode exampleKey;
 
+    [SerializeField] bool addToUndoSystem = true;
+    public bool addToUndo { get; set; }
+
     protected override void OnEnable()
     {
         base.OnEnable();
+        addToUndo = addToUndoSystem;
         InputCommands.AddKeyCommand(exampleKey, this);
     }
     protected override void OnDisable()

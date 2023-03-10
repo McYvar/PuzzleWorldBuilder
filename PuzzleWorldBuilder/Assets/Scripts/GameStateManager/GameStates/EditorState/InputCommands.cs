@@ -9,7 +9,11 @@ public class InputCommands : AbstractGameEditor, IPointerDownHandler, IPointerUp
     /// Date: 03/08/2023, By: Yvar
     /// A Class that handles the input from the user, things such as the use of the dropdown menu's,
     /// but also like copy, paste, undo and redo using the keyboard
+    /// 
+    /// Update: 03/09/23
+    /// Changed most things related to clicking under this script for the sake of organization
     /// </summary>
+
     [SerializeField] int maxUndoAmount = 10;
     CommandManager commandManager;
     public static Dictionary<KeyCode, ICommand> keyCommands = new Dictionary<KeyCode, ICommand>();
@@ -17,7 +21,10 @@ public class InputCommands : AbstractGameEditor, IPointerDownHandler, IPointerUp
 
     [SerializeField] DeleteObjectCommand deleteCommand;
     [SerializeField] SelectObjectCommand selectCommand;
-    [SerializeField] DeSelectCommand deSelectCommand;
+    [SerializeField] DeSelectObjectCommand deSelectCommand;
+    [SerializeField] CopyObjectCommand copyCommand;
+    [SerializeField] PasteObjectCommand pasteCommand;
+    [SerializeField] CutObjectCommand cutCommand;
 
     [SerializeField] Canvas mainCanvas;
     [SerializeField] RectTransform selectionLineTop;
@@ -44,6 +51,7 @@ public class InputCommands : AbstractGameEditor, IPointerDownHandler, IPointerUp
         SelectionProcess();
     }
 
+    #region CommandManager
     public CommandManager GetCommandManager()
     {
         return commandManager;
@@ -60,7 +68,9 @@ public class InputCommands : AbstractGameEditor, IPointerDownHandler, IPointerUp
             }
         }
     }
+    #endregion
 
+    #region Key commands
     void BasicKeys()
     {
 #if UNITY_EDITOR
@@ -84,6 +94,72 @@ public class InputCommands : AbstractGameEditor, IPointerDownHandler, IPointerUp
 #endif
     }
 
+    public static void AddKeyCommand(KeyCode keyCode, ICommand command)
+    {
+        if (!keyCommands.ContainsKey(keyCode))
+        keyCommands.Add(keyCode, command);
+    }
+
+    public static void ChangeKeyCommandKey(KeyCode oldKeyCode, KeyCode newKeyCode)
+    {
+        ICommand temp;
+        keyCommands.Remove(oldKeyCode, out temp);
+        keyCommands.Add(newKeyCode, temp);
+    }
+
+    public static void RemoveKeyCommand(KeyCode keyCode)
+    {
+        keyCommands.Remove(keyCode);
+    }
+    #endregion
+
+    #region Standard edit buttons
+    public void Undo()
+    {
+        commandManager.UndoCommand();
+    }
+
+    public void Redo()
+    {
+        commandManager.RedoCommand();
+    }
+
+    public void Copy()
+    {
+        /// Copy some object, when making a copy of an object instantiate some invisible copy of it and put in on the "clipboard".
+        /// When there is an object already on the "clipboard", delte this object, and replace it with the new copy.
+        /// Upon copying a bigger group of objects, I was thinking of parenting it under one gameobject so the object creation class
+        /// doesn't have to be rewritten
+        /// 03/08/2023 Update: did that anyway
+        
+        commandManager.ExecuteCommand(copyCommand);
+    }
+
+    public void Paste()
+    {
+        /// Paste some object, before you can paste a copy has to exist, otherwise nothing happens.
+        /// When pasting a copy, the creation of this copy has to go trough the class handling the creation of objects
+        /// in the level editor so the creation of it can be undone.
+
+        commandManager.ExecuteCommand(pasteCommand);
+    }
+
+    public void Cut()
+    {
+        /// Cut some object, upon cutting the object should be removed trough the class handling the deletion of objects
+        /// so this action can be undone. Also when cutting, an invisible copy of this object is made and put on the "clipboard".
+
+        commandManager.ExecuteCommand(cutCommand);
+    }
+
+    public void Delete()
+    {
+        if (selectedObjects.Count > 0)
+            commandManager.ExecuteCommand(deleteCommand);
+    }
+    #endregion
+
+    #region Selection
     void SelectionProcess()
     {
 
@@ -123,63 +199,6 @@ public class InputCommands : AbstractGameEditor, IPointerDownHandler, IPointerUp
             selectionLineBottom.sizeDelta = Vector2.zero;
         }
     }
-
-    public static void AddKeyCommand(KeyCode keyCode, ICommand command)
-    {
-        if (!keyCommands.ContainsKey(keyCode))
-        keyCommands.Add(keyCode, command);
-    }
-
-    public static void ChangeKeyCommandKey(KeyCode oldKeyCode, KeyCode newKeyCode)
-    {
-        ICommand temp;
-        keyCommands.Remove(oldKeyCode, out temp);
-        keyCommands.Add(newKeyCode, temp);
-    }
-
-    public static void RemoveKeyCommand(KeyCode keyCode)
-    {
-        keyCommands.Remove(keyCode);
-    }
-
-    public void Undo()
-    {
-        commandManager.UndoCommand();
-    }
-
-    public void Redo()
-    {
-        commandManager.RedoCommand();
-    }
-
-    public void Copy()
-    {
-        /// Copy some object, when making a copy of an object instantiate some invisible copy of it and put in on the "clipboard".
-        /// When there is an object already on the "clipboard", delte this object, and replace it with the new copy.
-        /// Upon copying a bigger group of objects, I was thinking of parenting it under one gameobject so the object creation class
-        /// doesn't have to be rewritten
-        /// 03/08/2023 Update: did that anyway
-    }
-
-    public void Paste()
-    {
-        /// Paste some object, before you can paste a copy has to exist, otherwise nothing happens.
-        /// When pasting a copy, the creation of this copy has to go trough the class handling the creation of objects
-        /// in the level editor so the creation of it can be undone.
-    }
-
-    public void Cut()
-    {
-        /// Cut some object, upon cutting the object should be removed trough the class handling the deletion of objects
-        /// so this action can be undone. Also when cutting, an invisible copy of this object is made and put on the "clipboard".
-    }
-
-    public void Delete()
-    {
-        if (selectedObjects.Count > 0)
-            commandManager.ExecuteCommand(deleteCommand);
-    }
-
     private void StartSelection(Vector2 mouseLocation)
     {
         selectionStartingPoint = mouseLocation;
@@ -219,6 +238,7 @@ public class InputCommands : AbstractGameEditor, IPointerDownHandler, IPointerUp
         List<SceneObject> temp = new List<SceneObject>();
         foreach (SceneObject sceneObject in SceneObject.sceneObjects)
         {
+            if (sceneObject == null) continue;
             Vector3 screenPosition = mainCamera.WorldToScreenPoint(sceneObject.transform.position);
             if (selectionBox.Contains(screenPosition, true))
             {
@@ -267,7 +287,9 @@ public class InputCommands : AbstractGameEditor, IPointerDownHandler, IPointerUp
             FinishSelection();
         }
     }
+    #endregion
 
+    /*
     private void OnDrawGizmos()
     {
         Gizmos.color = Color.green;
@@ -275,4 +297,5 @@ public class InputCommands : AbstractGameEditor, IPointerDownHandler, IPointerUp
         Vector3 camForward = mainCamera.ScreenToWorldPoint(new Vector3(selectionBox.center.x, selectionBox.center.y, mainCamera.nearClipPlane));
         Gizmos.DrawLine(mainCamera.transform.position, mainCamera.transform.position + (camForward - mainCamera.transform.position) * 100);
     }
+    */
 }

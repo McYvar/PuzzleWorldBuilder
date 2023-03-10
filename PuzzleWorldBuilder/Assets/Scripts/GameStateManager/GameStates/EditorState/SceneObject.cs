@@ -6,21 +6,26 @@ public class SceneObject : AbstractGameEditor
 {
     public static List<SceneObject> sceneObjects = new List<SceneObject>();
     MeshRenderer meshRenderer;
+    Collider anyCollider;
 
     protected override void OnEnable()
     {
         base.OnEnable();
+        anyCollider = GetComponent<Collider>();
+        anyCollider.enabled = false;
         meshRenderer = GetComponent<MeshRenderer>();
     }
 
     public void OnCreation()
     {
+        anyCollider.enabled = true;
         meshRenderer.enabled = true;
         sceneObjects.Add(this);
     }
 
     public void OnDeletion()
     {
+        anyCollider.enabled = false;
         meshRenderer.enabled = false;
         sceneObjects.Remove(this);
     }

@@ -25,10 +25,15 @@ public class AddObjectCommand : BaseObjectCommands
 
     public override void Execute()
     {
-        /// Add object, link last object as previous to this one
+        // Add object, link last object as previous to this one
         while (redoObjectStack.Count > 0)
         {
-            Destroy(redoObjectStack.Pop());
+            GameObject obj = redoObjectStack.Pop();
+            ClipBoard clipBoardItem = obj.GetComponent<ClipBoard>();
+            if (clipBoardItem == null)
+            {
+                Destroy(obj);
+            }
         }
         GameObject[] toArray = { CreateObject(myObjectPrefab) };
         AddObjectToLinkedList(toArray);
@@ -36,10 +41,10 @@ public class AddObjectCommand : BaseObjectCommands
 
     public override void Undo()
     {
-        /// Undo adding this object, link this object as next to last object
-        redoObjectStack.Push(ObjectList.list.Last.Value[0]);
-        DeleteObject(ObjectList.list.Last.Value[0]);
-        ObjectList.list.RemoveLast();
+        // Undo adding this object, link this object as next to last object
+        redoObjectStack.Push(ObjectList.allGOList.Last.Value[0]);
+        DeleteObject(ObjectList.allGOList.Last.Value[0]);
+        ObjectList.allGOList.RemoveLast();
     }
 
     public override void Redo() 

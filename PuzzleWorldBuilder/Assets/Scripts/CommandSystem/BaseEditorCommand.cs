@@ -7,9 +7,12 @@ public class BaseEditorCommand : AbstractGameEditor, ICommand
     [SerializeField] KeyCode baseKey;
     [SerializeField] protected InputCommands inputCommands;
 
+    public bool addToUndo { get; set; }
+
     protected override void OnEnable()
     {
         base.OnEnable();
+        addToUndo = true;
         InputCommands.AddKeyCommand(baseKey, this);
     }
     protected override void OnDisable()

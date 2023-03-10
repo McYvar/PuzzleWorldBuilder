@@ -18,6 +18,7 @@ public class SelectObjectCommand : BaseObjectCommands
         {
             sceneObject.OnSelection();
         }
+        redoStack.Clear();
     }
 
     public override void Undo()

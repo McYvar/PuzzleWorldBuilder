@@ -17,7 +17,7 @@ public class ObjectList : AbstractGameEditor
     /// I have done something to store this in two places... or something like that... bit messy
     /// </summary>
 
-    public static LinkedList<GameObject[]> list = new LinkedList<GameObject[]>();
+    public static LinkedList<GameObject[]> allGOList = new LinkedList<GameObject[]>();
 
     public override void EditorUpdate()
     {
