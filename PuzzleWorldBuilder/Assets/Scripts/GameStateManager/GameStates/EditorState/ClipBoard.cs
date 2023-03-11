@@ -23,6 +23,14 @@ public class ClipBoard : AbstractGameEditor
         clipboard.Remove(this);
     }
 
+    public override void EditorAwake()
+    {
+    }
+
+    public override void EditorStart()
+    {
+    }
+
     public override void EditorUpdate()
     {
     }

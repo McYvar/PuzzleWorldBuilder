@@ -5,7 +5,6 @@ using UnityEngine;
 public class BaseEditorCommand : AbstractGameEditor, ICommand
 {
     [SerializeField] KeyCode baseKey;
-    [SerializeField] protected InputCommands inputCommands;
 
     public bool addToUndo { get; set; }
 
@@ -30,6 +29,15 @@ public class BaseEditorCommand : AbstractGameEditor, ICommand
     }
 
     public virtual void Redo()
+    {
+    }
+
+    public override void EditorAwake()
+    {
+        Debug.Log(this);
+    }
+
+    public override void EditorStart()
     {
     }
 

@@ -20,6 +20,14 @@ public class BaseMenuWindow : AbstractGameEditor
         MenuOutline();
     }
 
+    public override void EditorAwake()
+    {
+    }
+
+    public override void EditorStart()
+    {
+    }
+
     public override void EditorUpdate()
     {
         MenuOutline();

@@ -10,6 +10,7 @@ public class EditorState : BaseState
 
     public override void OnAwake()
     {
+        Editor();
     }
 
     public override void OnEnter()
@@ -35,9 +36,12 @@ public class EditorState : BaseState
 
     void Editor()
     {
+        List<AbstractGameEditor> addedEditor = new List<AbstractGameEditor>();
         while (newEditorsQueue.Count > 0)
         {
-            editors.Add(newEditorsQueue.Dequeue());
+            AbstractGameEditor editor = newEditorsQueue.Dequeue();
+            addedEditor.Add(editor);
+            editors.Add(editor);
         }
 
         while (removeEditorsQueue.Count > 0)
@@ -46,6 +50,15 @@ public class EditorState : BaseState
             if (editor != null)
                 if (editors.Contains(editor))
                     editors.Remove(editor);
+        }
+
+        foreach (AbstractGameEditor editor in addedEditor)
+        {
+            editor.EditorAwake();
+        }
+        foreach (AbstractGameEditor editor in addedEditor)
+        {
+            editor.EditorStart();
         }
     }
 

@@ -12,6 +12,7 @@ public class DeleteObjectCommand : BaseObjectCommands
     /// </summary>
 
     Stack<GameObject[]> redoObjectsStack;
+    Stack<GameObject[]> undoObjectsStack;
     Stack<SceneObject[]> previouslySelectedObjects;
     [SerializeField] DeSelectObjectCommand deSelectCommand;
     [SerializeField] SelectObjectCommand selectCommand;
@@ -20,6 +21,7 @@ public class DeleteObjectCommand : BaseObjectCommands
     {
         base.OnEnable();
         redoObjectsStack = new Stack<GameObject[]>();
+        undoObjectsStack = new Stack<GameObject[]>();
         previouslySelectedObjects = new Stack<SceneObject[]>();
     }
 
@@ -60,7 +62,7 @@ public class DeleteObjectCommand : BaseObjectCommands
             if (obj != null) DeleteObject(obj);
         }
 
-        AddObjectToLinkedList(selectedObjects);
+        undoObjectsStack.Push(selectedObjects);
         redoObjectsStack.Clear();
     }
 
@@ -69,8 +71,7 @@ public class DeleteObjectCommand : BaseObjectCommands
         InputCommands.selectedObjects = new List<SceneObject>(previouslySelectedObjects.Pop());
         selectCommand.Execute();
 
-        GameObject[] undoObjects = ObjectList.allGOList.Last.Value;
-        ObjectList.allGOList.RemoveLast();
+        GameObject[] undoObjects = undoObjectsStack.Pop();
         foreach(GameObject obj in undoObjects)
         {
             obj.GetComponent<SceneObject>().OnCreation();
@@ -88,6 +89,6 @@ public class DeleteObjectCommand : BaseObjectCommands
         {
             if (obj != null) DeleteObject(obj);
         }
-        AddObjectToLinkedList(redoObjects);
+        undoObjectsStack.Push(redoObjects);
     }
 }

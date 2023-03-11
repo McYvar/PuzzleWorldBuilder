@@ -21,9 +21,12 @@ public class ObjectMenu : BaseMenuWindow
     [SerializeField] int currentCategory = 0;
     int navigator = 0;
 
-    protected override void OnEnable()
+    [SerializeField] InputCommands inputCommands;
+    [SerializeField] Transform objectListTransform;
+
+    public override void EditorStart()
     {
-        base.OnEnable();
+        base.EditorStart();
         CreateCatagoryItems();
         UpdateSizeDelta();
         DisplayCatagory(currentCategory);
@@ -47,37 +50,45 @@ public class ObjectMenu : BaseMenuWindow
     {
         if (objectMenuItemSpace.GetRectTransform() != null)
         rectTransform.sizeDelta = new Vector2(maxItemsInARow * objectMenuItemSpace.GetRectTransform().sizeDelta.x + (maxItemsInARow + 1) * spaceBetweenItems + 2 * edgeWidthOffset,
-                                             (((catagories[currentCategory].items.Count - 1) / maxItemsInARow) + 1) * objectMenuItemSpace.GetRectTransform().sizeDelta.y + (((catagories[currentCategory].items.Count - 1) / maxItemsInARow) + 2) * spaceBetweenItems + 2 * edgeHeightOffset);
+                                             (((catagories[currentCategory].parentObjectTransforms.Count - 1) / maxItemsInARow) + 1) * objectMenuItemSpace.GetRectTransform().sizeDelta.y + (((catagories[currentCategory].parentObjectTransforms.Count - 1) / maxItemsInARow) + 2) * spaceBetweenItems + 2 * edgeHeightOffset);
     }
 
     void CreateCatagoryItems()
     {
         for (int catagoryIterator = 0; catagoryIterator < catagories.Length; catagoryIterator++)
         {
-            List<GameObject> createdItems = new List<GameObject>();
+            List<Transform> createdItems = new List<Transform>();
             for (int itemIterator = 0; itemIterator < catagories[catagoryIterator].items.Count; itemIterator++)
             {
-                GameObject newItem = Instantiate(objectMenuItemSpace.gameObject, transform);
+                // first we create an instance of the item frame prefab and place it in the correct position
+                Transform newItem = Instantiate(objectMenuItemSpace.gameObject, transform).transform;
                 RectTransform newItemRect = newItem.GetComponent<RectTransform>();
                 if (newItemRect != null)
                 {
                     newItemRect.localPosition = new Vector2(edgeWidthOffset + spaceBetweenItems + (spaceBetweenItems + objectMenuItemSpace.GetRectTransform().sizeDelta.x) * (itemIterator % maxItemsInARow), -(edgeHeightOffset + spaceBetweenItems + (spaceBetweenItems + objectMenuItemSpace.GetRectTransform().sizeDelta.y) * (itemIterator / maxItemsInARow)));
                 }
-                newItem.SetActive(false);
+                newItem.gameObject.SetActive(false);
                 createdItems.Add(newItem);
+
+                // then inside this newly created item frame we put an image inside with specific offsets and assign the 
+                Item currentItem = catagories[catagoryIterator].items[itemIterator];
+                currentItem.Initialize(inputCommands.GetCommandManager(), objectListTransform);
+                ObjectMenuItemSpace currentItemSpace = newItem.GetComponent<ObjectMenuItemSpace>();
+                currentItemSpace.button.image.sprite = currentItem.sprite;
+                currentItemSpace.button.onClick.AddListener(() => currentItem.AddItemToScene());
             }
-            catagories[catagoryIterator].items = createdItems;
+            catagories[catagoryIterator].parentObjectTransforms = createdItems;
         }
     }
 
     public void DisplayCatagory(int category)
     {
-        foreach (var item in catagories[currentCategory].items)
+        foreach (var item in catagories[currentCategory].parentObjectTransforms)
         {
             item.gameObject.SetActive(false);
         }
         currentCategory = category;
-        foreach (var item in catagories[currentCategory].items)
+        foreach (var item in catagories[currentCategory].parentObjectTransforms)
         {
             item.gameObject.SetActive(true);
         }
@@ -89,6 +100,6 @@ public class ObjectMenu : BaseMenuWindow
 public struct Catagory
 {
     public string name;
-    //maybe turn this into a image...
-    public List<GameObject> items;
+    public List<Item> items;
+    [HideInInspector] public List<Transform> parentObjectTransforms;
 }

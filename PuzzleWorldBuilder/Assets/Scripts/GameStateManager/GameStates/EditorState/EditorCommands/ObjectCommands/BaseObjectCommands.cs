@@ -4,12 +4,16 @@ using UnityEngine;
 
 public class BaseObjectCommands : BaseEditorCommand
 {
-    Transform parent;
+    [SerializeField] Transform parent;
 
     protected override void OnEnable()
     {
         base.OnEnable();
-        parent = FindObjectOfType<ObjectList>().transform; // ugly... but only for once I suppose... for each instance of this script...
+    }
+
+    public void SetParent(Transform parent)
+    {
+        this.parent = parent;
     }
 
     public GameObject CreateObject(GameObject objectToCreate)
@@ -42,15 +46,5 @@ public class BaseObjectCommands : BaseEditorCommand
         // When this function is called, the objects have to be manually removed from the GO linked list
         SceneObject sceneObject = objectToDelete.GetComponent<SceneObject>();
         if (sceneObject != null) sceneObject.OnDeletion();
-    }
-
-    public void AddObjectToLinkedList(GameObject[] objectToAdd)
-    {
-        if (ObjectList.allGOList.Count > CommandManager.globalMaxUndoAmount)
-        {
-            ObjectList.allGOList.RemoveFirst();
-        }
-
-        ObjectList.allGOList.AddLast(objectToAdd);
     }
 }

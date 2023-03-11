@@ -35,7 +35,16 @@ public class ExampleCommand : AbstractGameEditor, ICommand
         Execute();
     }
 
+    public override void EditorAwake()
+    {
+    }
+
+    public override void EditorStart()
+    {
+    }
+
     public override void EditorUpdate()
     {
     }
+
 }

@@ -39,9 +39,13 @@ public class InputCommands : AbstractGameEditor, IPointerDownHandler, IPointerUp
     Vector2 selectionEndingPoint;
     bool isSelecting;
 
-    private void Start()
+    public override void EditorAwake()
     {
         commandManager = new CommandManager(maxUndoAmount);
+    }
+
+    public override void EditorStart()
+    {
     }
 
     public override void EditorUpdate()

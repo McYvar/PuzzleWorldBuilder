@@ -14,14 +14,9 @@ public class AddObjectCommand : BaseObjectCommands
     
     // now a key, later a drag and drop
     [SerializeField] GameObject myObjectPrefab;
-
-    Stack<GameObject> redoObjectStack;
-
-    protected override void OnEnable()
-    {
-        base.OnEnable();
-        redoObjectStack = new Stack<GameObject>();
-    }
+    GameObject myObject;
+    public static Stack<GameObject> redoObjectStack = new Stack<GameObject>();
+    public static Stack<GameObject> undoObjectStack = new Stack<GameObject>();
 
     public override void Execute()
     {
@@ -35,16 +30,16 @@ public class AddObjectCommand : BaseObjectCommands
                 Destroy(obj);
             }
         }
-        GameObject[] toArray = { CreateObject(myObjectPrefab) };
-        AddObjectToLinkedList(toArray);
+        myObject = CreateObject(myObjectPrefab);
+        undoObjectStack.Push(myObject);
     }
 
     public override void Undo()
     {
         // Undo adding this object, link this object as next to last object
-        redoObjectStack.Push(ObjectList.allGOList.Last.Value[0]);
-        DeleteObject(ObjectList.allGOList.Last.Value[0]);
-        ObjectList.allGOList.RemoveLast();
+        myObject = undoObjectStack.Pop();
+        redoObjectStack.Push(myObject);
+        DeleteObject(myObject);
     }
 
     public override void Redo() 
@@ -54,10 +49,9 @@ public class AddObjectCommand : BaseObjectCommands
         /// stored somewhere else on destroying
         /// 
         /// Redo adding previous object linked to the most recent one, link redo object to the recent one
-        GameObject redoObject = redoObjectStack.Pop();
-        SceneObject sceneObject = redoObject.GetComponent<SceneObject>();
+        myObject = redoObjectStack.Pop();
+        undoObjectStack.Push(myObject);
+        SceneObject sceneObject = myObject.GetComponent<SceneObject>();
         if (sceneObject != null) sceneObject.OnCreation();
-        GameObject[] toArray = { redoObject };
-        AddObjectToLinkedList(toArray);
     }
 }

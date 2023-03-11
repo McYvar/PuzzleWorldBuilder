@@ -11,11 +11,13 @@ public class PasteObjectCommand : BaseObjectCommands
     /// 
 
     Stack<GameObject[]> redoObjectsStack;
+    Stack<GameObject[]> undoObjectsStack;
 
     protected override void OnEnable()
     {
         base.OnEnable();
         redoObjectsStack = new Stack<GameObject[]>();
+        undoObjectsStack = new Stack<GameObject[]>();
     }
 
     public override void Execute()
@@ -51,13 +53,12 @@ public class PasteObjectCommand : BaseObjectCommands
             if (clipBoard != null) Destroy(clipBoard);
         }
 
-        AddObjectToLinkedList(newObj.ToArray());
+        undoObjectsStack.Push(newObj.ToArray());
     }
 
     public override void Undo()
     {
-        GameObject[] undoObjects = ObjectList.allGOList.Last.Value;
-        ObjectList.allGOList.RemoveLast();
+        GameObject[] undoObjects = undoObjectsStack.Pop();
         foreach (GameObject obj in undoObjects)
         {
             DeleteObject(obj);
@@ -73,6 +74,6 @@ public class PasteObjectCommand : BaseObjectCommands
             SceneObject sceneObject = obj.GetComponent<SceneObject>();
             if (sceneObject != null) sceneObject.OnCreation();
         }
-        AddObjectToLinkedList(redoObjects);
+        undoObjectsStack.Push(redoObjects);
     }
 }

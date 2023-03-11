@@ -63,8 +63,16 @@ public class BackGroundLayerOptions : AbstractGameEditor, IPointerUpHandler, IPo
     {
         FloatingDropDownMenu.DisplayDropDownOnLocation(eventData.position.x, eventData.position.y);
     }
+    public override void EditorAwake()
+    {
+    }
+
+    public override void EditorStart()
+    {
+    }
 
     public override void EditorUpdate()
     {
     }
+
 }
