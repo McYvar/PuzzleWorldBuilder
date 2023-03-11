@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class ObjectMenu : BaseMenuWindow
 {
@@ -11,13 +12,15 @@ public class ObjectMenu : BaseMenuWindow
     /// Also will the menu be categorized, so for each category there is a seperate list.
     /// </summary>
 
-    [SerializeField] ObjectMenuItemSpace objectMenuItemSpace;
+    [SerializeField] ObjectMenuItemSpace objectMenuItemSpacePrefab;
+    [SerializeField] ObjectMenuItemSpace categoryButtonPrefab;
     [SerializeField] float spaceBetweenItems;
     [SerializeField] float edgeWidthOffset;
     [SerializeField] float edgeHeightOffset;
+    [SerializeField] float editorMinimumHeight;
     [SerializeField, Range(1, 7)] int maxItemsInARow;
 
-    [SerializeField] Catagory[] catagories;
+    [SerializeField] Category[] categories;
     [SerializeField] int currentCategory = 0;
     int navigator = 0;
 
@@ -27,9 +30,9 @@ public class ObjectMenu : BaseMenuWindow
     public override void EditorStart()
     {
         base.EditorStart();
-        CreateCatagoryItems();
+        CreateCategoryItems();
         UpdateSizeDelta();
-        DisplayCatagory(currentCategory);
+        DisplayCategory(currentCategory);
     }
 
     protected override void Update()
@@ -39,7 +42,7 @@ public class ObjectMenu : BaseMenuWindow
     
     public override void EditorUpdate()
     {
-        if (navigator >= catagories.Length)
+        if (navigator >= categories.Length)
         {
             navigator = 0;
             return;
@@ -48,58 +51,71 @@ public class ObjectMenu : BaseMenuWindow
 
     void UpdateSizeDelta()
     {
-        if (objectMenuItemSpace.GetRectTransform() != null)
-        rectTransform.sizeDelta = new Vector2(maxItemsInARow * objectMenuItemSpace.GetRectTransform().sizeDelta.x + (maxItemsInARow + 1) * spaceBetweenItems + 2 * edgeWidthOffset,
-                                             (((catagories[currentCategory].parentObjectTransforms.Count - 1) / maxItemsInARow) + 1) * objectMenuItemSpace.GetRectTransform().sizeDelta.y + (((catagories[currentCategory].parentObjectTransforms.Count - 1) / maxItemsInARow) + 2) * spaceBetweenItems + 2 * edgeHeightOffset);
+        float newHeight = (((categories[currentCategory].parentObjectTransforms.Count - 1) / maxItemsInARow) + 1) * objectMenuItemSpacePrefab.GetRectTransform().sizeDelta.y + (((categories[currentCategory].parentObjectTransforms.Count - 1) / maxItemsInARow) + 2) * spaceBetweenItems + 2 * edgeHeightOffset;
+        if (newHeight < editorMinimumHeight) newHeight = editorMinimumHeight;
+        if (objectMenuItemSpacePrefab.GetRectTransform() != null && categories.Length > 0)
+        rectTransform.sizeDelta = new Vector2(maxItemsInARow * objectMenuItemSpacePrefab.GetRectTransform().sizeDelta.x + (maxItemsInARow + 1) * spaceBetweenItems + 2 * edgeWidthOffset, newHeight);
     }
 
-    void CreateCatagoryItems()
+    void CreateCategoryItems()
     {
-        for (int catagoryIterator = 0; catagoryIterator < catagories.Length; catagoryIterator++)
+        for (int categoryIterator = 0; categoryIterator < categories.Length; categoryIterator++)
         {
             List<Transform> createdItems = new List<Transform>();
-            for (int itemIterator = 0; itemIterator < catagories[catagoryIterator].items.Count; itemIterator++)
+            for (int itemIterator = 0; itemIterator < categories[categoryIterator].items.Count; itemIterator++)
             {
                 // first we create an instance of the item frame prefab and place it in the correct position
-                Transform newItem = Instantiate(objectMenuItemSpace.gameObject, transform).transform;
+                Transform newItem = Instantiate(objectMenuItemSpacePrefab.gameObject, transform).transform;
                 RectTransform newItemRect = newItem.GetComponent<RectTransform>();
                 if (newItemRect != null)
                 {
-                    newItemRect.localPosition = new Vector2(edgeWidthOffset + spaceBetweenItems + (spaceBetweenItems + objectMenuItemSpace.GetRectTransform().sizeDelta.x) * (itemIterator % maxItemsInARow), -(edgeHeightOffset + spaceBetweenItems + (spaceBetweenItems + objectMenuItemSpace.GetRectTransform().sizeDelta.y) * (itemIterator / maxItemsInARow)));
+                    newItemRect.localPosition = new Vector2(edgeWidthOffset + spaceBetweenItems + (spaceBetweenItems + objectMenuItemSpacePrefab.GetRectTransform().sizeDelta.x) * (itemIterator % maxItemsInARow), -(edgeHeightOffset + spaceBetweenItems + (spaceBetweenItems + objectMenuItemSpacePrefab.GetRectTransform().sizeDelta.y) * (itemIterator / maxItemsInARow)));
                 }
                 newItem.gameObject.SetActive(false);
                 createdItems.Add(newItem);
 
                 // then inside this newly created item frame we put an image inside with specific offsets and assign the 
-                Item currentItem = catagories[catagoryIterator].items[itemIterator];
+                Item currentItem = categories[categoryIterator].items[itemIterator];
                 currentItem.Initialize(inputCommands.GetCommandManager(), objectListTransform);
                 ObjectMenuItemSpace currentItemSpace = newItem.GetComponent<ObjectMenuItemSpace>();
                 currentItemSpace.button.image.sprite = currentItem.sprite;
                 currentItemSpace.button.onClick.AddListener(() => currentItem.AddItemToScene());
             }
-            catagories[catagoryIterator].parentObjectTransforms = createdItems;
+            // now add and connect a button to the category
+            categories[categoryIterator].parentObjectTransforms = createdItems;
+            GameObject buttonObj = Instantiate(categoryButtonPrefab.gameObject, transform);
+            ObjectMenuItemSpace button = buttonObj.GetComponent<ObjectMenuItemSpace>();
+            categories[categoryIterator].button = button;
+            RectTransform currentButtonRectTransform = button.GetRectTransform();
+            currentButtonRectTransform.localPosition = new Vector2(0, -currentButtonRectTransform.sizeDelta.x * categoryIterator);
+            int currentCategory = categoryIterator;
+            button.button.onClick.AddListener(() => DisplayCategory(currentCategory));
+            button.text.text = categories[currentCategory].name;
         }
     }
 
-    public void DisplayCatagory(int category)
+    public void DisplayCategory(int category)
     {
-        foreach (var item in catagories[currentCategory].parentObjectTransforms)
+        foreach (var item in categories[currentCategory].parentObjectTransforms)
         {
             item.gameObject.SetActive(false);
         }
+        categories[currentCategory].button.button.image.color = categories[currentCategory].button.normalColor;
         currentCategory = category;
-        foreach (var item in catagories[currentCategory].parentObjectTransforms)
+        foreach (var item in categories[currentCategory].parentObjectTransforms)
         {
             item.gameObject.SetActive(true);
         }
+        categories[currentCategory].button.button.image.color = categories[currentCategory].button.activeColor;
         UpdateSizeDelta();
     }
 }
 
 [System.Serializable]
-public struct Catagory
+public struct Category
 {
     public string name;
     public List<Item> items;
     [HideInInspector] public List<Transform> parentObjectTransforms;
+    [HideInInspector] public ObjectMenuItemSpace button;
 }

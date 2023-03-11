@@ -60,6 +60,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   baseKey: 0
+  parent: {fileID: 0}
   myObjectPrefab: {fileID: 6448174439648810407, guid: 12deaa6052c541548bed56691574176f, type: 3}
 --- !u!65 &960371871952297340
 BoxCollider:

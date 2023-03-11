@@ -2,12 +2,13 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
+[ExecuteAlways]
 public class ObjectMenuItemSpace : BaseMenuWindow
 {
     public Button button;
-    protected override void Update()
-    {
-        base.Update();
-    }
+    public TMP_Text text;
+    public Color activeColor;
+    public Color normalColor;
 }
