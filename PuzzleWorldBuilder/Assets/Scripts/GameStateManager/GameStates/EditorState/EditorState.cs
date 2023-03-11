@@ -26,11 +26,15 @@ public class EditorState : BaseState
 
     public override void OnUpdate()
     {
+        Editor();
         foreach (AbstractGameEditor editor in editors)
         {
             editor.EditorUpdate();
         }
+    }
 
+    void Editor()
+    {
         while (newEditorsQueue.Count > 0)
         {
             editors.Add(newEditorsQueue.Dequeue());
