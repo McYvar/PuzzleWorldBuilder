@@ -11,15 +11,22 @@ public class OverrideSelectObjectCommand : BaseObjectCommands
     /// </summary>
 
     List<SceneObject> previouslySelected = new List<SceneObject>();
+    List<SceneObject> currentlySelected = new List<SceneObject>();
 
-    Stack<SceneObject[]> undoStack;
-    Stack<SceneObject[]> redoStack;
+    Stack<SceneObject[]> prevUndoStack;
+    Stack<SceneObject[]> curUndoStack;
+
+    Stack<SceneObject[]> curRedoStack;
+    Stack<SceneObject[]> prevRedoStack;
 
     protected override void OnEnable()
     {
         base.OnEnable();
-        redoStack = new Stack<SceneObject[]>();
-        undoStack = new Stack<SceneObject[]>();
+        prevUndoStack = new Stack<SceneObject[]>();
+        curUndoStack = new Stack<SceneObject[]>();
+
+        prevRedoStack = new Stack<SceneObject[]>();
+        curRedoStack = new Stack<SceneObject[]>();
     }
 
     public override void Execute()
@@ -27,53 +34,62 @@ public class OverrideSelectObjectCommand : BaseObjectCommands
         foreach (SceneObject sceneObject in previouslySelected)
         {
             sceneObject.OnDeselection();
+            InputCommands.selectedObjects.Remove(sceneObject);
         }
-        foreach (SceneObject sceneObject in InputCommands.selectedObjects)
+        prevUndoStack.Push(previouslySelected.ToArray());
+
+        foreach (SceneObject sceneObject in currentlySelected)
         {
             sceneObject.OnSelection();
+            InputCommands.selectedObjects.Add(sceneObject);
         }
-        undoStack.Push(previouslySelected.ToArray());
+        curUndoStack.Push(currentlySelected.ToArray());
     }
 
     public override void Undo()
     {
-        foreach (SceneObject sceneObject in InputCommands.selectedObjects)
+        SceneObject[] curSceneObjects = curUndoStack.Pop();
+        foreach (SceneObject sceneObject in curSceneObjects)
         {
             sceneObject.OnDeselection();
+            InputCommands.selectedObjects.Remove(sceneObject);
         }
-        SceneObject[] sceneObjects = undoStack.Pop();
-        previouslySelected.Clear();
-        previouslySelected.AddRange(InputCommands.selectedObjects);
-        InputCommands.selectedObjects.Clear();
-        InputCommands.selectedObjects.AddRange(sceneObjects);
-        foreach (SceneObject sceneObject in sceneObjects)
+        curRedoStack.Push(curSceneObjects);
+
+        SceneObject[] prevSceneObjects = prevUndoStack.Pop();
+        foreach (SceneObject sceneObject in prevSceneObjects)
         {
             sceneObject.OnSelection();
+            InputCommands.selectedObjects.Add(sceneObject);
         }
-        redoStack.Push(previouslySelected.ToArray());
+        prevRedoStack.Push(prevSceneObjects);
     }
 
     public override void Redo()
     {
-        foreach (SceneObject sceneObject in InputCommands.selectedObjects)
+        SceneObject[] curSceneObjects = curRedoStack.Pop();
+        foreach (SceneObject sceneObject in curSceneObjects)
         {
             sceneObject.OnDeselection();
+            InputCommands.selectedObjects.Remove(sceneObject);
         }
-        SceneObject[] sceneObjects = redoStack.Pop();
-        previouslySelected.Clear();
-        previouslySelected.AddRange(InputCommands.selectedObjects);
-        InputCommands.selectedObjects.Clear();
-        InputCommands.selectedObjects.AddRange(sceneObjects);
-        foreach (SceneObject sceneObject in sceneObjects)
+        prevUndoStack.Push(curSceneObjects);
+
+        SceneObject[] prevSceneObjects = prevRedoStack.Pop();
+        foreach (SceneObject sceneObject in prevSceneObjects)
         {
             sceneObject.OnSelection();
+            InputCommands.selectedObjects.Add(sceneObject);
         }
-        undoStack.Push(previouslySelected.ToArray());
+        curUndoStack.Push(prevSceneObjects);
     }
 
-    public void InitializePrevSelected(List<SceneObject> previouslySelected)
+    public void InitializeSelected(List<SceneObject> previouslySelected, List<SceneObject> currentlySelected)
     {
         this.previouslySelected.Clear();
         this.previouslySelected.AddRange(previouslySelected);
+
+        this.currentlySelected.Clear();
+        this.currentlySelected.AddRange(currentlySelected);
     }
 }

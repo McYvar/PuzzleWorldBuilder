@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -21,11 +20,12 @@ public class InputCommands : AbstractGameEditor, IPointerDownHandler, IPointerUp
 
     [SerializeField] DeleteObjectCommand deleteCommand;
     [SerializeField] SelectObjectCommand selectCommand;
-    [SerializeField] DeSelectObjectCommand deSelectCommand;
+    [SerializeField] DeselectObjectCommand deselectCommand;
     [SerializeField] CopyObjectCommand copyCommand;
     [SerializeField] PasteObjectCommand pasteCommand;
     [SerializeField] CutObjectCommand cutCommand;
     [SerializeField] OverrideSelectObjectCommand overrideSelectCommand;
+    [SerializeField] FlipSelectionObjectCommand flipSelectCommand;
 
     [SerializeField] Canvas mainCanvas;
     [SerializeField] RectTransform selectionLineTop;
@@ -219,6 +219,8 @@ public class InputCommands : AbstractGameEditor, IPointerDownHandler, IPointerUp
         isSelecting = false;
 
         Rect selectionBox = new Rect(selectionStartingPoint, selectionEndingPoint - selectionStartingPoint);
+
+        List<SceneObject> temp = new List<SceneObject>();
         if (selectionBox.size.magnitude < 5)
         {
             RaycastHit hit;
@@ -227,80 +229,53 @@ public class InputCommands : AbstractGameEditor, IPointerDownHandler, IPointerUp
                 camForward - mainCamera.transform.position,
                 out hit);
 
-            // Tiny rules for a single object selection
             if (hit.collider != null)
             {
+                // means we hit only one object
                 SceneObject sceneObject = hit.collider.GetComponent<SceneObject>();
                 if (sceneObject != null)
                 {
-                    if (selectedObjects.Count > 0)
-                    {
-                        if (selectedObjects.Count == 1)
-                        {
-                            if (selectedObjects.Contains(sceneObject)) return;
-                        }
-                        overrideSelectCommand.InitializePrevSelected(selectedObjects);
-                        selectedObjects.Clear();
-                        selectedObjects.Add(sceneObject);
-                        commandManager.ExecuteCommand(overrideSelectCommand);
-                    }
-                    else
-                    {
-                        selectedObjects.Clear();
-                        selectedObjects.Add(sceneObject);
-                        commandManager.ExecuteCommand(selectCommand);
-                    }
+                    temp.Add(sceneObject);
                 }
-                return;
             }
         }
-
-        // And here the rules for multi selection
-        List<SceneObject> temp = new List<SceneObject>();
-        foreach (SceneObject sceneObject in SceneObject.sceneObjects)
+        else
         {
-            if (sceneObject == null) continue;
-            Vector3 screenPosition = mainCamera.WorldToScreenPoint(sceneObject.transform.position);
-            if (selectionBox.Contains(screenPosition, true))
+            foreach (SceneObject sceneObject in SceneObject.sceneObjects)
             {
-                temp.Add(sceneObject);
-            }
-        }
-        
-        if (temp.Count > 0)
-        {
-            if (selectedObjects.Count > 0)
-            {
-                if (temp.Count == selectedObjects.Count)
+                if (sceneObject == null) continue;
+                Vector3 screenPosition = mainCamera.WorldToScreenPoint(sceneObject.transform.position);
+                if (selectionBox.Contains(screenPosition, true))
                 {
-                    bool newSelected = false;
-                    foreach (SceneObject tempSceneObject in temp)
-                    {
-                        if (!selectedObjects.Contains(tempSceneObject))
-                        {
-                            newSelected = true;
-                            break;
-                        }
-                    }
-
-                    if (!newSelected) return;
+                    temp.Add(sceneObject);
                 }
-
-                overrideSelectCommand.InitializePrevSelected(selectedObjects);
-                selectedObjects.Clear();
-                selectedObjects.AddRange(temp);
-                commandManager.ExecuteCommand(overrideSelectCommand);
-            }
-            else
-            {
-                selectedObjects.Clear();
-                selectedObjects.AddRange(temp);
-                commandManager.ExecuteCommand(selectCommand);
             }
         }
+
+        if (temp.Count < 0)
+        {
+            deselectCommand.InitializePreDeselected(selectedObjects);
+            commandManager.ExecuteCommand(deselectCommand);
+            return;
+        }
+
+        // case: shift is pressed
+        if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
+        {
+            flipSelectCommand.InitializePreSelected(selectedObjects, temp);
+            commandManager.ExecuteCommand(flipSelectCommand);
+        }
+        // case: cntl is pressed or nothing is selected
+        else if (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl) || selectedObjects.Count == 0)
+        {
+            selectCommand.InitializePreSelected(selectedObjects, temp);
+            commandManager.ExecuteCommand(selectCommand);
+        }
+        // case: nothing is pressed and at least one object is selected while selecting another object
         else if (selectedObjects.Count > 0)
         {
-            commandManager.ExecuteCommand(deSelectCommand);
+            overrideSelectCommand.InitializeSelected(selectedObjects, temp);
+            commandManager.ExecuteCommand(overrideSelectCommand);
         }
     }
 
@@ -308,7 +283,7 @@ public class InputCommands : AbstractGameEditor, IPointerDownHandler, IPointerUp
     {
         isSelecting = false;
         if (selectedObjects.Count == 0) return;
-        else commandManager.ExecuteCommand(deSelectCommand);
+        else commandManager.ExecuteCommand(deselectCommand);
     }
 
     public void OnPointerDown(PointerEventData eventData)

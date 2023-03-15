@@ -6,6 +6,7 @@ public class SelectObjectCommand : BaseObjectCommands
 {
     Stack<SceneObject[]> undoStack;
     Stack<SceneObject[]> redoStack;
+    List<SceneObject> preSelected = new List<SceneObject>();
 
     protected override void OnEnable()
     {
@@ -16,12 +17,13 @@ public class SelectObjectCommand : BaseObjectCommands
     
     public override void Execute()
     {
-        foreach (SceneObject sceneObject in InputCommands.selectedObjects)
+        foreach (SceneObject sceneObject in preSelected)
         {
             sceneObject.OnSelection();
+            InputCommands.selectedObjects.Add(sceneObject);
         }
         redoStack.Clear();
-        undoStack.Push(InputCommands.selectedObjects.ToArray());
+        undoStack.Push(preSelected.ToArray());
     }
 
     public override void Undo()
@@ -29,21 +31,36 @@ public class SelectObjectCommand : BaseObjectCommands
         SceneObject[] redoObjects = undoStack.Pop();
         foreach (SceneObject sceneObject in redoObjects)
         {
-            sceneObject?.OnDeselection();
+            sceneObject.OnDeselection();
+            InputCommands.selectedObjects.Remove(sceneObject);
         }
-        InputCommands.selectedObjects.Clear();
+        preSelected.Clear();
         redoStack.Push(redoObjects);
     }
 
     public override void Redo()
     {
         SceneObject[] redoObjects = redoStack.Pop();
-        InputCommands.selectedObjects.Clear();
-        InputCommands.selectedObjects.AddRange(redoObjects);
-        foreach (SceneObject sceneObject in InputCommands.selectedObjects)
+        preSelected.Clear();
+        preSelected.AddRange(redoObjects);
+        foreach (SceneObject sceneObject in preSelected)
         {
-            sceneObject?.OnSelection();
+            sceneObject.OnSelection();
+            InputCommands.selectedObjects.Add(sceneObject);
         }
         undoStack.Push(redoObjects);
+    }
+
+    public void InitializePreSelected(List<SceneObject> currentlySelected, List<SceneObject> preSelected)
+    {
+        this.preSelected.Clear();
+        this.preSelected.AddRange(preSelected);
+
+        foreach(SceneObject sceneObject in currentlySelected)
+        {
+            if (this.preSelected.Contains(sceneObject))
+                this.preSelected.Remove(sceneObject);
+        }
+        Debug.Log(preSelected.Count);
     }
 }

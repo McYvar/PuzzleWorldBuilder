@@ -14,7 +14,7 @@ public class DeleteObjectCommand : BaseObjectCommands
     Stack<GameObject[]> redoObjectsStack;
     Stack<GameObject[]> undoObjectsStack;
     Stack<SceneObject[]> previouslySelectedObjects;
-    [SerializeField] DeSelectObjectCommand deSelectCommand;
+    [SerializeField] DeselectObjectCommand deSelectCommand;
     [SerializeField] SelectObjectCommand selectCommand;
 
     protected override void OnEnable()

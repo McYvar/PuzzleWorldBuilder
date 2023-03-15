@@ -1,10 +1,11 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
-public class DeSelectObjectCommand : BaseEditorCommand
+public class DeselectObjectCommand : BaseEditorCommand
 {
     Stack<SceneObject[]> undoStack;
     Stack<SceneObject[]> redoStack;
+    List<SceneObject> preDeselected = new List<SceneObject>();
 
     protected override void OnEnable()
     {
@@ -15,12 +16,13 @@ public class DeSelectObjectCommand : BaseEditorCommand
 
     public override void Execute()
     {
-        SceneObject[] sceneObjects = InputCommands.selectedObjects.ToArray();
+        SceneObject[] sceneObjects = preDeselected.ToArray();
         foreach (SceneObject sceneObject in sceneObjects)
         {
             sceneObject.OnDeselection();
+            InputCommands.selectedObjects.Remove(sceneObject);
         }
-        InputCommands.selectedObjects.Clear();
+        preDeselected.Clear();
         redoStack.Clear();
         undoStack.Push(sceneObjects);
     }
@@ -31,9 +33,10 @@ public class DeSelectObjectCommand : BaseEditorCommand
         foreach (SceneObject sceneObject in sceneObjects)
         {
             sceneObject.OnSelection();
+            InputCommands.selectedObjects.Add(sceneObject);
         }
-        InputCommands.selectedObjects.Clear();
-        InputCommands.selectedObjects.AddRange(sceneObjects);
+        preDeselected.Clear();
+        preDeselected.AddRange(sceneObjects);
         redoStack.Push(sceneObjects);
     }
 
@@ -43,8 +46,15 @@ public class DeSelectObjectCommand : BaseEditorCommand
         foreach (SceneObject sceneObject in sceneObjects)
         {
             sceneObject.OnDeselection();
+            InputCommands.selectedObjects.Remove(sceneObject);
         }
-        InputCommands.selectedObjects.Clear();
+        preDeselected.Clear();
         undoStack.Push(sceneObjects);
+    }
+
+    public void InitializePreDeselected(List<SceneObject> preDeselected)
+    {
+        this.preDeselected.Clear();
+        this.preDeselected.AddRange(preDeselected);
     }
 }
