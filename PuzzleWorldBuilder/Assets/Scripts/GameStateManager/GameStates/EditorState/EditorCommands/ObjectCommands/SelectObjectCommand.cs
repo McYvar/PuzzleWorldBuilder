@@ -4,12 +4,14 @@ using UnityEngine;
 
 public class SelectObjectCommand : BaseObjectCommands
 {
+    Stack<SceneObject[]> undoStack;
     Stack<SceneObject[]> redoStack;
 
     protected override void OnEnable()
     {
         base.OnEnable();
         redoStack = new Stack<SceneObject[]>();
+        undoStack = new Stack<SceneObject[]>();
     }
     
     public override void Execute()
@@ -19,27 +21,29 @@ public class SelectObjectCommand : BaseObjectCommands
             sceneObject.OnSelection();
         }
         redoStack.Clear();
+        undoStack.Push(InputCommands.selectedObjects.ToArray());
     }
 
     public override void Undo()
     {
-        SceneObject[] redoSceneObjects = new SceneObject[InputCommands.selectedObjects.Count];
-        for(int i = 0; i < redoSceneObjects.Length; i++)
+        SceneObject[] redoObjects = undoStack.Pop();
+        foreach (SceneObject sceneObject in redoObjects)
         {
-            InputCommands.selectedObjects[i].OnDeselection();
-            redoSceneObjects[i] = InputCommands.selectedObjects[i];
+            sceneObject?.OnDeselection();
         }
         InputCommands.selectedObjects.Clear();
-        redoStack.Push(redoSceneObjects);
+        redoStack.Push(redoObjects);
     }
 
     public override void Redo()
     {
         SceneObject[] redoObjects = redoStack.Pop();
-        for(int i = 0;i < redoObjects.Length;i++)
+        InputCommands.selectedObjects.Clear();
+        InputCommands.selectedObjects.AddRange(redoObjects);
+        foreach (SceneObject sceneObject in InputCommands.selectedObjects)
         {
-            redoObjects[i].OnSelection();
-            InputCommands.selectedObjects.Add(redoObjects[i]);
+            sceneObject?.OnSelection();
         }
+        undoStack.Push(redoObjects);
     }
 }

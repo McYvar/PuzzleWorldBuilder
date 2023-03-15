@@ -1,9 +1,10 @@
 ﻿using System.Collections.Generic;
+using UnityEngine;
 
 public class DeSelectObjectCommand : BaseEditorCommand
 {
-    Stack<SceneObject[]> redoStack;
     Stack<SceneObject[]> undoStack;
+    Stack<SceneObject[]> redoStack;
 
     protected override void OnEnable()
     {
@@ -14,25 +15,25 @@ public class DeSelectObjectCommand : BaseEditorCommand
 
     public override void Execute()
     {
-        SceneObject[] sceneObjects = new SceneObject[InputCommands.selectedObjects.Count];
-        for (int i = 0; i < sceneObjects.Length; i++)
+        SceneObject[] sceneObjects = InputCommands.selectedObjects.ToArray();
+        foreach (SceneObject sceneObject in sceneObjects)
         {
-            if (InputCommands.selectedObjects[i] != null) sceneObjects[i] = InputCommands.selectedObjects[i];
-            sceneObjects[i].OnDeselection();
+            sceneObject.OnDeselection();
         }
         InputCommands.selectedObjects.Clear();
-        undoStack.Push(sceneObjects);
         redoStack.Clear();
+        undoStack.Push(sceneObjects);
     }
 
     public override void Undo()
     {
         SceneObject[] sceneObjects = undoStack.Pop();
-        for (int i = 0; i < sceneObjects.Length; i++)
+        foreach (SceneObject sceneObject in sceneObjects)
         {
-            if (sceneObjects[i] != null) InputCommands.selectedObjects.Add(sceneObjects[i]);
-            sceneObjects[i].OnSelection();
+            sceneObject.OnSelection();
         }
+        InputCommands.selectedObjects.Clear();
+        InputCommands.selectedObjects.AddRange(sceneObjects);
         redoStack.Push(sceneObjects);
     }
 

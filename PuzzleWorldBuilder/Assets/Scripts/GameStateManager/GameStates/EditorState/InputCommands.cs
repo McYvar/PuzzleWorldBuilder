@@ -25,6 +25,7 @@ public class InputCommands : AbstractGameEditor, IPointerDownHandler, IPointerUp
     [SerializeField] CopyObjectCommand copyCommand;
     [SerializeField] PasteObjectCommand pasteCommand;
     [SerializeField] CutObjectCommand cutCommand;
+    [SerializeField] OverrideSelectObjectCommand overrideSelectCommand;
 
     [SerializeField] Canvas mainCanvas;
     [SerializeField] RectTransform selectionLineTop;
@@ -38,6 +39,9 @@ public class InputCommands : AbstractGameEditor, IPointerDownHandler, IPointerUp
     Vector2 selectionStartingPoint;
     Vector2 selectionEndingPoint;
     bool isSelecting;
+
+    [SerializeField] GameObject MovementToolObject;
+    [SerializeField] float MovementToolDistance;
 
     public override void EditorAwake()
     {
@@ -53,6 +57,7 @@ public class InputCommands : AbstractGameEditor, IPointerDownHandler, IPointerUp
         CommandManagerUpdater();
         BasicKeys();
         SelectionProcess();
+        MovementTool();
     }
 
     #region CommandManager
@@ -222,23 +227,35 @@ public class InputCommands : AbstractGameEditor, IPointerDownHandler, IPointerUp
                 camForward - mainCamera.transform.position,
                 out hit);
 
+            // Tiny rules for a single object selection
             if (hit.collider != null)
             {
                 SceneObject sceneObject = hit.collider.GetComponent<SceneObject>();
                 if (sceneObject != null)
                 {
-                    foreach (SceneObject obj in selectedObjects)
+                    if (selectedObjects.Count > 0)
                     {
-                        obj.OnDeselection();
+                        if (selectedObjects.Count == 1)
+                        {
+                            if (selectedObjects.Contains(sceneObject)) return;
+                        }
+                        overrideSelectCommand.InitializePrevSelected(selectedObjects);
+                        selectedObjects.Clear();
+                        selectedObjects.Add(sceneObject);
+                        commandManager.ExecuteCommand(overrideSelectCommand);
                     }
-                    selectedObjects.Clear();
-                    selectedObjects.Add(sceneObject);
-                    commandManager.ExecuteCommand(selectCommand);
+                    else
+                    {
+                        selectedObjects.Clear();
+                        selectedObjects.Add(sceneObject);
+                        commandManager.ExecuteCommand(selectCommand);
+                    }
                 }
                 return;
             }
         }
 
+        // And here the rules for multi selection
         List<SceneObject> temp = new List<SceneObject>();
         foreach (SceneObject sceneObject in SceneObject.sceneObjects)
         {
@@ -252,12 +269,34 @@ public class InputCommands : AbstractGameEditor, IPointerDownHandler, IPointerUp
         
         if (temp.Count > 0)
         {
-            foreach (SceneObject obj in selectedObjects)
+            if (selectedObjects.Count > 0)
             {
-                obj.OnDeselection();
+                if (temp.Count == selectedObjects.Count)
+                {
+                    bool newSelected = false;
+                    foreach (SceneObject tempSceneObject in temp)
+                    {
+                        if (!selectedObjects.Contains(tempSceneObject))
+                        {
+                            newSelected = true;
+                            break;
+                        }
+                    }
+
+                    if (!newSelected) return;
+                }
+
+                overrideSelectCommand.InitializePrevSelected(selectedObjects);
+                selectedObjects.Clear();
+                selectedObjects.AddRange(temp);
+                commandManager.ExecuteCommand(overrideSelectCommand);
             }
-            selectedObjects = temp;
-            commandManager.ExecuteCommand(selectCommand);
+            else
+            {
+                selectedObjects.Clear();
+                selectedObjects.AddRange(temp);
+                commandManager.ExecuteCommand(selectCommand);
+            }
         }
         else if (selectedObjects.Count > 0)
         {
@@ -289,6 +328,30 @@ public class InputCommands : AbstractGameEditor, IPointerDownHandler, IPointerUp
         if (eventData.button == PointerEventData.InputButton.Left)
         {
             FinishSelection();
+        }
+    }
+    #endregion
+
+    #region MovementTool
+    void MovementTool()
+    {
+        if (selectedObjects.Count > 0)
+        {
+            // If there are objects selected, show the movement tool
+            if (!MovementToolObject.activeInHierarchy) MovementToolObject.SetActive(true);
+            Vector3 centrePoint = Vector3.zero;
+            foreach (var obj in selectedObjects)
+            {
+                centrePoint += obj.transform.position;
+            }
+            centrePoint /= selectedObjects.Count;
+            /// Just a mention to whoever reads this note... after writing this line of code I was convinced I was a mathmatical genius for a moment :o
+            MovementToolObject.transform.position = mainCamera.transform.position + (centrePoint - mainCamera.transform.position).normalized * MovementToolDistance;
+        }
+        else
+        {
+            // Hide when there are no more objects selected
+            if (MovementToolObject.activeInHierarchy) MovementToolObject.SetActive(false);
         }
     }
     #endregion
