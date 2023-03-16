@@ -44,8 +44,8 @@ public class InputCommands : AbstractGameEditor, IPointerDownHandler, IPointerUp
     Vector2 selectionEndingPoint;
     bool isSelecting;
 
-    [SerializeField] GameObject MovementToolObject;
-    [SerializeField] float MovementToolDistance;
+    [SerializeField] GameObject movementToolObject;
+    [SerializeField] float movementToolDistance;
 
     public override void EditorAwake()
     {
@@ -235,13 +235,13 @@ public class InputCommands : AbstractGameEditor, IPointerDownHandler, IPointerUp
         }
         return false;
     }
-    private void StartSelection(Vector2 mouseLocation)
+    void StartSelection(Vector2 mouseLocation)
     {
         selectionStartingPoint = mouseLocation;
         isSelecting = true;
     }
 
-    private void FinishSelection()
+    void FinishSelection()
     {
         isSelecting = false;
 
@@ -378,7 +378,7 @@ public class InputCommands : AbstractGameEditor, IPointerDownHandler, IPointerUp
             if (currentMoveToolArrow != null) return;
 
             // if there are objects selected, show the movement tool
-            if (!MovementToolObject.activeInHierarchy) MovementToolObject.SetActive(true);
+            if (!movementToolObject.activeInHierarchy) movementToolObject.SetActive(true);
             Vector3 centrePoint = Vector3.zero;
             foreach (var obj in selectedObjects)
             {
@@ -386,14 +386,14 @@ public class InputCommands : AbstractGameEditor, IPointerDownHandler, IPointerUp
             }
             centrePoint /= selectedObjects.Count;
             /// Just a mention to whoever reads this note... after writing this line of code I was convinced I was a mathmatical genius for a moment :o
-            MovementToolObject.transform.position = mainCamera.transform.position + (centrePoint - mainCamera.transform.position).normalized * MovementToolDistance;
+            movementToolObject.transform.position = mainCamera.transform.position + (centrePoint - mainCamera.transform.position).normalized * movementToolDistance;
 
             // each seperate arrow has to get a mousedown function
         }
         else
         {
             // hide when there are no more objects selected
-            if (MovementToolObject.activeInHierarchy) MovementToolObject.SetActive(false);
+            if (movementToolObject.activeInHierarchy) movementToolObject.SetActive(false);
         }
     }
     #endregion

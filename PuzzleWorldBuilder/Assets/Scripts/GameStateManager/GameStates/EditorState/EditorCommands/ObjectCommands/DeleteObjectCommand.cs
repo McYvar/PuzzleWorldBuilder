@@ -14,7 +14,7 @@ public class DeleteObjectCommand : BaseObjectCommands
     Stack<GameObject[]> redoObjectsStack;
     Stack<GameObject[]> undoObjectsStack;
     Stack<SceneObject[]> previouslySelectedObjects;
-    [SerializeField] DeselectObjectCommand deSelectCommand;
+    [SerializeField] DeselectObjectCommand deselectCommand;
     [SerializeField] SelectObjectCommand selectCommand;
 
     protected override void OnEnable()
@@ -55,7 +55,7 @@ public class DeleteObjectCommand : BaseObjectCommands
             selectedObjects[i] = InputCommands.selectedObjects[i].gameObject;
         }
         previouslySelectedObjects.Push(InputCommands.selectedObjects.ToArray());
-        deSelectCommand.Execute();
+        deselectCommand.Execute();
 
         foreach (GameObject obj in selectedObjects)
         {
@@ -82,7 +82,7 @@ public class DeleteObjectCommand : BaseObjectCommands
     public override void Redo()
     {
         previouslySelectedObjects.Push(InputCommands.selectedObjects.ToArray());
-        deSelectCommand.Execute();
+        deselectCommand.Execute();
 
         GameObject[] redoObjects = redoObjectsStack.Pop();
         foreach(GameObject obj in redoObjects)

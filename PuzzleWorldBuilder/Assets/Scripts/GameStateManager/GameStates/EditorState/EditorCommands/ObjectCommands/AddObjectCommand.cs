@@ -15,8 +15,8 @@ public class AddObjectCommand : BaseObjectCommands
     // now a key, later a drag and drop
     [SerializeField] GameObject myObjectPrefab;
     GameObject myObject;
-    public static Stack<GameObject> redoObjectStack = new Stack<GameObject>();
-    public static Stack<GameObject> undoObjectStack = new Stack<GameObject>();
+    Stack<GameObject> redoObjectStack = new Stack<GameObject>();
+    Stack<GameObject> undoObjectStack = new Stack<GameObject>();
 
     public override void Execute()
     {
