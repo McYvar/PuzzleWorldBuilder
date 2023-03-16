@@ -8,9 +8,6 @@ public class OverrideSelectObjectCommand : BaseObjectCommands
     /// Date: 03/15/2023, By: Yvar
     /// I felt like this was necessary...
     /// So it's a command activates when other objects in the scene are already selected, and you override this selection.
-    /// 
-    /// Update: 03/15/2023
-    /// It took me a few hours later, but this class is now obsolete :)
     /// </summary>
 
     List<SceneObject> previouslySelected = new List<SceneObject>();

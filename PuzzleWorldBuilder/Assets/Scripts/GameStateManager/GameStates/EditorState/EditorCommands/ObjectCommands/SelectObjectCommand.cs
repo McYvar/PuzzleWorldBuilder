@@ -61,6 +61,5 @@ public class SelectObjectCommand : BaseObjectCommands
             if (this.preSelected.Contains(sceneObject))
                 this.preSelected.Remove(sceneObject);
         }
-        Debug.Log(preSelected.Count);
     }
 }

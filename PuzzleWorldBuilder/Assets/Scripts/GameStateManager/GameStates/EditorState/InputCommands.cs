@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-public class InputCommands : AbstractGameEditor, IPointerDownHandler, IPointerUpHandler
+public class InputCommands : AbstractGameEditor, IPointerDownHandler, IPointerUpHandler, IPointerMoveHandler
 {
     /// <summary>
     /// Date: 03/08/2023, By: Yvar
@@ -35,6 +35,10 @@ public class InputCommands : AbstractGameEditor, IPointerDownHandler, IPointerUp
     [SerializeField] float selectionWidth;
 
     [SerializeField] Camera mainCamera;
+
+    [SerializeField] Camera overlayCamera;
+    [SerializeField] LayerMask overlayLayer;
+    MoveToolArrow currentMoveToolArrow;
 
     Vector2 selectionStartingPoint;
     Vector2 selectionEndingPoint;
@@ -208,6 +212,29 @@ public class InputCommands : AbstractGameEditor, IPointerDownHandler, IPointerUp
             selectionLineBottom.sizeDelta = Vector2.zero;
         }
     }
+
+    bool FoundMoveToolArrow(Vector2 mouseLocation)
+    {
+        RaycastHit hit;
+        Vector3 camForward = overlayCamera.ScreenToWorldPoint(new Vector3(mouseLocation.x, mouseLocation.y, overlayCamera.nearClipPlane));
+        Physics.Raycast(overlayCamera.transform.position,
+            camForward - overlayCamera.transform.position,
+            out hit,
+            Mathf.Infinity,
+            overlayLayer);
+
+        if (hit.collider != null)
+        {
+
+            MoveToolArrow arrow = hit.collider.GetComponent<MoveToolArrow>();
+            if (arrow != null)
+            {
+                currentMoveToolArrow = arrow;
+                return true;
+            }
+        }
+        return false;
+    }
     private void StartSelection(Vector2 mouseLocation)
     {
         selectionStartingPoint = mouseLocation;
@@ -252,10 +279,13 @@ public class InputCommands : AbstractGameEditor, IPointerDownHandler, IPointerUp
             }
         }
 
-        if (temp.Count < 0)
+        if (temp.Count == 0)
         {
-            deselectCommand.InitializePreDeselected(selectedObjects);
-            commandManager.ExecuteCommand(deselectCommand);
+            if (selectedObjects.Count > 0)
+            {
+                deselectCommand.InitializePreDeselected(selectedObjects);
+                commandManager.ExecuteCommand(deselectCommand);
+            }
             return;
         }
 
@@ -274,6 +304,20 @@ public class InputCommands : AbstractGameEditor, IPointerDownHandler, IPointerUp
         // case: nothing is pressed and at least one object is selected while selecting another object
         else if (selectedObjects.Count > 0)
         {
+            // if the lists contain the same size and elements, we do nothing
+            if (selectedObjects.Count == temp.Count)
+            {
+                bool contains = true;
+                foreach (SceneObject sceneObject in selectedObjects)
+                {
+                    if (temp.Contains(sceneObject)) continue;
+                    else
+                    {
+                        contains = false;
+                    }
+                }
+                if (contains) return;
+            }
             overrideSelectCommand.InitializeSelected(selectedObjects, temp);
             commandManager.ExecuteCommand(overrideSelectCommand);
         }
@@ -282,15 +326,25 @@ public class InputCommands : AbstractGameEditor, IPointerDownHandler, IPointerUp
     private void AbortSelection()
     {
         isSelecting = false;
-        if (selectedObjects.Count == 0) return;
-        else commandManager.ExecuteCommand(deselectCommand);
+        if (selectedObjects.Count > 0)
+        {
+            deselectCommand.InitializePreDeselected(selectedObjects);
+            commandManager.ExecuteCommand(deselectCommand);
+        }
     }
 
     public void OnPointerDown(PointerEventData eventData)
     {
         if (eventData.button == PointerEventData.InputButton.Left)
         {
-            StartSelection(eventData.position);
+            if (FoundMoveToolArrow(eventData.position))
+            {
+                currentMoveToolArrow?.MouseDown();
+            }
+            else
+            {
+                StartSelection(eventData.position);
+            }
         }
         else if (eventData.button == PointerEventData.InputButton.Right && isSelecting)
         {
@@ -298,9 +352,17 @@ public class InputCommands : AbstractGameEditor, IPointerDownHandler, IPointerUp
         }
     }
 
+    public void OnPointerMove(PointerEventData eventData)
+    {
+        currentMoveToolArrow?.MouseMove();
+    }
+
     public void OnPointerUp(PointerEventData eventData)
     {
-        if (eventData.button == PointerEventData.InputButton.Left)
+        currentMoveToolArrow?.MouseUp();
+        currentMoveToolArrow = null;
+
+        if (eventData.button == PointerEventData.InputButton.Left && isSelecting)
         {
             FinishSelection();
         }
@@ -312,7 +374,10 @@ public class InputCommands : AbstractGameEditor, IPointerDownHandler, IPointerUp
     {
         if (selectedObjects.Count > 0)
         {
-            // If there are objects selected, show the movement tool
+            // if a movetoolarrow is selected, ignore these options
+            if (currentMoveToolArrow != null) return;
+
+            // if there are objects selected, show the movement tool
             if (!MovementToolObject.activeInHierarchy) MovementToolObject.SetActive(true);
             Vector3 centrePoint = Vector3.zero;
             foreach (var obj in selectedObjects)
@@ -322,10 +387,12 @@ public class InputCommands : AbstractGameEditor, IPointerDownHandler, IPointerUp
             centrePoint /= selectedObjects.Count;
             /// Just a mention to whoever reads this note... after writing this line of code I was convinced I was a mathmatical genius for a moment :o
             MovementToolObject.transform.position = mainCamera.transform.position + (centrePoint - mainCamera.transform.position).normalized * MovementToolDistance;
+
+            // each seperate arrow has to get a mousedown function
         }
         else
         {
-            // Hide when there are no more objects selected
+            // hide when there are no more objects selected
             if (MovementToolObject.activeInHierarchy) MovementToolObject.SetActive(false);
         }
     }
