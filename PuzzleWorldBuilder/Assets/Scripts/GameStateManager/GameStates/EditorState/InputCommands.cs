@@ -384,7 +384,7 @@ public class InputCommands : AbstractGameEditor, IPointerDownHandler, IPointerUp
         {
             if (FoundMoveToolArrow(eventData.position))
             {
-                currentMoveToolArrow?.MouseDown();
+                currentMoveToolArrow?.MouseDown(movementToolDistance);
             }
             else
             {
@@ -431,7 +431,8 @@ public class InputCommands : AbstractGameEditor, IPointerDownHandler, IPointerUp
             }
             centrePoint /= selectedObjects.Count;
             /// Just a mention to whoever reads this note... after writing this line of code I was convinced I was a mathmatical genius for a moment :o
-            movementToolObject.transform.position = mainCamera.transform.position + (centrePoint - mainCamera.transform.position).normalized * movementToolDistance;
+            float angle = Vector3.Angle(mainCamera.transform.forward, centrePoint - mainCamera.transform.position);
+            movementToolObject.transform.position = mainCamera.transform.position + (centrePoint - mainCamera.transform.position).normalized * (movementToolDistance / Mathf.Cos(angle * Mathf.Deg2Rad));
 
             // each seperate arrow has to get a mousedown function
         }

@@ -6,6 +6,7 @@ public class SceneObject : AbstractGameEditor
 {
     // static list of all objects visible in the scene
     public static List<SceneObject> sceneObjects = new List<SceneObject>();
+    [HideInInspector] public Vector3 myStartPos;
     MeshRenderer meshRenderer;
     Collider anyCollider;
 
