@@ -35,6 +35,14 @@ public class ExampleCommand : AbstractGameEditor, ICommand
         Execute();
     }
 
+    public void ClearFirstUndo()
+    {
+    }
+
+    public void ClearRedo()
+    {
+    }
+
     public override void EditorAwake()
     {
     }
@@ -46,5 +54,4 @@ public class ExampleCommand : AbstractGameEditor, ICommand
     public override void EditorUpdate()
     {
     }
-
 }

@@ -7,8 +7,8 @@ public class FlipSelectionObjectCommand : BaseObjectCommands
     List<SceneObject> flipSelected = new List<SceneObject>();
     List<SceneObject> newSelected = new List<SceneObject>();
 
-    Stack<SceneObject[]> curUndoStack;
-    Stack<SceneObject[]> newUndoStack;
+    LinkedList<SceneObject[]> curUndoLinkedList;
+    LinkedList<SceneObject[]> newUndoLinkedList;
 
     Stack<SceneObject[]> curRedoStack;
     Stack<SceneObject[]> newRedoStack;
@@ -16,8 +16,8 @@ public class FlipSelectionObjectCommand : BaseObjectCommands
     protected override void OnEnable()
     {
         base.OnEnable();
-        newUndoStack = new Stack<SceneObject[]>();
-        curUndoStack = new Stack<SceneObject[]>();
+        newUndoLinkedList = new LinkedList<SceneObject[]>();
+        curUndoLinkedList = new LinkedList<SceneObject[]>();
 
         curRedoStack = new Stack<SceneObject[]>();
         newRedoStack = new Stack<SceneObject[]>();
@@ -30,19 +30,20 @@ public class FlipSelectionObjectCommand : BaseObjectCommands
             sceneObject.OnDeselection();
             InputCommands.selectedObjects.Remove(sceneObject);
         }
-        curUndoStack.Push(flipSelected.ToArray());
+        curUndoLinkedList.AddLast(flipSelected.ToArray());
 
         foreach (SceneObject sceneObject in newSelected)
         {
             sceneObject.OnSelection();
             InputCommands.selectedObjects.Add(sceneObject);
         }
-        newUndoStack.Push(newSelected.ToArray());
+        newUndoLinkedList.AddLast(newSelected.ToArray());
     }
 
     public override void Undo()
     {
-        SceneObject[] newSceneObjects = newUndoStack.Pop();
+        SceneObject[] newSceneObjects = newUndoLinkedList.Last.Value;
+        newUndoLinkedList.RemoveLast();
         foreach (SceneObject sceneObject in newSceneObjects)
         {
             sceneObject.OnDeselection();
@@ -50,7 +51,8 @@ public class FlipSelectionObjectCommand : BaseObjectCommands
         }
         newRedoStack.Push(newSceneObjects);
 
-        SceneObject[] curSceneObjects = curUndoStack.Pop();
+        SceneObject[] curSceneObjects = curUndoLinkedList.Last.Value;
+        curUndoLinkedList.RemoveLast();
         foreach (SceneObject sceneObject in curSceneObjects)
         {
             sceneObject.OnSelection();
@@ -67,7 +69,7 @@ public class FlipSelectionObjectCommand : BaseObjectCommands
             sceneObject.OnDeselection();
             InputCommands.selectedObjects.Remove(sceneObject);
         }
-        curUndoStack.Push(curSceneObjects);
+        curUndoLinkedList.AddLast(curSceneObjects);
 
         SceneObject[] newSceneObjects = newRedoStack.Pop();
         foreach (SceneObject sceneObject in newSceneObjects)
@@ -75,8 +77,20 @@ public class FlipSelectionObjectCommand : BaseObjectCommands
             sceneObject.OnSelection();
             InputCommands.selectedObjects.Add(sceneObject);
         }
-        newUndoStack.Push(newSceneObjects);
+        newUndoLinkedList.AddLast(newSceneObjects);
 
+    }
+
+    public override void ClearFirstUndo()
+    {
+        curUndoLinkedList.RemoveFirst();
+        newUndoLinkedList.RemoveFirst();
+    }
+
+    public override void ClearRedo()
+    {
+        curRedoStack.Clear();
+        newRedoStack.Clear();
     }
 
     public void InitializePreSelected(List<SceneObject> currentlySelected, List<SceneObject> newSelected)

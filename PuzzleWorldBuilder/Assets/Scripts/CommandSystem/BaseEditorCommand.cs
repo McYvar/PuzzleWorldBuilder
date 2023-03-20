@@ -32,9 +32,16 @@ public class BaseEditorCommand : AbstractGameEditor, ICommand
     {
     }
 
+    public virtual void ClearFirstUndo()
+    {
+    }
+
+    public virtual void ClearRedo()
+    {
+    }
+
     public override void EditorAwake()
     {
-        Debug.Log(this);
     }
 
     public override void EditorStart()

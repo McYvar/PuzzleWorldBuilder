@@ -10,70 +10,69 @@ public class PasteObjectCommand : BaseObjectCommands
     /// </summary>
     /// 
 
-    Stack<GameObject[]> redoObjectsStack;
-    Stack<GameObject[]> undoObjectsStack;
+    LinkedList<SceneObject[]> undoLinkedList;
+    Stack<SceneObject[]> redoStack;
 
     protected override void OnEnable()
     {
         base.OnEnable();
-        redoObjectsStack = new Stack<GameObject[]>();
-        undoObjectsStack = new Stack<GameObject[]>();
+        undoLinkedList = new LinkedList<SceneObject[]>();
+        redoStack = new Stack<SceneObject[]>();
     }
 
     public override void Execute()
     {
-        while (redoObjectsStack.Count > 0)
-        {
-            foreach (GameObject obj in redoObjectsStack.Pop())
-            {
-                Destroy(obj);
-            }
-        }
-
-        if (ClipBoard.clipboard.Count == 0)
-        {
-            Debug.Log("Nothing to paste");
-            Debug.Log(InputCommands.selectedObjects.Count);
-            addToUndo = false;
-            return;
-        }
-        addToUndo = true;
-
-        List<GameObject> newObj = new List<GameObject>();
+        List<SceneObject> newObj = new List<SceneObject>();
         foreach (ClipBoard item in ClipBoard.clipboard)
         {
-            GameObject createdObject = CreateObject(item.gameObject);
+            SceneObject createdObject = CreateObject(item.GetComponent<SceneObject>());
             createdObject.name = item.normalName;
             newObj.Add(createdObject);
         }
 
-        foreach (GameObject obj in newObj)
+        foreach (SceneObject sceneObject in newObj)
         {
-            ClipBoard clipBoard = obj.GetComponent<ClipBoard>();
+            ClipBoard clipBoard = sceneObject.GetComponent<ClipBoard>();
             if (clipBoard != null) Destroy(clipBoard);
         }
 
-        undoObjectsStack.Push(newObj.ToArray());
+        undoLinkedList.AddLast(newObj.ToArray());
     }
 
     public override void Undo()
     {
-        GameObject[] undoObjects = undoObjectsStack.Pop();
-        foreach (GameObject obj in undoObjects)
+        SceneObject[] undoObjects = undoLinkedList.Last.Value;
+        undoLinkedList.RemoveLast();
+        foreach (SceneObject sceneObject in undoObjects)
         {
-            DeleteObject(obj);
+            sceneObject.OnDeletion();
         }
-        redoObjectsStack.Push(undoObjects);
+        redoStack.Push(undoObjects);
     }
 
     public override void Redo()
     {
-        GameObject[] redoObjects = redoObjectsStack.Pop();
-        foreach (GameObject obj in redoObjects)
+        SceneObject[] redoObjects = redoStack.Pop();
+        foreach (SceneObject sceneObject in redoObjects)
         {
-            SceneObject sceneObject = obj.GetComponent<SceneObject>();
-            if (sceneObject != null) sceneObject.OnCreation();
+            sceneObject.OnCreation();
         }
-        undoObjectsStack.Push(redoObjects);
+        undoLinkedList.AddLast(redoObjects);
+    }
+
+    public override void ClearFirstUndo()
+    {
+        undoLinkedList.RemoveFirst();
+    }
+
+    public override void ClearRedo()
+    {
+        while (redoStack.Count > 0)
+        {
+            foreach (SceneObject sceneObject in redoStack.Pop())
+            {
+                Destroy(sceneObject.gameObject);
+            }
+        }
     }
 }

@@ -7,4 +7,6 @@ public interface ICommand
     void Execute();
     void Undo();
     void Redo();
+    void ClearFirstUndo();
+    void ClearRedo();
 }

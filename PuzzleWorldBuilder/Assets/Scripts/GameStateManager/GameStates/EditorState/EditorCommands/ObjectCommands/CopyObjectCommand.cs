@@ -16,12 +16,6 @@ public class CopyObjectCommand : BaseObjectCommands
     public override void Execute()
     {
         addToUndo = false;
-        if (InputCommands.selectedObjects.Count == 0)
-        {
-            Debug.Log("Nothing to copy!");
-            return;
-        }
-
         while (ClipBoard.clipboard.Count > 0)
         {
             Destroy(ClipBoard.clipboard[0].gameObject);
@@ -29,8 +23,7 @@ public class CopyObjectCommand : BaseObjectCommands
 
         foreach (SceneObject obj in InputCommands.selectedObjects)
         {
-            CreateInvisible(obj.gameObject).AddComponent<ClipBoard>().AddToClipBoard();
+            CreateInvisible(obj).gameObject.AddComponent<ClipBoard>().AddToClipBoard();
         }
-        Debug.Log("Copied objects to clipboard!");
     }
 }

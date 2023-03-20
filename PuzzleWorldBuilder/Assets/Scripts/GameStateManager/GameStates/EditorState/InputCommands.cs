@@ -62,6 +62,18 @@ public class InputCommands : AbstractGameEditor, IPointerDownHandler, IPointerUp
         BasicKeys();
         SelectionProcess();
         MovementTool();
+
+        if (Input.GetKeyDown(KeyCode.D))
+        {
+            for (int i = 0; i < selectedObjects.Count; i++)
+            {
+                Debug.Log(i + ": " + selectedObjects[i].name);
+            }
+            if (selectedObjects.Count == 0)
+            {
+                Debug.Log("list is empty!");
+            }
+        }
     }
 
     #region CommandManager
@@ -95,6 +107,22 @@ public class InputCommands : AbstractGameEditor, IPointerDownHandler, IPointerUp
         {
             Redo();
         }
+        else if (Input.GetKeyDown(KeyCode.C))
+        {
+            Copy();
+        }
+        else if (Input.GetKeyDown(KeyCode.V))
+        {
+            Paste();
+        }
+        else if (Input.GetKeyDown(KeyCode.X))
+        {
+            Cut();
+        }
+        else if (Input.GetKeyDown(KeyCode.Delete))
+        {
+            Delete();
+        }
 #else
         if (Input.GetKeyDown(KeyCode.Z) && (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl)))
         {
@@ -103,6 +131,22 @@ public class InputCommands : AbstractGameEditor, IPointerDownHandler, IPointerUp
         else if (Input.GetKeyDown(KeyCode.Y) && (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl)))
         {
             Redo();
+        }
+        else if (Input.GetKeyDown(KeyCode.C) && (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl)))
+        {
+            Copy();
+        }
+        else if (Input.GetKeyDown(KeyCode.V) && (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl)))
+        {
+            Paste();
+        }
+        else if (Input.GetKeyDown(KeyCode.X) && (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl)))
+        {
+            Cut();
+        }
+        else if (Input.GetKeyDown(KeyCode.Delete) && (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl)))
+        {
+            Delete();
         }
 #endif
     }
@@ -144,8 +188,9 @@ public class InputCommands : AbstractGameEditor, IPointerDownHandler, IPointerUp
         /// Upon copying a bigger group of objects, I was thinking of parenting it under one gameobject so the object creation class
         /// doesn't have to be rewritten
         /// 03/08/2023 Update: did that anyway
-        
-        commandManager.ExecuteCommand(copyCommand);
+
+        if (selectedObjects.Count > 0)
+            commandManager.ExecuteCommand(copyCommand);
     }
 
     public void Paste()
@@ -153,16 +198,16 @@ public class InputCommands : AbstractGameEditor, IPointerDownHandler, IPointerUp
         /// Paste some object, before you can paste a copy has to exist, otherwise nothing happens.
         /// When pasting a copy, the creation of this copy has to go trough the class handling the creation of objects
         /// in the level editor so the creation of it can be undone.
-
-        commandManager.ExecuteCommand(pasteCommand);
+        if (ClipBoard.clipboard.Count > 0)
+            commandManager.ExecuteCommand(pasteCommand);
     }
 
     public void Cut()
     {
         /// Cut some object, upon cutting the object should be removed trough the class handling the deletion of objects
         /// so this action can be undone. Also when cutting, an invisible copy of this object is made and put on the "clipboard".
-
-        commandManager.ExecuteCommand(cutCommand);
+        if (selectedObjects.Count > 0)
+            commandManager.ExecuteCommand(cutCommand);
     }
 
     public void Delete()
@@ -298,8 +343,8 @@ public class InputCommands : AbstractGameEditor, IPointerDownHandler, IPointerUp
         // case: cntl is pressed or nothing is selected
         else if (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl) || selectedObjects.Count == 0)
         {
-            selectCommand.InitializePreSelected(selectedObjects, temp);
-            commandManager.ExecuteCommand(selectCommand);
+            if (selectCommand.InitializePreSelected(selectedObjects, temp) > 0)
+                commandManager.ExecuteCommand(selectCommand);
         }
         // case: nothing is pressed and at least one object is selected while selecting another object
         else if (selectedObjects.Count > 0)

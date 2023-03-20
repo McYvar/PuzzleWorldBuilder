@@ -10,86 +10,100 @@ public class OverrideSelectObjectCommand : BaseObjectCommands
     /// So it's a command activates when other objects in the scene are already selected, and you override this selection.
     /// </summary>
 
-    List<SceneObject> previouslySelected = new List<SceneObject>();
     List<SceneObject> currentlySelected = new List<SceneObject>();
+    List<SceneObject> nextSelected = new List<SceneObject>();
 
-    Stack<SceneObject[]> prevUndoStack;
-    Stack<SceneObject[]> curUndoStack;
+    LinkedList<SceneObject[]> curUndoLinkedList;
+    LinkedList<SceneObject[]> nextUndoLinkedList;
 
-    Stack<SceneObject[]> curRedoStack;
-    Stack<SceneObject[]> prevRedoStack;
+    Stack<SceneObject[]> nextRedoStack;
+    Stack<SceneObject[]> currentRedoStack;
 
     protected override void OnEnable()
     {
         base.OnEnable();
-        prevUndoStack = new Stack<SceneObject[]>();
-        curUndoStack = new Stack<SceneObject[]>();
+        curUndoLinkedList = new LinkedList<SceneObject[]>();
+        nextUndoLinkedList = new LinkedList<SceneObject[]>();
 
-        prevRedoStack = new Stack<SceneObject[]>();
-        curRedoStack = new Stack<SceneObject[]>();
+        currentRedoStack = new Stack<SceneObject[]>();
+        nextRedoStack = new Stack<SceneObject[]>();
     }
 
     public override void Execute()
     {
-        foreach (SceneObject sceneObject in previouslySelected)
+        foreach (SceneObject sceneObject in currentlySelected)
         {
             sceneObject.OnDeselection();
             InputCommands.selectedObjects.Remove(sceneObject);
         }
-        prevUndoStack.Push(previouslySelected.ToArray());
+        curUndoLinkedList.AddLast(currentlySelected.ToArray());
 
+        foreach (SceneObject sceneObject in nextSelected)
+        {
+            sceneObject.OnSelection();
+            InputCommands.selectedObjects.Add(sceneObject);
+        }
+        nextUndoLinkedList.AddLast(nextSelected.ToArray());
+    }
+
+    public override void Undo()
+    {
+        SceneObject[] nextSelected = nextUndoLinkedList.Last.Value;
+        nextUndoLinkedList.RemoveLast();
+        foreach (SceneObject sceneObject in nextSelected)
+        {
+            sceneObject.OnDeselection();
+            InputCommands.selectedObjects.Remove(sceneObject);
+        }
+        nextRedoStack.Push(nextSelected);
+
+        SceneObject[] currentlySelected = curUndoLinkedList.Last.Value;
+        curUndoLinkedList.RemoveLast();
         foreach (SceneObject sceneObject in currentlySelected)
         {
             sceneObject.OnSelection();
             InputCommands.selectedObjects.Add(sceneObject);
         }
-        curUndoStack.Push(currentlySelected.ToArray());
-    }
-
-    public override void Undo()
-    {
-        SceneObject[] curSceneObjects = curUndoStack.Pop();
-        foreach (SceneObject sceneObject in curSceneObjects)
-        {
-            sceneObject.OnDeselection();
-            InputCommands.selectedObjects.Remove(sceneObject);
-        }
-        curRedoStack.Push(curSceneObjects);
-
-        SceneObject[] prevSceneObjects = prevUndoStack.Pop();
-        foreach (SceneObject sceneObject in prevSceneObjects)
-        {
-            sceneObject.OnSelection();
-            InputCommands.selectedObjects.Add(sceneObject);
-        }
-        prevRedoStack.Push(prevSceneObjects);
+        currentRedoStack.Push(currentlySelected);
     }
 
     public override void Redo()
     {
-        SceneObject[] curSceneObjects = curRedoStack.Pop();
-        foreach (SceneObject sceneObject in curSceneObjects)
+        SceneObject[] currentlySelected = currentRedoStack.Pop();
+        foreach (SceneObject sceneObject in currentlySelected)
         {
             sceneObject.OnDeselection();
             InputCommands.selectedObjects.Remove(sceneObject);
         }
-        prevUndoStack.Push(curSceneObjects);
+        curUndoLinkedList.AddLast(currentlySelected);
 
-        SceneObject[] prevSceneObjects = prevRedoStack.Pop();
-        foreach (SceneObject sceneObject in prevSceneObjects)
+        SceneObject[] nextSelected = nextRedoStack.Pop();
+        foreach (SceneObject sceneObject in nextSelected)
         {
             sceneObject.OnSelection();
             InputCommands.selectedObjects.Add(sceneObject);
         }
-        curUndoStack.Push(prevSceneObjects);
+        nextUndoLinkedList.AddLast(nextSelected);
     }
 
-    public void InitializeSelected(List<SceneObject> previouslySelected, List<SceneObject> currentlySelected)
+    public override void ClearFirstUndo()
     {
-        this.previouslySelected.Clear();
-        this.previouslySelected.AddRange(previouslySelected);
+        curUndoLinkedList.RemoveFirst();
+        nextUndoLinkedList.RemoveFirst();
+    }
 
+    public override void ClearRedo()
+    {
+        currentRedoStack.Clear();
+        nextRedoStack.Clear();
+    }
+
+    public void InitializeSelected(List<SceneObject> currentlySelected, List<SceneObject> nextSelected)
+    {
         this.currentlySelected.Clear();
         this.currentlySelected.AddRange(currentlySelected);
+
+        this.nextSelected.Clear();
+        this.nextSelected.AddRange(nextSelected);
     }
 }

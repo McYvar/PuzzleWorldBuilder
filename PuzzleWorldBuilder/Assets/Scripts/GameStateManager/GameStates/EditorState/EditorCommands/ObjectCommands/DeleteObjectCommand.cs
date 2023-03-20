@@ -11,84 +11,63 @@ public class DeleteObjectCommand : BaseObjectCommands
     /// Only one instance of this command should exist
     /// </summary>
 
-    Stack<GameObject[]> redoObjectsStack;
-    Stack<GameObject[]> undoObjectsStack;
-    Stack<SceneObject[]> previouslySelectedObjects;
-    [SerializeField] DeselectObjectCommand deselectCommand;
-    [SerializeField] SelectObjectCommand selectCommand;
+    Stack<SceneObject[]> redoStack;
+    LinkedList<SceneObject[]> undoLinkedList;
 
     protected override void OnEnable()
     {
         base.OnEnable();
-        redoObjectsStack = new Stack<GameObject[]>();
-        undoObjectsStack = new Stack<GameObject[]>();
-        previouslySelectedObjects = new Stack<SceneObject[]>();
+        redoStack = new Stack<SceneObject[]>();
+        undoLinkedList = new LinkedList<SceneObject[]>();
     }
 
     public override void Execute()
     {
         // When we delete an object in the puzzlemaker that is selected, we should also remove it from the selected objects list
-        if (InputCommands.selectedObjects.Count > 0)
+        SceneObject[] currentlySelectedObjects = InputCommands.selectedObjects.ToArray();
+        foreach (SceneObject sceneObject in currentlySelectedObjects)
         {
-            if (InputCommands.selectedObjects[0] != null)
-            {
-                if (!InputCommands.selectedObjects[0].IsAlive())
-                {
-                    Debug.Log("Nothing to delete!");
-                    addToUndo = false;
-                    return;
-                }
-            }
+            sceneObject.OnDeletion();
+            InputCommands.selectedObjects.Remove(sceneObject);
         }
-        else
-        {
-            Debug.Log("Nothing to delete!");
-            addToUndo = false;
-            return;
-        }
-
-        addToUndo = true;
-        GameObject[] selectedObjects = new GameObject[InputCommands.selectedObjects.Count];
-        // For an object to be removed it first needs to be selected, if none is selected, we add a null object to the undo list
-        for (int i = 0; i < selectedObjects.Length; i++)
-        {
-            selectedObjects[i] = InputCommands.selectedObjects[i].gameObject;
-        }
-        previouslySelectedObjects.Push(InputCommands.selectedObjects.ToArray());
-        deselectCommand.Execute();
-
-        foreach (GameObject obj in selectedObjects)
-        {
-            if (obj != null) DeleteObject(obj);
-        }
-
-        undoObjectsStack.Push(selectedObjects);
-        redoObjectsStack.Clear();
+        undoLinkedList.AddLast(currentlySelectedObjects);
     }
 
     public override void Undo()
     {
-        InputCommands.selectedObjects = new List<SceneObject>(previouslySelectedObjects.Pop());
-        selectCommand.Execute();
-
-        GameObject[] undoObjects = undoObjectsStack.Pop();
-        foreach(GameObject obj in undoObjects)
+        SceneObject[] undoSelctedObjects = undoLinkedList.Last.Value;
+        undoLinkedList.RemoveLast();
+        foreach (SceneObject sceneObject in undoSelctedObjects)
         {
-            obj.GetComponent<SceneObject>().OnCreation();
+            sceneObject.OnCreation();
+            InputCommands.selectedObjects.Add(sceneObject);
         }
-        redoObjectsStack.Push(undoObjects);
+        redoStack.Push(undoSelctedObjects);
     }
 
     public override void Redo()
     {
-        previouslySelectedObjects.Push(InputCommands.selectedObjects.ToArray());
-        deselectCommand.Execute();
-
-        GameObject[] redoObjects = redoObjectsStack.Pop();
-        foreach(GameObject obj in redoObjects)
+        SceneObject[] redoSelctedObjects = redoStack.Pop();
+        foreach (SceneObject sceneObject in redoSelctedObjects)
         {
-            if (obj != null) DeleteObject(obj);
+            sceneObject.OnDeletion();
+            InputCommands.selectedObjects.Remove(sceneObject);
         }
-        undoObjectsStack.Push(redoObjects);
+        undoLinkedList.AddLast(redoSelctedObjects);
+    }
+
+    public override void ClearFirstUndo()
+    {
+        SceneObject[] sceneObjects = undoLinkedList.First.Value;
+        foreach (SceneObject sceneObject in sceneObjects)
+        {
+            Destroy(sceneObject.gameObject);
+        }
+        undoLinkedList.RemoveFirst();
+    }
+
+    public override void ClearRedo()
+    {
+        redoStack.Clear();
     }
 }

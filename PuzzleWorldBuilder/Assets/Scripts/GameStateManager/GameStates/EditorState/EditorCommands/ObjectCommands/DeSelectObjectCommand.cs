@@ -3,15 +3,16 @@ using UnityEngine;
 
 public class DeselectObjectCommand : BaseEditorCommand
 {
-    Stack<SceneObject[]> undoStack;
+    LinkedList<SceneObject[]> undoLinkedList;
     Stack<SceneObject[]> redoStack;
-    List<SceneObject> preDeselected = new List<SceneObject>();
+    List<SceneObject> preDeselected;
 
     protected override void OnEnable()
     {
         base.OnEnable();
+        undoLinkedList = new LinkedList<SceneObject[]>();
         redoStack = new Stack<SceneObject[]>();
-        undoStack = new Stack<SceneObject[]>();
+        preDeselected = new List<SceneObject>();
     }
 
     public override void Execute()
@@ -24,12 +25,13 @@ public class DeselectObjectCommand : BaseEditorCommand
         }
         preDeselected.Clear();
         redoStack.Clear();
-        undoStack.Push(sceneObjects);
+        undoLinkedList.AddLast(sceneObjects);
     }
 
     public override void Undo()
     {
-        SceneObject[] sceneObjects = undoStack.Pop();
+        SceneObject[] sceneObjects = undoLinkedList.Last.Value;
+        undoLinkedList.RemoveLast();
         foreach (SceneObject sceneObject in sceneObjects)
         {
             sceneObject.OnSelection();
@@ -49,7 +51,17 @@ public class DeselectObjectCommand : BaseEditorCommand
             InputCommands.selectedObjects.Remove(sceneObject);
         }
         preDeselected.Clear();
-        undoStack.Push(sceneObjects);
+        undoLinkedList.AddLast(sceneObjects);
+    }
+
+    public override void ClearFirstUndo()
+    {
+        undoLinkedList.RemoveFirst();
+    }
+
+    public override void ClearRedo()
+    {
+        redoStack.Clear();
     }
 
     public void InitializePreDeselected(List<SceneObject> preDeselected)

@@ -16,6 +16,7 @@ public class CommandManager
 
     public void ExecuteCommand(ICommand command)
     {
+        command.ClearRedo();
         command.Execute();
         if (command.addToUndo)
         {
@@ -78,6 +79,7 @@ public class CommandManager
 
     public void RemoveAtBottom()
     {
+        undoListStack[0].ClearFirstUndo();
         undoListStack.RemoveAt(0);
     }
 

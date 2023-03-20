@@ -4,15 +4,15 @@ using UnityEngine;
 
 public class SelectObjectCommand : BaseObjectCommands
 {
-    Stack<SceneObject[]> undoStack;
+    LinkedList<SceneObject[]> undoLinkedList;
     Stack<SceneObject[]> redoStack;
     List<SceneObject> preSelected = new List<SceneObject>();
 
     protected override void OnEnable()
     {
         base.OnEnable();
+        undoLinkedList = new LinkedList<SceneObject[]>();
         redoStack = new Stack<SceneObject[]>();
-        undoStack = new Stack<SceneObject[]>();
     }
     
     public override void Execute()
@@ -22,13 +22,13 @@ public class SelectObjectCommand : BaseObjectCommands
             sceneObject.OnSelection();
             InputCommands.selectedObjects.Add(sceneObject);
         }
-        redoStack.Clear();
-        undoStack.Push(preSelected.ToArray());
+        undoLinkedList.AddLast(preSelected.ToArray());
     }
 
     public override void Undo()
     {
-        SceneObject[] redoObjects = undoStack.Pop();
+        SceneObject[] redoObjects = undoLinkedList.Last.Value;
+        undoLinkedList.RemoveLast();
         foreach (SceneObject sceneObject in redoObjects)
         {
             sceneObject.OnDeselection();
@@ -48,10 +48,20 @@ public class SelectObjectCommand : BaseObjectCommands
             sceneObject.OnSelection();
             InputCommands.selectedObjects.Add(sceneObject);
         }
-        undoStack.Push(redoObjects);
+        undoLinkedList.AddLast(redoObjects);
     }
 
-    public void InitializePreSelected(List<SceneObject> currentlySelected, List<SceneObject> preSelected)
+    public override void ClearFirstUndo()
+    {
+        undoLinkedList.RemoveFirst();
+    }
+
+    public override void ClearRedo()
+    {
+        redoStack.Clear();
+    }
+
+    public int InitializePreSelected(List<SceneObject> currentlySelected, List<SceneObject> preSelected)
     {
         this.preSelected.Clear();
         this.preSelected.AddRange(preSelected);
@@ -61,5 +71,6 @@ public class SelectObjectCommand : BaseObjectCommands
             if (this.preSelected.Contains(sceneObject))
                 this.preSelected.Remove(sceneObject);
         }
+        return this.preSelected.Count;
     }
 }
