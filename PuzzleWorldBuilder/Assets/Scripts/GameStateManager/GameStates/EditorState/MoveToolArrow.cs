@@ -8,10 +8,19 @@ public class MoveToolArrow : AbstractGameEditor
     [SerializeField] Transform toolCentre;
     Transform arrows;
     float arrowsDepth;
+
     Vector3 startPos;
     float forwardDepth;
     Vector3 offset;
     Vector3 displacement;
+
+    Vector3 resultMove;
+
+    [SerializeField] MeshRenderer myMesh;
+    [SerializeField] Collider myCollider;
+    [Range(0, 15), SerializeField] float minViewAngle;
+    [SerializeField] bool isFreeMove;
+    bool doEmission;
 
     protected override void OnEnable()
     {
@@ -29,15 +38,35 @@ public class MoveToolArrow : AbstractGameEditor
 
     public override void EditorUpdate()
     {
+        float angle = Vector3.Angle(arrows.position - mainCamera.transform.forward, transform.forward);
+        if (angle < minViewAngle || angle > 180 - minViewAngle)
+        {
+            myMesh.enabled = false;
+            myCollider.enabled = false;
+        }
+        else
+        {
+            myMesh.enabled = true;
+            myCollider.enabled = true;
+        }
+
+        if (doEmission)
+        {
+            myMesh.material.EnableKeyword("_EMISSION");
+        }
+        else
+        {
+            myMesh.material.DisableKeyword("_EMISSION");
+        }
     }
 
-    public void MouseDown(float depth, Vector3 centre)
+    public void MouseDown(float currentArrowDepth, Vector3 currentToolCentre)
     {
-        arrowsDepth = depth;
-        toolCentre.position = centre;
+        doEmission = true;
+        arrowsDepth = currentArrowDepth;
+        toolCentre.position = currentToolCentre;
         forwardDepth = (toolCentre.position - mainCamera.transform.position).magnitude * Mathf.Cos(Vector3.Angle(mainCamera.transform.forward, toolCentre.position - mainCamera.transform.position) * Mathf.Deg2Rad);
         startPos = toolCentre.position;
-        Debug.Log(forwardDepth);
 
         // the tool position is a tiny bit depenand on a offset determined by the mouse position, here we calulate that offset
         Vector3 mousePosition = mainCamera.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, mainCamera.nearClipPlane));
@@ -81,17 +110,31 @@ public class MoveToolArrow : AbstractGameEditor
         // now we need to determine the displaced position vector
         displacement = toolCentre.position - startPos;
 
+        if (isFreeMove)
+        {
+            // in the case of a free move, we just set the resultMove to the displacement
+            resultMove = displacement;
+        }
+        else
+        {
+            // the displacement then needs to be translated into the forward direction of this arrow for a non-free move
+            // we use the magnitude of the arrow, and translate this into the lenght of the forward direction using the angle between the two
+            float arrowForwardLength = displacement.magnitude * Mathf.Cos(Vector3.Angle(displacement, transform.forward) * Mathf.Deg2Rad);
+            resultMove = transform.forward * arrowForwardLength;
+        }
         foreach (SceneObject sceneObject in InputCommands.selectedObjects)
         {
-            sceneObject.transform.position = sceneObject.myStartPos + displacement;
+            // Then we aply this result move to every selected object
+            sceneObject.transform.position = sceneObject.myStartPos + resultMove;
         }
 
         float newArrowsDepth = arrowsDepth / Mathf.Cos(mouseAngle * Mathf.Deg2Rad);
-        arrows.transform.position = mainCamera.transform.position + (toolCentre.position - mainCamera.transform.position).normalized * newArrowsDepth;
+        arrows.position = mainCamera.transform.position + (toolCentre.position - mainCamera.transform.position).normalized * newArrowsDepth;
     }
 
-    public void MouseUp()
+    public Vector3 MouseUp()
     {
-        // add displacement to a movecommand!
+        doEmission = false;
+        return resultMove;
     }
 }

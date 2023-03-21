@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-public class InputCommands : AbstractGameEditor, IPointerDownHandler, IPointerUpHandler, IPointerMoveHandler
+public class InputCommands : AbstractGameEditor, IPointerDownHandler, IPointerUpHandler, IPointerMoveHandler, IScrollHandler
 {
     /// <summary>
     /// Date: 03/08/2023, By: Yvar
@@ -13,11 +13,12 @@ public class InputCommands : AbstractGameEditor, IPointerDownHandler, IPointerUp
     /// Changed most things related to clicking under this script for the sake of organization
     /// </summary>
 
+    // command manager
     [SerializeField] int maxUndoAmount = 10;
     CommandManager commandManager;
     public static Dictionary<KeyCode, ICommand> keyCommands = new Dictionary<KeyCode, ICommand>();
-    public static List<SceneObject> selectedObjects = new List<SceneObject>();
 
+    // all object commands
     [SerializeField] DeleteObjectCommand deleteCommand;
     [SerializeField] SelectObjectCommand selectCommand;
     [SerializeField] DeselectObjectCommand deselectCommand;
@@ -26,27 +27,55 @@ public class InputCommands : AbstractGameEditor, IPointerDownHandler, IPointerUp
     [SerializeField] CutObjectCommand cutCommand;
     [SerializeField] OverrideSelectObjectCommand overrideSelectCommand;
     [SerializeField] FlipSelectionObjectCommand flipSelectCommand;
+    [SerializeField] TranslateObjectCommand translateCommand;
 
+    // canvas related
     [SerializeField] Canvas mainCanvas;
     [SerializeField] RectTransform selectionLineTop;
     [SerializeField] RectTransform selectionLineBottom;
     [SerializeField] RectTransform selectionLineLeft;
     [SerializeField] RectTransform selectionLineRight;
     [SerializeField] float selectionWidth;
-
     [SerializeField] Camera mainCamera;
-
     [SerializeField] Camera overlayCamera;
     [SerializeField] LayerMask overlayLayer;
     MoveToolArrow currentMoveToolArrow;
-
     Vector2 selectionStartingPoint;
     Vector2 selectionEndingPoint;
-    bool isSelecting;
+    bool isSelecting = false;
 
+    // movement tool
     [SerializeField] GameObject movementToolObject;
     [SerializeField] float movementToolDistance;
     Vector3 centrePoint;
+
+    // pivot transform
+    [SerializeField] Transform camerasPivot;
+    Vector3 smoothPivot;
+    Vector3 smoothDampRef = Vector3.zero;
+    bool doSmooth = false;
+
+    bool isTranslatingPivot = false;
+    float minTranslateAmp = 0;
+    [SerializeField, Range(0.0f, 0.2f)] float maxTranslateAmp;
+    float translateAmp;
+
+    bool isRotatingPivot = false;
+    [SerializeField, Range(0.0f, 1.0f)] float rotateAmp;
+
+    float cameraOffset;
+    [SerializeField, Range(0.0f, 50.0f)] float scrollDistBase;
+    float scrollAmp;
+
+    public static List<SceneObject> selectedObjects = new List<SceneObject>();
+
+    protected override void OnEnable()
+    {
+        base.OnEnable();
+        cameraOffset = (mainCamera.transform.position - camerasPivot.position).magnitude;
+        smoothPivot = camerasPivot.position;
+        Zoom(0);
+    }
 
     public override void EditorAwake()
     {
@@ -64,16 +93,14 @@ public class InputCommands : AbstractGameEditor, IPointerDownHandler, IPointerUp
         SelectionProcess();
         MovementTool();
 
-        if (Input.GetKeyDown(KeyCode.D))
+        if (doSmooth)
         {
-            for (int i = 0; i < selectedObjects.Count; i++)
-            {
-                Debug.Log(i + ": " + selectedObjects[i].name);
-            }
-            if (selectedObjects.Count == 0)
-            {
-                Debug.Log("list is empty!");
-            }
+            camerasPivot.position = Vector3.SmoothDamp(camerasPivot.position, smoothPivot, ref smoothDampRef, scrollAmp);
+            if (Vector3.Distance(camerasPivot.position, smoothPivot) < 0.1f) doSmooth = false;
+        }
+        else
+        {
+            smoothPivot = camerasPivot.position;
         }
     }
 
@@ -150,12 +177,20 @@ public class InputCommands : AbstractGameEditor, IPointerDownHandler, IPointerUp
             Delete();
         }
 #endif
+        if (Input.GetKeyDown(KeyCode.F))
+        {
+            if (selectedObjects.Count > 0)
+            {
+                doSmooth = true;
+                SetPivot(centrePoint);
+            }
+        }
     }
 
     public static void AddKeyCommand(KeyCode keyCode, ICommand command)
     {
         if (!keyCommands.ContainsKey(keyCode))
-        keyCommands.Add(keyCode, command);
+            keyCommands.Add(keyCode, command);
     }
 
     public static void ChangeKeyCommandKey(KeyCode oldKeyCode, KeyCode newKeyCode)
@@ -378,41 +413,6 @@ public class InputCommands : AbstractGameEditor, IPointerDownHandler, IPointerUp
             commandManager.ExecuteCommand(deselectCommand);
         }
     }
-
-    public void OnPointerDown(PointerEventData eventData)
-    {
-        if (eventData.button == PointerEventData.InputButton.Left)
-        {
-            if (FoundMoveToolArrow(eventData.position))
-            {
-                currentMoveToolArrow?.MouseDown(movementToolDistance, centrePoint);
-            }
-            else
-            {
-                StartSelection(eventData.position);
-            }
-        }
-        else if (eventData.button == PointerEventData.InputButton.Right && isSelecting)
-        {
-            AbortSelection();
-        }
-    }
-
-    public void OnPointerMove(PointerEventData eventData)
-    {
-        currentMoveToolArrow?.MouseMove();
-    }
-
-    public void OnPointerUp(PointerEventData eventData)
-    {
-        currentMoveToolArrow?.MouseUp();
-        currentMoveToolArrow = null;
-
-        if (eventData.button == PointerEventData.InputButton.Left && isSelecting)
-        {
-            FinishSelection();
-        }
-    }
     #endregion
 
     #region MovementTool
@@ -444,6 +444,116 @@ public class InputCommands : AbstractGameEditor, IPointerDownHandler, IPointerUp
             // hide when there are no more objects selected
             if (movementToolObject.activeInHierarchy) movementToolObject.SetActive(false);
         }
+    }
+    #endregion
+
+    #region InputEvents
+    public void OnPointerDown(PointerEventData eventData)
+    {
+        if (Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.RightAlt))
+        {
+            if (eventData.button == PointerEventData.InputButton.Left)
+            {
+                isRotatingPivot = true;
+                isTranslatingPivot = false;
+            }
+        }
+        else
+        {
+            if (eventData.button == PointerEventData.InputButton.Left)
+            {
+                // check if we hit a movement tool
+                if (FoundMoveToolArrow(eventData.position))
+                {
+                    currentMoveToolArrow?.MouseDown(movementToolDistance, centrePoint);
+                }
+                // if we only click down on the background
+                else
+                {
+                    StartSelection(eventData.position);
+                }
+            }
+
+            if (eventData.button == PointerEventData.InputButton.Right)
+            {
+                if (isSelecting) AbortSelection();
+            }
+        }
+
+        if (eventData.button == PointerEventData.InputButton.Middle)
+        {
+            doSmooth = false;
+            isRotatingPivot = false;
+            isTranslatingPivot = true;
+        }
+    }
+
+    public void OnPointerMove(PointerEventData eventData)
+    {
+        if (isRotatingPivot && currentMoveToolArrow == null)
+        {
+            RotatePivot(eventData.delta);
+        }
+        else if (isTranslatingPivot && currentMoveToolArrow == null)
+        {
+            TranslatePivot(eventData.delta);
+        }
+        else if (!isTranslatingPivot)
+        {
+            currentMoveToolArrow?.MouseMove();
+        }
+    }
+
+    public void OnPointerUp(PointerEventData eventData)
+    {
+        if (currentMoveToolArrow != null)
+        {
+            translateCommand.InitializeNewPostition(currentMoveToolArrow.MouseUp());
+            commandManager.ExecuteCommand(translateCommand);
+            currentMoveToolArrow = null;
+        }
+
+        if (eventData.button == PointerEventData.InputButton.Left)
+        {
+            if (isSelecting) FinishSelection();
+            if (isRotatingPivot) isRotatingPivot = false;
+        }
+
+        if (eventData.button == PointerEventData.InputButton.Middle)
+        {
+            if (isTranslatingPivot) isTranslatingPivot = false;
+        }
+    }
+
+    public void OnScroll(PointerEventData eventData)
+    {
+        Zoom(eventData.scrollDelta.y);
+    }
+    #endregion
+
+    #region Pivot
+    void RotatePivot(Vector2 mouseDelta)
+    {
+        camerasPivot.rotation = Quaternion.Euler(camerasPivot.eulerAngles.x + -mouseDelta.y * rotateAmp, camerasPivot.eulerAngles.y + mouseDelta.x * rotateAmp, 0);
+    }
+
+    void SetPivot(Vector3 newLocation)
+    {
+        smoothPivot = newLocation;
+    }
+
+    void TranslatePivot(Vector2 mouseDelta)
+    {
+        camerasPivot.position += (camerasPivot.right * -mouseDelta.x + camerasPivot.up * -mouseDelta.y) * translateAmp;
+    }
+
+    void Zoom(float scrollDelta)
+    {
+        cameraOffset -= scrollDelta * scrollAmp;
+        if (cameraOffset < 1) cameraOffset = 1;
+        mainCamera.transform.position = camerasPivot.position + -camerasPivot.forward * cameraOffset;
+        scrollAmp = Mathf.InverseLerp(1, scrollDistBase, Vector3.Distance(mainCamera.transform.position, camerasPivot.position));
+        translateAmp = Mathf.Lerp(minTranslateAmp, maxTranslateAmp, scrollAmp);
     }
     #endregion
 
