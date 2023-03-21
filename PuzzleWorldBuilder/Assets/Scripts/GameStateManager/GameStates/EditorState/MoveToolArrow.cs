@@ -4,17 +4,18 @@ using UnityEngine;
 
 public class MoveToolArrow : AbstractGameEditor
 {
-    [SerializeField] Transform parent;
     [SerializeField] Camera mainCamera;
     [SerializeField] Transform toolCentre;
+    Transform arrows;
+    float arrowsDepth;
     Vector3 startPos;
-    float setToolDepth;
+    float forwardDepth;
     Vector3 offset;
 
     protected override void OnEnable()
     {
         base.OnEnable();
-        parent = transform.parent;
+        arrows = transform.parent;
     }
 
     public override void EditorAwake()
@@ -29,14 +30,17 @@ public class MoveToolArrow : AbstractGameEditor
     {
     }
 
-    public void MouseDown(float depth)
+    public void MouseDown(float depth, Vector3 centre)
     {
-        setToolDepth = depth;
-        startPos = parent.position;
+        arrowsDepth = depth;
+        toolCentre.position = centre;
+        forwardDepth = (toolCentre.position - mainCamera.transform.position).magnitude * Mathf.Cos(Vector3.Angle(mainCamera.transform.forward, toolCentre.position - mainCamera.transform.position) * Mathf.Deg2Rad);
+        startPos = toolCentre.position;
+        Debug.Log(forwardDepth);
 
         // the tool position is a tiny bit depenand on a offset determined by the mouse position, here we calulate that offset
         Vector3 mousePosition = mainCamera.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, mainCamera.nearClipPlane));
-        Vector3 fromCamToToolDirection = parent.position - mainCamera.transform.position;
+        Vector3 fromCamToToolDirection = toolCentre.position - mainCamera.transform.position;
 
         // first we need both angles from the maincamera to both the mouse and the tool
         float mouseAngle = Vector3.Angle(mainCamera.transform.forward, mousePosition - mainCamera.transform.position);
@@ -44,14 +48,14 @@ public class MoveToolArrow : AbstractGameEditor
 
         // then since we know the depth of the tool, we need to calculate the mousepoint depth
         // first we need the camera depth calulated using the tool angle and the tool depth (camera depth = adjacent, toolDepth = oblique)
-        float cameraDepth = setToolDepth * Mathf.Cos(toolAngle * Mathf.Deg2Rad);
+        float cameraDepth = forwardDepth * Mathf.Cos(toolAngle * Mathf.Deg2Rad);
         
         // then using this camera depth we calculate the mouseDepth
         float mouseDepth = cameraDepth / Mathf.Cos(mouseAngle * Mathf.Deg2Rad);
 
         // now we translate the mouseDepth into a offset vector
         Vector3 fromCamToMouseDirection = mousePosition - mainCamera.transform.position;
-        offset = fromCamToMouseDirection.normalized * mouseDepth - fromCamToToolDirection.normalized * setToolDepth;
+        offset = fromCamToMouseDirection.normalized * mouseDepth - fromCamToToolDirection.normalized * forwardDepth;
 
         foreach (SceneObject sceneObject in InputCommands.selectedObjects)
         {
@@ -67,19 +71,23 @@ public class MoveToolArrow : AbstractGameEditor
 
         // and again with the mouseAngle and current original tooldepth, we can calculate the new tooldepth
         float mouseAngle = Vector3.Angle(mainCamera.transform.forward, mousePosition - mainCamera.transform.position);
-        float newToolDepth = setToolDepth / Mathf.Cos(mouseAngle * Mathf.Deg2Rad);
+        float newToolDepth = forwardDepth / Mathf.Cos(mouseAngle * Mathf.Deg2Rad);
 
         // and the tool position can be calculated using this depth
         Vector3 fromCamToMouseDirection = mousePosition - mainCamera.transform.position;
-        parent.position = mainCamera.transform.position + fromCamToMouseDirection.normalized * newToolDepth - offset;
+        toolCentre.position = mainCamera.transform.position + fromCamToMouseDirection.normalized * newToolDepth - offset;
 
         // now we need to determine the displaced position vector
-        Vector3 displacement = parent.position - startPos;
+        Vector3 displacement = toolCentre.position - startPos;
+        Debug.Log(displacement);
 
         foreach (SceneObject sceneObject in InputCommands.selectedObjects)
         {
             sceneObject.transform.position = sceneObject.myStartPos + displacement;
         }
+
+        float newArrowsDepth = arrowsDepth / Mathf.Cos(mouseAngle * Mathf.Deg2Rad);
+        arrows.transform.position = mainCamera.transform.position + (toolCentre.position - mainCamera.transform.position).normalized * newArrowsDepth;
     }
 
     public void MouseUp()

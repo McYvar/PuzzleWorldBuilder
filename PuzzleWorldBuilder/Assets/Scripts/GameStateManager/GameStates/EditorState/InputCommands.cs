@@ -46,6 +46,7 @@ public class InputCommands : AbstractGameEditor, IPointerDownHandler, IPointerUp
 
     [SerializeField] GameObject movementToolObject;
     [SerializeField] float movementToolDistance;
+    Vector3 centrePoint;
 
     public override void EditorAwake()
     {
@@ -384,7 +385,7 @@ public class InputCommands : AbstractGameEditor, IPointerDownHandler, IPointerUp
         {
             if (FoundMoveToolArrow(eventData.position))
             {
-                currentMoveToolArrow?.MouseDown(movementToolDistance);
+                currentMoveToolArrow?.MouseDown(movementToolDistance, centrePoint);
             }
             else
             {
@@ -424,13 +425,15 @@ public class InputCommands : AbstractGameEditor, IPointerDownHandler, IPointerUp
 
             // if there are objects selected, show the movement tool
             if (!movementToolObject.activeInHierarchy) movementToolObject.SetActive(true);
-            Vector3 centrePoint = Vector3.zero;
+            centrePoint = Vector3.zero;
             foreach (var obj in selectedObjects)
             {
                 centrePoint += obj.transform.position;
             }
             centrePoint /= selectedObjects.Count;
+
             /// Just a mention to whoever reads this note... after writing this line of code I was convinced I was a mathmatical genius for a moment :o
+            /// Edit: You should take a look at the MoveToolArrow class
             float angle = Vector3.Angle(mainCamera.transform.forward, centrePoint - mainCamera.transform.position);
             movementToolObject.transform.position = mainCamera.transform.position + (centrePoint - mainCamera.transform.position).normalized * (movementToolDistance / Mathf.Cos(angle * Mathf.Deg2Rad));
 
