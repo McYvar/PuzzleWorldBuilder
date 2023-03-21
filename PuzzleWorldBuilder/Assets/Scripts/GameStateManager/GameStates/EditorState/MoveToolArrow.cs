@@ -11,6 +11,7 @@ public class MoveToolArrow : AbstractGameEditor
     Vector3 startPos;
     float forwardDepth;
     Vector3 offset;
+    Vector3 displacement;
 
     protected override void OnEnable()
     {
@@ -78,8 +79,7 @@ public class MoveToolArrow : AbstractGameEditor
         toolCentre.position = mainCamera.transform.position + fromCamToMouseDirection.normalized * newToolDepth - offset;
 
         // now we need to determine the displaced position vector
-        Vector3 displacement = toolCentre.position - startPos;
-        Debug.Log(displacement);
+        displacement = toolCentre.position - startPos;
 
         foreach (SceneObject sceneObject in InputCommands.selectedObjects)
         {
@@ -92,5 +92,6 @@ public class MoveToolArrow : AbstractGameEditor
 
     public void MouseUp()
     {
+        // add displacement to a movecommand!
     }
 }
