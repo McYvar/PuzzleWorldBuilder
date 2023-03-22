@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class MoveToolArrow : AbstractGameEditor
@@ -21,6 +19,9 @@ public class MoveToolArrow : AbstractGameEditor
     [Range(0, 15), SerializeField] float minViewAngle;
     [SerializeField] bool isFreeMove;
     bool doEmission;
+
+    [SerializeField] bool doSnap;
+    [SerializeField] float snapSize;
 
     protected override void OnEnable()
     {
@@ -79,7 +80,7 @@ public class MoveToolArrow : AbstractGameEditor
         // then since we know the depth of the tool, we need to calculate the mousepoint depth
         // first we need the camera depth calulated using the tool angle and the tool depth (camera depth = adjacent, toolDepth = oblique)
         float cameraDepth = forwardDepth * Mathf.Cos(toolAngle * Mathf.Deg2Rad);
-        
+
         // then using this camera depth we calculate the mouseDepth
         float mouseDepth = cameraDepth / Mathf.Cos(mouseAngle * Mathf.Deg2Rad);
 
@@ -113,14 +114,26 @@ public class MoveToolArrow : AbstractGameEditor
         if (isFreeMove)
         {
             // in the case of a free move, we just set the resultMove to the displacement
-            resultMove = displacement;
+            if (doSnap)
+            {
+                float currentSnapX = (int)(displacement.x / snapSize);
+                float currentSnapY = (int)(displacement.y / snapSize);
+                float currentSnapZ = (int)(displacement.z / snapSize);
+                resultMove = new Vector3(currentSnapX * snapSize, currentSnapY * snapSize, currentSnapZ * snapSize);
+            }
+            else resultMove = displacement;
         }
         else
         {
             // the displacement then needs to be translated into the forward direction of this arrow for a non-free move
             // we use the magnitude of the arrow, and translate this into the lenght of the forward direction using the angle between the two
             float arrowForwardLength = displacement.magnitude * Mathf.Cos(Vector3.Angle(displacement, transform.forward) * Mathf.Deg2Rad);
-            resultMove = transform.forward * arrowForwardLength;
+            if (doSnap)
+            {
+                float currentSnap = (int)(arrowForwardLength / snapSize);
+                resultMove = transform.forward * currentSnap * snap;
+            }
+            else resultMove = transform.forward * arrowForwardLength;
         }
         foreach (SceneObject sceneObject in InputCommands.selectedObjects)
         {
