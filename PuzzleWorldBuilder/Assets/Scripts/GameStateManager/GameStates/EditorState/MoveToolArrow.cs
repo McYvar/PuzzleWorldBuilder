@@ -116,9 +116,9 @@ public class MoveToolArrow : AbstractGameEditor
             // in the case of a free move, we just set the resultMove to the displacement
             if (doSnap)
             {
-                float currentSnapX = (int)(displacement.x / snapSize);
-                float currentSnapY = (int)(displacement.y / snapSize);
-                float currentSnapZ = (int)(displacement.z / snapSize);
+                int currentSnapX = (int)(displacement.x / snapSize);
+                int currentSnapY = (int)(displacement.y / snapSize);
+                int currentSnapZ = (int)(displacement.z / snapSize);
                 resultMove = new Vector3(currentSnapX * snapSize, currentSnapY * snapSize, currentSnapZ * snapSize);
             }
             else resultMove = displacement;
@@ -130,8 +130,8 @@ public class MoveToolArrow : AbstractGameEditor
             float arrowForwardLength = displacement.magnitude * Mathf.Cos(Vector3.Angle(displacement, transform.forward) * Mathf.Deg2Rad);
             if (doSnap)
             {
-                float currentSnap = (int)(arrowForwardLength / snapSize);
-                resultMove = transform.forward * currentSnap * snap;
+                int currentSnap = (int)(arrowForwardLength / snapSize);
+                resultMove = transform.forward * currentSnap * snapSize;
             }
             else resultMove = transform.forward * arrowForwardLength;
         }

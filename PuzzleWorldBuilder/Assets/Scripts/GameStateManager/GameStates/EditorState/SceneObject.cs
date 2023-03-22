@@ -14,7 +14,7 @@ public class SceneObject : AbstractGameEditor
     {
         base.OnEnable();
         anyCollider = GetComponent<Collider>();
-        anyCollider.enabled = false;
+        anyCollider.enabled = true;
         meshRenderer = GetComponent<MeshRenderer>();
     }
 
