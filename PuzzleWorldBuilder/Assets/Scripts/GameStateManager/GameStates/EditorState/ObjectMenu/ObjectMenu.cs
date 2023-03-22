@@ -17,7 +17,6 @@ public class ObjectMenu : BaseMenuWindow
     [SerializeField] float spaceBetweenItems;
     [SerializeField] float edgeWidthOffset;
     [SerializeField] float edgeHeightOffset;
-    [SerializeField] float editorMinimumHeight;
     [SerializeField, Range(1, 7)] int maxItemsInARow;
 
     [SerializeField] Category[] categories;
@@ -51,8 +50,9 @@ public class ObjectMenu : BaseMenuWindow
 
     void UpdateSizeDelta()
     {
+        float compareHeight = categories.Length * categoryButtonPrefab.GetRectTransform().sizeDelta.x;
         float newHeight = (((categories[currentCategory].parentObjectTransforms.Count - 1) / maxItemsInARow) + 1) * objectMenuItemSpacePrefab.GetRectTransform().sizeDelta.y + (((categories[currentCategory].parentObjectTransforms.Count - 1) / maxItemsInARow) + 2) * spaceBetweenItems + 2 * edgeHeightOffset;
-        if (newHeight < editorMinimumHeight) newHeight = editorMinimumHeight;
+        if (newHeight < compareHeight) newHeight = compareHeight  - outlineWidth * 0.5f;
         if (objectMenuItemSpacePrefab.GetRectTransform() != null && categories.Length > 0)
         rectTransform.sizeDelta = new Vector2(maxItemsInARow * objectMenuItemSpacePrefab.GetRectTransform().sizeDelta.x + (maxItemsInARow + 1) * spaceBetweenItems + 2 * edgeWidthOffset, newHeight);
     }

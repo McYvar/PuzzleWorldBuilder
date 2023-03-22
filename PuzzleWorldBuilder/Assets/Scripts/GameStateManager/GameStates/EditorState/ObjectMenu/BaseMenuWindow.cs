@@ -2,11 +2,11 @@
 
 public class BaseMenuWindow : AbstractGameEditor
 {
-    [SerializeField] RectTransform outlineTop;
-    [SerializeField] RectTransform outlineBottom;
-    [SerializeField] RectTransform outlineLeft;
-    [SerializeField] RectTransform outlineRight;
-    [SerializeField] float outlineWidth = 0.5f;
+    [SerializeField] protected RectTransform outlineTop;
+    [SerializeField] protected RectTransform outlineBottom;
+    [SerializeField] protected RectTransform outlineLeft;
+    [SerializeField] protected RectTransform outlineRight;
+    [SerializeField] protected float outlineWidth = 0.5f;
     [SerializeField] protected RectTransform rectTransform;
 
     protected override void OnEnable()
