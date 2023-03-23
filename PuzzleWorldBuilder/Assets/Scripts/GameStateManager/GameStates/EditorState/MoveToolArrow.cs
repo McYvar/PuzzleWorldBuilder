@@ -16,7 +16,7 @@ public class MoveToolArrow : AbstractGameEditor
 
     [SerializeField] MeshRenderer myMesh;
     [SerializeField] Collider myCollider;
-    [Range(0, 15), SerializeField] float minViewAngle;
+    [Range(0, 30), SerializeField] float minViewAngle;
     [SerializeField] bool isFreeMove;
     bool doEmission;
 
@@ -39,7 +39,7 @@ public class MoveToolArrow : AbstractGameEditor
 
     public override void EditorUpdate()
     {
-        float angle = Vector3.Angle(arrows.position - mainCamera.transform.forward, transform.forward);
+        float angle = Vector3.Angle(mainCamera.transform.forward, transform.forward);
         if (angle < minViewAngle || angle > 180 - minViewAngle)
         {
             myMesh.enabled = false;

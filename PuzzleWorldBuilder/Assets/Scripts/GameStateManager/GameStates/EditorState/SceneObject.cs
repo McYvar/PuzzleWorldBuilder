@@ -1,35 +1,27 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
-[RequireComponent(typeof(MeshRenderer))]
 public class SceneObject : AbstractGameEditor
 {
     // static list of all objects visible in the scene
     public static List<SceneObject> sceneObjects = new List<SceneObject>();
     [HideInInspector] public Vector3 myStartPos;
-    MeshRenderer meshRenderer;
-    Collider anyCollider;
+    protected MeshRenderer meshRenderer;
+    protected Collider anyCollider;
 
     protected override void OnEnable()
     {
         base.OnEnable();
         anyCollider = GetComponent<Collider>();
-        anyCollider.enabled = true;
         meshRenderer = GetComponent<MeshRenderer>();
     }
 
-    public void OnCreation()
+    public virtual void OnCreation()
     {
-        anyCollider.enabled = true;
-        meshRenderer.enabled = true;
-        sceneObjects.Add(this);
     }
 
-    public void OnDeletion()
+    public virtual void OnDeletion()
     {
-        anyCollider.enabled = false;
-        meshRenderer.enabled = false;
-        sceneObjects.Remove(this);
     }
 
     public void OnInvisibe()
@@ -38,13 +30,13 @@ public class SceneObject : AbstractGameEditor
         meshRenderer.enabled = false;
     }
 
-    public void OnSelection()
+    public virtual void OnSelection()
     {
         // outline material has to be the first assigned material to objects, maybe better solution for this later
         meshRenderer.material.SetInt("_UseShader", 1);
     }
 
-    public void OnDeselection()
+    public virtual void OnDeselection()
     {
         meshRenderer.material.SetInt("_UseShader", 0);
     }

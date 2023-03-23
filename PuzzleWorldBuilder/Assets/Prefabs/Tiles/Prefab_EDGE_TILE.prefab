@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 6753673599722329561}
   - component: {fileID: 551836701610962462}
   - component: {fileID: 9102670891695677500}
-  - component: {fileID: -3006541167012128838}
+  - component: {fileID: -7165020359989446535}
   m_Layer: 0
   m_Name: Prefab_EDGE_TILE
   m_TagString: Untagged
@@ -99,7 +99,7 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &-3006541167012128838
+--- !u!114 &-7165020359989446535
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -108,7 +108,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1959658430133673523}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9f23acd5137fa6f499039ff139c89a0c, type: 3}
+  m_Script: {fileID: 11500000, guid: 2afd3b9acdf6b5644804a012cd476fac, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   myStartPos: {x: 0, y: 0, z: 0}

@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 4163988913845605326}
   - component: {fileID: 5189795323243145340}
   - component: {fileID: 8715023141368231788}
-  - component: {fileID: 9096902649502600672}
+  - component: {fileID: 8597411321108547151}
   m_Layer: 0
   m_Name: Prefab_PLACEABLE_TILE
   m_TagString: Untagged
@@ -99,7 +99,7 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &9096902649502600672
+--- !u!114 &8597411321108547151
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -108,7 +108,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 227193790824826280}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9f23acd5137fa6f499039ff139c89a0c, type: 3}
+  m_Script: {fileID: 11500000, guid: 2afd3b9acdf6b5644804a012cd476fac, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   myStartPos: {x: 0, y: 0, z: 0}
