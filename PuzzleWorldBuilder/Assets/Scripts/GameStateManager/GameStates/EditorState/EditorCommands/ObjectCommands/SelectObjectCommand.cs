@@ -4,35 +4,33 @@ using UnityEngine;
 
 public class SelectObjectCommand : BaseObjectCommands
 {
-    LinkedList<SceneObject[]> undoLinkedList;
-    Stack<SceneObject[]> redoStack;
-    List<SceneObject> preSelected = new List<SceneObject>();
+    LinkedList<TerrainObject[]> undoLinkedList;
+    Stack<TerrainObject[]> redoStack;
+    List<TerrainObject> preSelected = new List<TerrainObject>();
 
     protected override void OnEnable()
     {
         base.OnEnable();
-        undoLinkedList = new LinkedList<SceneObject[]>();
-        redoStack = new Stack<SceneObject[]>();
+        undoLinkedList = new LinkedList<TerrainObject[]>();
+        redoStack = new Stack<TerrainObject[]>();
     }
     
     public override void Execute()
     {
-        foreach (SceneObject sceneObject in preSelected)
+        foreach (TerrainObject terrainObject in preSelected)
         {
-            sceneObject.OnSelection();
-            InputCommands.selectedObjects.Add(sceneObject);
+            terrainObject.OnSelection();
         }
         undoLinkedList.AddLast(preSelected.ToArray());
     }
 
     public override void Undo()
     {
-        SceneObject[] redoObjects = undoLinkedList.Last.Value;
+        TerrainObject[] redoObjects = undoLinkedList.Last.Value;
         undoLinkedList.RemoveLast();
-        foreach (SceneObject sceneObject in redoObjects)
+        foreach (TerrainObject terrainObject in redoObjects)
         {
-            sceneObject.OnDeselection();
-            InputCommands.selectedObjects.Remove(sceneObject);
+            terrainObject.OnDeselection();
         }
         preSelected.Clear();
         redoStack.Push(redoObjects);
@@ -40,13 +38,12 @@ public class SelectObjectCommand : BaseObjectCommands
 
     public override void Redo()
     {
-        SceneObject[] redoObjects = redoStack.Pop();
+        TerrainObject[] redoObjects = redoStack.Pop();
         preSelected.Clear();
         preSelected.AddRange(redoObjects);
-        foreach (SceneObject sceneObject in preSelected)
+        foreach (TerrainObject terrainObject in preSelected)
         {
-            sceneObject.OnSelection();
-            InputCommands.selectedObjects.Add(sceneObject);
+            terrainObject.OnSelection();
         }
         undoLinkedList.AddLast(redoObjects);
     }
@@ -61,15 +58,15 @@ public class SelectObjectCommand : BaseObjectCommands
         redoStack.Clear();
     }
 
-    public int InitializePreSelected(List<SceneObject> currentlySelected, List<SceneObject> preSelected)
+    public int InitializePreSelected(List<TerrainObject> currentlySelected, List<TerrainObject> preSelected)
     {
         this.preSelected.Clear();
         this.preSelected.AddRange(preSelected);
 
-        foreach(SceneObject sceneObject in currentlySelected)
+        foreach(TerrainObject terrainObject in currentlySelected)
         {
-            if (this.preSelected.Contains(sceneObject))
-                this.preSelected.Remove(sceneObject);
+            if (this.preSelected.Contains(terrainObject))
+                this.preSelected.Remove(terrainObject);
         }
         return this.preSelected.Count;
     }

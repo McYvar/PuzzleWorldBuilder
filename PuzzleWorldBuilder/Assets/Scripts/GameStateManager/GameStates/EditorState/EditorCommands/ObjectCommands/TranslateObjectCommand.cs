@@ -26,9 +26,9 @@ public class TranslateObjectCommand : BaseObjectCommands
         // but in the undo I do
         Vector3 undoPosition = undoLinkedList.Last.Value;
         undoLinkedList.RemoveLast();
-        foreach (SceneObject sceneObject in InputCommands.selectedObjects)
+        foreach (TerrainObject terrainObject in InputCommands.selectedTerrainObjects)
         {
-            sceneObject.transform.position -= undoPosition;
+            terrainObject.transform.position -= undoPosition;
         }
         redoStack.Push(undoPosition);
     }
@@ -37,9 +37,9 @@ public class TranslateObjectCommand : BaseObjectCommands
     {
         // and in the redo aswell
         Vector3 redoPosition = redoStack.Pop();
-        foreach (SceneObject sceneObject in InputCommands.selectedObjects)
+        foreach (TerrainObject terrainObject in InputCommands.selectedTerrainObjects)
         {
-            sceneObject.transform.position += redoPosition;
+            terrainObject.transform.position += redoPosition;
         }
         undoLinkedList.AddLast(redoPosition);
     }

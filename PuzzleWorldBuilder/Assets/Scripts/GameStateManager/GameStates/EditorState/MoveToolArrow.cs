@@ -20,7 +20,7 @@ public class MoveToolArrow : AbstractGameEditor
     [SerializeField] bool isFreeMove;
     bool doEmission;
 
-    [SerializeField] bool doSnap;
+    [SerializeField] bool doPositionSnap;
     [SerializeField] float snapSize;
 
     protected override void OnEnable()
@@ -88,10 +88,10 @@ public class MoveToolArrow : AbstractGameEditor
         Vector3 fromCamToMouseDirection = mousePosition - mainCamera.transform.position;
         offset = fromCamToMouseDirection.normalized * mouseDepth - fromCamToToolDirection.normalized * forwardDepth;
 
-        foreach (SceneObject sceneObject in InputCommands.selectedObjects)
+        foreach (TerrainObject terrainObject in InputCommands.selectedTerrainObjects)
         {
             // for each selected object we define a starting position
-            sceneObject.myStartPos = sceneObject.transform.position;
+            terrainObject.myStartPos = terrainObject.transform.position;
         }
     }
 
@@ -114,7 +114,7 @@ public class MoveToolArrow : AbstractGameEditor
         if (isFreeMove)
         {
             // in the case of a free move, we just set the resultMove to the displacement
-            if (doSnap)
+            if (doPositionSnap)
             {
                 int currentSnapX = (int)(displacement.x / snapSize);
                 int currentSnapY = (int)(displacement.y / snapSize);
@@ -128,17 +128,17 @@ public class MoveToolArrow : AbstractGameEditor
             // the displacement then needs to be translated into the forward direction of this arrow for a non-free move
             // we use the magnitude of the arrow, and translate this into the lenght of the forward direction using the angle between the two
             float arrowForwardLength = displacement.magnitude * Mathf.Cos(Vector3.Angle(displacement, transform.forward) * Mathf.Deg2Rad);
-            if (doSnap)
+            if (doPositionSnap)
             {
                 int currentSnap = (int)(arrowForwardLength / snapSize);
                 resultMove = transform.forward * currentSnap * snapSize;
             }
             else resultMove = transform.forward * arrowForwardLength;
         }
-        foreach (SceneObject sceneObject in InputCommands.selectedObjects)
+        foreach (TerrainObject terrainObject in InputCommands.selectedTerrainObjects)
         {
             // Then we aply this result move to every selected object
-            sceneObject.transform.position = sceneObject.myStartPos + resultMove;
+            terrainObject.transform.position = terrainObject.myStartPos + resultMove;
         }
 
         float newArrowsDepth = arrowsDepth / Mathf.Cos(mouseAngle * Mathf.Deg2Rad);

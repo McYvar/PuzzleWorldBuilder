@@ -2,8 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-[CreateAssetMenu(menuName = "PuzzleGrid/Grid", fileName = "Grid")]
-public class PuzzleGrid : ScriptableObject
+public class PuzzleGrid
 {
     /// <summary>
     /// Date: 03/22/23, By: Yvar
@@ -13,109 +12,138 @@ public class PuzzleGrid : ScriptableObject
     /// Around the newly created tile, a detection system will determine if there should grow a new NONE tile.
     /// This class also tracks the total grid size, which should be able to grow.
     /// </summary>
+    
+    int width;
+    int length;
+    TileInformation[,] tileInformation;
+    TileInformation currentHighlightedTile;
 
-    [HideInInspector] public List<Vector2Int> gridRegister;
-    [SerializeField] int totalWidth;
-    [SerializeField] int totalLength;
-    [SerializeField] GameObject Prefab_PLACEABLE_TILE;
-    [SerializeField] GameObject Prefab_EDGE_TILE;
-    TileInformation[,] tilesInformation;
+    Material[] noneTileMaterials;
 
-    /*
-    public PuzzleGrid(int startWidth, int StartLength)
+    public PuzzleGrid(int width, int length, Vector3 origin, params Material[] materials)
     {
-        totalWidth = startWidth;
-        totalLength = StartLength;
+        this.width = width;
+        this.length = length;
+        noneTileMaterials = materials;
 
-        // First we setup the first grid
-        gridRegister = new List<Vector2Int>();
-        tilesInformation = new TileInformation[totalWidth, totalLength];
-        for (int width = 0; width < startWidth; width++)
-        {
-            for (int length = 0; length < StartLength; length++)
-            {
-                RegisterNewTile(new Vector2Int(width, length));
-                if (width == 0 || length == 0 || width == startWidth - 1 || length == StartLength - 1)
-                {
-                    tilesInformation[width, length].myType = TileType.NONE_TILE;
-                }
-                else if (width == 1 || length == 1 || width == startWidth - 2 || length == StartLength - 2)
-                {
-                    tilesInformation[width, length].myType = TileType.EDGE_TILE;
-                    // add arrow here?
-                }
-                else
-                {
-                    tilesInformation[width, length].myType = TileType.PLACEABLE_TILE;
-                    // add tile here?
-                }
-                tilesInformation[width, length].myLocation = new Vector2Int(width, length);
-            }
-        }
-    }
-    */
+        tileInformation = new TileInformation[width, length];
 
-    public void Initialize()
-    {
-        // First we setup the first grid
-        gridRegister = new List<Vector2Int>();
-        tilesInformation = new TileInformation[totalWidth, totalLength];
-        for (int width = 0; width < totalWidth; width++)
+        for (int x = 0; x < tileInformation.GetLength(0); x++)
         {
-            for (int length = 0; length < totalLength; length++)
+            for (int z = 0; z < tileInformation.GetLength(1); z++)
             {
-                RegisterNewTile(new Vector2Int(width, length));
-                if (width == 0 || length == 0 || width == totalWidth - 1 || length == totalLength - 1)
-                {
-                    tilesInformation[width, length].myType = TileType.NONE_TILE;
-                }
-                else if (width == 1 || length == 1 || width == totalWidth - 2 || length == totalLength - 2)
-                {
-                    tilesInformation[width, length].myType = TileType.EDGE_TILE;
-                    Instantiate(Prefab_EDGE_TILE, new Vector3(width, 0, length), Quaternion.identity);
-                }
-                else
-                {
-                    tilesInformation[width, length].myType = TileType.PLACEABLE_TILE;
-                    Instantiate(Prefab_PLACEABLE_TILE, new Vector3(width, 0, length), Quaternion.identity);
-                }
-                tilesInformation[width, length].myLocation = new Vector2Int(width, length);
+                tileInformation[x, z] = new TileInformation(TileType.NONE_TILE, new Vector3(x, 0, z), materials);
+                tileInformation[x, z].AssignGridToObject(this);
             }
         }
     }
 
-    void RegisterNewTile(Vector2Int newTile)
+    public void IncreaseGrid(int addWidth, int addLength)
     {
-        gridRegister.Add(newTile);
+        width += addWidth;
+        length += addLength;
+        TileInformation[,] temp = new TileInformation[width, length];
+        for (int x = 0; x < width; x++)
+        {
+            for (int z = 0; z < length; z++)
+            {
+                if (x >= width - addWidth || z >= length - addLength)
+                {
+                    temp[x, z] = new TileInformation(TileType.NONE_TILE, new Vector3(x, 0, z), noneTileMaterials);
+                    temp[x, z].AssignGridToObject(this);
+                }
+                else temp[x, z] = tileInformation[x, z];
+            }
+        }
+        tileInformation = temp;
     }
 
-    void RemoveTile(Vector2Int removeTile)
+    public void HighlightTile(int x, int z)
     {
-        // should be casted to some sort of undo, but for now keep it simple
-        if (gridRegister.Contains(removeTile))
-            gridRegister.Remove(removeTile);
-    }
-
-    /// <summary>
-    /// Algoritm to update the grids tile types. To determine the tiletype, there should be a few conditions:
-    /// 1. The most outer tiles are ALWAYS NONE tiles.
-    /// 2. 
-    /// </summary>
-    void UpdateGrid()
-    {
-
-    }
-
-    public TileType GetTileType(Vector2Int location)
-    {
-        return tilesInformation[location.x, location.y].myType;
+        if (x >= 0 && z >= 0 && x < width && z < length)
+        {
+            currentHighlightedTile?.Unhighlight();
+            currentHighlightedTile = tileInformation[x, z];
+            currentHighlightedTile.Highlight();
+        }
     }
 }
 
-public struct TileInformation
+public class TileInformation
 {
-    public TileType myType;
-    public Vector2Int myLocation;
+    TileType myType;
+    GameObject myGameObject;
+
+    Mesh myMesh;
+    MeshRenderer myMeshRenderer;
+    MeshCollider myCollider;
+
+    Vector2 tileOffset = new Vector2(-0.5f, -0.5f);
+
+    public TileInformation(TileType myType, Vector3 myPosition, params Material[] materials)
+    {
+        this.myType = myType;
+
+        myGameObject = new GameObject("Tile(" + myPosition.x + ", " + myPosition.z + ")", typeof(MeshRenderer), typeof(MeshFilter), typeof(MeshCollider), typeof(GridObject));
+        myGameObject.transform.position = myPosition;
+
+        myMesh = new Mesh();
+
+        Vector3[] vertices = new Vector3[4];
+        Vector2[] uv = new Vector2[4];
+        int[] triangles = new int[6];
+
+        vertices[0] = new Vector3(0.05f + tileOffset.x, 0, 0.05f + tileOffset.y);
+        vertices[1] = new Vector3(0.05f + tileOffset.x, 0, 0.95f + tileOffset.y);
+        vertices[2] = new Vector3(0.95f + tileOffset.x, 0, 0.95f + tileOffset.y);
+        vertices[3] = new Vector3(0.95f + tileOffset.x, 0, 0.05f + tileOffset.y);
+
+        uv[0] = new Vector2(0, 0);
+        uv[1] = new Vector2(0, 1);
+        uv[2] = new Vector2(1, 1);
+        uv[3] = new Vector2(0, 1);
+
+        triangles[0] = 0;
+        triangles[1] = 1;
+        triangles[2] = 2;
+
+        triangles[3] = 0;
+        triangles[4] = 2;
+        triangles[5] = 3;
+
+        myMesh.vertices = vertices;
+        myMesh.uv = uv;
+        myMesh.triangles = triangles;
+
+        myGameObject.GetComponent<MeshFilter>().mesh = myMesh;
+        myMeshRenderer = myGameObject.GetComponent<MeshRenderer>();
+
+        myMeshRenderer.materials = materials;
+
+        myGameObject.GetComponent<MeshCollider>().sharedMesh = myMesh;
+    }
+
+    public void SetType(TileType newType)
+    {
+        myType = newType;
+    }
+
+    public void Highlight()
+    {
+        if (myType == TileType.NONE_TILE)
+            myMeshRenderer.material.EnableKeyword("_EMISSION");
+    }
+    
+    public void Unhighlight()
+    {
+        myMeshRenderer.material.DisableKeyword("_EMISSION");
+    }
+
+    public void AssignGridToObject(PuzzleGrid grid)
+    {
+        myGameObject.GetComponent<GridObject>().AssignGrid(grid);
+    }
 }
 
-public enum TileType { NONE_TILE = 0, EDGE_TILE = 1 , PLACEABLE_TILE = 2 }
+public enum TileType { NONE_TILE = 0, EDGE_TILE = 1, PLACEABLE_TILE = 2 }
+

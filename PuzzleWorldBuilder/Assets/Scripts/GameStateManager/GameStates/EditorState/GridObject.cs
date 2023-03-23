@@ -1,8 +1,29 @@
-﻿public class GridObject : SceneObject
+﻿using UnityEngine;
+
+public class GridObject : SceneObject
 {
+    PuzzleGrid sharedGrid;
+
     protected override void OnEnable()
     {
         base.OnEnable();
-        sceneObjects.Add(this);
+    }
+
+    public override void OnSelection()
+    {
+    }
+
+    public override void OnDeselection()
+    {
+
+    }
+
+    public override void OnDeletion()
+    {
+    }
+
+    public void AssignGrid(PuzzleGrid grid) 
+    {
+        sharedGrid = grid;
     }
 }

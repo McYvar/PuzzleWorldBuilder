@@ -3,55 +3,52 @@ using UnityEngine;
 
 public class DeselectObjectCommand : BaseEditorCommand
 {
-    LinkedList<SceneObject[]> undoLinkedList;
-    Stack<SceneObject[]> redoStack;
-    List<SceneObject> preDeselected;
+    LinkedList<TerrainObject[]> undoLinkedList;
+    Stack<TerrainObject[]> redoStack;
+    List<TerrainObject> preDeselected;
 
     protected override void OnEnable()
     {
         base.OnEnable();
-        undoLinkedList = new LinkedList<SceneObject[]>();
-        redoStack = new Stack<SceneObject[]>();
-        preDeselected = new List<SceneObject>();
+        undoLinkedList = new LinkedList<TerrainObject[]>();
+        redoStack = new Stack<TerrainObject[]>();
+        preDeselected = new List<TerrainObject>();
     }
 
     public override void Execute()
     {
-        SceneObject[] sceneObjects = preDeselected.ToArray();
-        foreach (SceneObject sceneObject in sceneObjects)
+        TerrainObject[] terrainObjects = preDeselected.ToArray();
+        foreach (TerrainObject terrainObject in terrainObjects)
         {
-            sceneObject.OnDeselection();
-            InputCommands.selectedObjects.Remove(sceneObject);
+            terrainObject.OnDeselection();
         }
         preDeselected.Clear();
         redoStack.Clear();
-        undoLinkedList.AddLast(sceneObjects);
+        undoLinkedList.AddLast(terrainObjects);
     }
 
     public override void Undo()
     {
-        SceneObject[] sceneObjects = undoLinkedList.Last.Value;
+        TerrainObject[] terrainObjects = undoLinkedList.Last.Value;
         undoLinkedList.RemoveLast();
-        foreach (SceneObject sceneObject in sceneObjects)
+        foreach (TerrainObject terrainObject in terrainObjects)
         {
-            sceneObject.OnSelection();
-            InputCommands.selectedObjects.Add(sceneObject);
+            terrainObject.OnSelection();
         }
         preDeselected.Clear();
-        preDeselected.AddRange(sceneObjects);
-        redoStack.Push(sceneObjects);
+        preDeselected.AddRange(terrainObjects);
+        redoStack.Push(terrainObjects);
     }
 
     public override void Redo()
     {
-        SceneObject[] sceneObjects = redoStack.Pop();
-        foreach (SceneObject sceneObject in sceneObjects)
+        TerrainObject[] terrainObjects = redoStack.Pop();
+        foreach (TerrainObject terrainObject in terrainObjects)
         {
-            sceneObject.OnDeselection();
-            InputCommands.selectedObjects.Remove(sceneObject);
+            terrainObject.OnDeselection();
         }
         preDeselected.Clear();
-        undoLinkedList.AddLast(sceneObjects);
+        undoLinkedList.AddLast(terrainObjects);
     }
 
     public override void ClearFirstUndo()
@@ -64,7 +61,7 @@ public class DeselectObjectCommand : BaseEditorCommand
         redoStack.Clear();
     }
 
-    public void InitializePreDeselected(List<SceneObject> preDeselected)
+    public void InitializePreDeselected(List<TerrainObject> preDeselected)
     {
         this.preDeselected.Clear();
         this.preDeselected.AddRange(preDeselected);

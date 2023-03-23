@@ -16,17 +16,17 @@ public class BaseObjectCommands : BaseEditorCommand
         this.parent = parent;
     }
 
-    public SceneObject CreateObject(SceneObject objectToCreate)
+    public TerrainObject CreateObject(TerrainObject objectToCreate)
     {
-        SceneObject newObject = Instantiate(objectToCreate, parent);
+        TerrainObject newObject = Instantiate(objectToCreate, parent);
         newObject.name = objectToCreate.name;
         newObject.OnCreation();
         return newObject;
     }
 
-    public SceneObject CreateInvisible(SceneObject objectToCreate)
+    public TerrainObject CreateInvisible(TerrainObject objectToCreate)
     {
-        SceneObject newObject = Instantiate(objectToCreate, parent);
+        TerrainObject newObject = Instantiate(objectToCreate, parent);
         newObject.name = objectToCreate.name;
         newObject.OnInvisibe();
         return newObject;

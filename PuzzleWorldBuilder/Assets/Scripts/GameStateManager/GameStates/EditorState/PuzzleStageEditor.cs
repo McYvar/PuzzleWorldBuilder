@@ -4,11 +4,14 @@ using UnityEngine;
 
 public class PuzzleStageEditor : AbstractGameEditor
 {
-    [SerializeField] PuzzleGrid puzzleGrid;
+    [SerializeField] Material[] noneTileMaterials;
+    PuzzleGrid puzzleGrid;
+
+    GridObject currentGridObject;
 
     public override void EditorAwake()
     {
-        puzzleGrid.Initialize();
+        puzzleGrid = new PuzzleGrid(30, 30, Vector3.zero, noneTileMaterials);
     }
 
     public override void EditorStart()
@@ -17,18 +20,27 @@ public class PuzzleStageEditor : AbstractGameEditor
 
     public override void EditorUpdate()
     {
+        if (Input.GetKeyUp(KeyCode.S))
+        {
+            puzzleGrid.IncreaseGrid(1, 1);
+        }
+
+        RaycastHit hit;
+        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        Physics.Raycast(ray, out hit);
+        if (hit.collider != null)
+        {
+            currentGridObject = hit.collider.GetComponent<GridObject>();
+            if (currentGridObject != null) puzzleGrid.HighlightTile((int)hit.collider.transform.position.x, (int)hit.collider.transform.position.z);
+        }
+    }
+
+    public PuzzleGrid GetPuzzleGrid()
+    {
+        return puzzleGrid;
     }
 
     private void OnDrawGizmos()
     {
-        if (!UnityEditor.EditorApplication.isPlaying) return;
-        foreach (Vector2Int vec in puzzleGrid.gridRegister)
-        {
-            if (puzzleGrid.GetTileType(vec) == TileType.NONE_TILE) Gizmos.color = Color.red;
-            else if (puzzleGrid.GetTileType(vec) == TileType.EDGE_TILE) Gizmos.color = Color.yellow;
-            else if (puzzleGrid.GetTileType(vec) == TileType.PLACEABLE_TILE) Gizmos.color = Color.blue;
-
-            Gizmos.DrawSphere(new Vector3(vec.x, 0, vec.y), 0.3f);
-        }
     }
 }

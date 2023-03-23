@@ -11,57 +11,57 @@ public class DeleteObjectCommand : BaseObjectCommands
     /// Only one instance of this command should exist
     /// </summary>
 
-    Stack<SceneObject[]> redoStack;
-    LinkedList<SceneObject[]> undoLinkedList;
+    Stack<TerrainObject[]> redoStack;
+    LinkedList<TerrainObject[]> undoLinkedList;
 
     protected override void OnEnable()
     {
         base.OnEnable();
-        redoStack = new Stack<SceneObject[]>();
-        undoLinkedList = new LinkedList<SceneObject[]>();
+        redoStack = new Stack<TerrainObject[]>();
+        undoLinkedList = new LinkedList<TerrainObject[]>();
     }
 
     public override void Execute()
     {
         // When we delete an object in the puzzlemaker that is selected, we should also remove it from the selected objects list
-        SceneObject[] currentlySelectedObjects = InputCommands.selectedObjects.ToArray();
-        foreach (SceneObject sceneObject in currentlySelectedObjects)
+        TerrainObject[] currentlySelectedObjects = InputCommands.selectedTerrainObjects.ToArray();
+        foreach (TerrainObject terrainObject in currentlySelectedObjects)
         {
-            sceneObject.OnDeletion();
-            InputCommands.selectedObjects.Remove(sceneObject);
+            terrainObject.OnDeletion();
+            InputCommands.selectedTerrainObjects.Remove(terrainObject);
         }
         undoLinkedList.AddLast(currentlySelectedObjects);
     }
 
     public override void Undo()
     {
-        SceneObject[] undoSelctedObjects = undoLinkedList.Last.Value;
+        TerrainObject[] undoSelctedObjects = undoLinkedList.Last.Value;
         undoLinkedList.RemoveLast();
-        foreach (SceneObject sceneObject in undoSelctedObjects)
+        foreach (TerrainObject terrainObject in undoSelctedObjects)
         {
-            sceneObject.OnCreation();
-            InputCommands.selectedObjects.Add(sceneObject);
+            terrainObject.OnCreation();
+            InputCommands.selectedTerrainObjects.Add(terrainObject);
         }
         redoStack.Push(undoSelctedObjects);
     }
 
     public override void Redo()
     {
-        SceneObject[] redoSelctedObjects = redoStack.Pop();
-        foreach (SceneObject sceneObject in redoSelctedObjects)
+        TerrainObject[] redoSelctedObjects = redoStack.Pop();
+        foreach (TerrainObject terrainObject in redoSelctedObjects)
         {
-            sceneObject.OnDeletion();
-            InputCommands.selectedObjects.Remove(sceneObject);
+            terrainObject.OnDeletion();
+            InputCommands.selectedTerrainObjects.Remove(terrainObject);
         }
         undoLinkedList.AddLast(redoSelctedObjects);
     }
 
     public override void ClearFirstUndo()
     {
-        SceneObject[] sceneObjects = undoLinkedList.First.Value;
-        foreach (SceneObject sceneObject in sceneObjects)
+        TerrainObject[] terrainObjects = undoLinkedList.First.Value;
+        foreach (TerrainObject terrainObject in terrainObjects)
         {
-            Destroy(sceneObject.gameObject);
+            Destroy(terrainObject.gameObject);
         }
         undoLinkedList.RemoveFirst();
     }

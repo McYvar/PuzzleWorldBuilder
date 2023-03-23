@@ -4,80 +4,74 @@ using UnityEngine;
 
 public class FlipSelectionObjectCommand : BaseObjectCommands
 {
-    List<SceneObject> flipSelected = new List<SceneObject>();
-    List<SceneObject> newSelected = new List<SceneObject>();
+    List<TerrainObject> flipSelected = new List<TerrainObject>();
+    List<TerrainObject> newSelected = new List<TerrainObject>();
 
-    LinkedList<SceneObject[]> curUndoLinkedList;
-    LinkedList<SceneObject[]> newUndoLinkedList;
+    LinkedList<TerrainObject[]> curUndoLinkedList;
+    LinkedList<TerrainObject[]> newUndoLinkedList;
 
-    Stack<SceneObject[]> curRedoStack;
-    Stack<SceneObject[]> newRedoStack;
+    Stack<TerrainObject[]> curRedoStack;
+    Stack<TerrainObject[]> newRedoStack;
 
     protected override void OnEnable()
     {
         base.OnEnable();
-        newUndoLinkedList = new LinkedList<SceneObject[]>();
-        curUndoLinkedList = new LinkedList<SceneObject[]>();
+        newUndoLinkedList = new LinkedList<TerrainObject[]>();
+        curUndoLinkedList = new LinkedList<TerrainObject[]>();
 
-        curRedoStack = new Stack<SceneObject[]>();
-        newRedoStack = new Stack<SceneObject[]>();
+        curRedoStack = new Stack<TerrainObject[]>();
+        newRedoStack = new Stack<TerrainObject[]>();
     }
 
     public override void Execute()
     {
-        foreach (SceneObject sceneObject in flipSelected)
+        foreach (TerrainObject terrainObject in flipSelected)
         {
-            sceneObject.OnDeselection();
-            InputCommands.selectedObjects.Remove(sceneObject);
+            terrainObject.OnDeselection();
         }
         curUndoLinkedList.AddLast(flipSelected.ToArray());
 
-        foreach (SceneObject sceneObject in newSelected)
+        foreach (TerrainObject terrainObject in newSelected)
         {
-            sceneObject.OnSelection();
-            InputCommands.selectedObjects.Add(sceneObject);
+            terrainObject.OnSelection();
         }
         newUndoLinkedList.AddLast(newSelected.ToArray());
     }
 
     public override void Undo()
     {
-        SceneObject[] newSceneObjects = newUndoLinkedList.Last.Value;
+        TerrainObject[] newTerrainObjects = newUndoLinkedList.Last.Value;
         newUndoLinkedList.RemoveLast();
-        foreach (SceneObject sceneObject in newSceneObjects)
+        foreach (TerrainObject terrainObject in newTerrainObjects)
         {
-            sceneObject.OnDeselection();
-            InputCommands.selectedObjects.Remove(sceneObject);
+            terrainObject.OnDeselection();
         }
-        newRedoStack.Push(newSceneObjects);
+        newRedoStack.Push(newTerrainObjects);
 
-        SceneObject[] curSceneObjects = curUndoLinkedList.Last.Value;
+        TerrainObject[] curTerrainObjects = curUndoLinkedList.Last.Value;
         curUndoLinkedList.RemoveLast();
-        foreach (SceneObject sceneObject in curSceneObjects)
+        foreach (TerrainObject terrainObject in curTerrainObjects)
         {
-            sceneObject.OnSelection();
-            InputCommands.selectedObjects.Add(sceneObject);
+            terrainObject.OnSelection();
         }
-        curRedoStack.Push(curSceneObjects);
+        curRedoStack.Push(curTerrainObjects);
     }
 
     public override void Redo()
     {
-        SceneObject[] curSceneObjects = curRedoStack.Pop();
-        foreach (SceneObject sceneObject in curSceneObjects)
+        TerrainObject[] curTerrainObjects = curRedoStack.Pop();
+        foreach (TerrainObject terrainObject in curTerrainObjects)
         {
-            sceneObject.OnDeselection();
-            InputCommands.selectedObjects.Remove(sceneObject);
+            terrainObject.OnDeselection();
         }
-        curUndoLinkedList.AddLast(curSceneObjects);
+        curUndoLinkedList.AddLast(curTerrainObjects);
 
-        SceneObject[] newSceneObjects = newRedoStack.Pop();
-        foreach (SceneObject sceneObject in newSceneObjects)
+        TerrainObject[] newTerrainObjects = newRedoStack.Pop();
+        foreach (TerrainObject terrainObject in newTerrainObjects)
         {
-            sceneObject.OnSelection();
-            InputCommands.selectedObjects.Add(sceneObject);
+            terrainObject.OnSelection();
         }
-        newUndoLinkedList.AddLast(newSceneObjects);
+        newUndoLinkedList.AddLast(newTerrainObjects);
 
     }
 
@@ -93,18 +87,18 @@ public class FlipSelectionObjectCommand : BaseObjectCommands
         newRedoStack.Clear();
     }
 
-    public void InitializePreSelected(List<SceneObject> currentlySelected, List<SceneObject> newSelected)
+    public void InitializePreSelected(List<TerrainObject> currentlySelected, List<TerrainObject> newSelected)
     {
         this.newSelected.Clear();
         this.newSelected.AddRange(newSelected);
 
         flipSelected.Clear();
-        foreach (SceneObject sceneObject in currentlySelected)
+        foreach (TerrainObject terrainObject in currentlySelected)
         {
-            if (this.newSelected.Contains(sceneObject))
+            if (this.newSelected.Contains(terrainObject))
             {
-                flipSelected.Add(sceneObject);
-                this.newSelected.Remove(sceneObject);
+                flipSelected.Add(terrainObject);
+                this.newSelected.Remove(terrainObject);
             }
         }
     }

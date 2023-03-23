@@ -21,7 +21,7 @@ public class CopyObjectCommand : BaseObjectCommands
             Destroy(ClipBoard.clipboard[0].gameObject);
         }
 
-        foreach (SceneObject obj in InputCommands.selectedObjects)
+        foreach (TerrainObject obj in InputCommands.selectedTerrainObjects)
         {
             CreateInvisible(obj).gameObject.AddComponent<ClipBoard>().AddToClipBoard();
         }

@@ -13,9 +13,9 @@ public class AddObjectCommand : BaseObjectCommands
     /// </summary>
     
     // now a key, later a drag and drop
-    [SerializeField] SceneObject myObjectPrefab;
-    LinkedList<SceneObject> undoLinkedList = new LinkedList<SceneObject>();
-    Stack<SceneObject> redoStack = new Stack<SceneObject>();
+    [SerializeField] TerrainObject myObjectPrefab;
+    LinkedList<TerrainObject> undoLinkedList = new LinkedList<TerrainObject>();
+    Stack<TerrainObject> redoStack = new Stack<TerrainObject>();
 
     public override void Execute()
     {
@@ -26,10 +26,10 @@ public class AddObjectCommand : BaseObjectCommands
     public override void Undo()
     {
         // Undo adding this object, link this object as next to last object
-        SceneObject sceneObject = undoLinkedList.Last.Value;
+        TerrainObject terrainObject = undoLinkedList.Last.Value;
         undoLinkedList.RemoveLast();
-        sceneObject.OnDeletion();
-        redoStack.Push(sceneObject);
+        terrainObject.OnDeletion();
+        redoStack.Push(terrainObject);
     }
 
     public override void Redo() 
@@ -39,9 +39,9 @@ public class AddObjectCommand : BaseObjectCommands
         /// stored somewhere else on destroying
         /// 
         /// Redo adding previous object linked to the most recent one, link redo object to the recent one
-        SceneObject sceneObject = redoStack.Pop();
-        sceneObject.OnCreation();
-        undoLinkedList.AddLast(sceneObject);
+        TerrainObject terrainObject = redoStack.Pop();
+        terrainObject.OnCreation();
+        undoLinkedList.AddLast(terrainObject);
     }
 
     public override void ClearFirstUndo()
