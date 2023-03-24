@@ -30,10 +30,17 @@ public class SceneObject : AbstractGameEditor
 
     public virtual void OnSelection()
     {
+        InputCommands.selectedObjects.Add(this);
     }
 
     public virtual void OnDeselection()
     {
+        InputCommands.selectedObjects.Remove(this);
+    }
+
+    public virtual void MoveTo(Vector3 newPos)
+    {
+
     }
 
     public override void EditorAwake()

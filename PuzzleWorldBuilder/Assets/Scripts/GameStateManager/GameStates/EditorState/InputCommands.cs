@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Net.Security;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
@@ -67,7 +68,7 @@ public class InputCommands : AbstractGameEditor, IPointerDownHandler, IPointerUp
     [SerializeField, Range(0.0f, 50.0f)] float scrollDistBase;
     float scrollAmp;
 
-    public static List<TerrainObject> selectedTerrainObjects = new List<TerrainObject>();
+    public static List<SceneObject> selectedObjects = new List<SceneObject>();
 
     protected override void OnEnable()
     {
@@ -101,6 +102,11 @@ public class InputCommands : AbstractGameEditor, IPointerDownHandler, IPointerUp
         else
         {
             smoothPivot = camerasPivot.position;
+        }
+
+        if (Input.GetKeyDown(KeyCode.S))
+        {
+            Debug.Log(selectedObjects.Count);
         }
     }
 
@@ -179,7 +185,7 @@ public class InputCommands : AbstractGameEditor, IPointerDownHandler, IPointerUp
 #endif
         if (Input.GetKeyDown(KeyCode.F))
         {
-            if (selectedTerrainObjects.Count > 0)
+            if (selectedObjects.Count > 0)
             {
                 doSmooth = true;
                 SetPivot(centrePoint);
@@ -225,7 +231,7 @@ public class InputCommands : AbstractGameEditor, IPointerDownHandler, IPointerUp
         /// doesn't have to be rewritten
         /// 03/08/2023 Update: did that anyway
 
-        if (selectedTerrainObjects.Count > 0)
+        if (selectedObjects.Count > 0)
             commandManager.ExecuteCommand(copyCommand);
     }
 
@@ -242,13 +248,13 @@ public class InputCommands : AbstractGameEditor, IPointerDownHandler, IPointerUp
     {
         /// Cut some object, upon cutting the object should be removed trough the class handling the deletion of objects
         /// so this action can be undone. Also when cutting, an invisible copy of this object is made and put on the "clipboard".
-        if (selectedTerrainObjects.Count > 0)
+        if (selectedObjects.Count > 0)
             commandManager.ExecuteCommand(cutCommand);
     }
 
     public void Delete()
     {
-        if (selectedTerrainObjects.Count > 0)
+        if (selectedObjects.Count > 0)
             commandManager.ExecuteCommand(deleteCommand);
     }
     #endregion
@@ -328,7 +334,7 @@ public class InputCommands : AbstractGameEditor, IPointerDownHandler, IPointerUp
 
         Rect selectionBox = new Rect(selectionStartingPoint, selectionEndingPoint - selectionStartingPoint);
 
-        List<TerrainObject> temp = new List<TerrainObject>();
+        List<SceneObject> temp = new List<SceneObject>();
         if (selectionBox.size.magnitude < 5)
         {
             RaycastHit hit;
@@ -340,15 +346,27 @@ public class InputCommands : AbstractGameEditor, IPointerDownHandler, IPointerUp
             if (hit.collider != null)
             {
                 // means we hit only one object
+                // also we first search for terrain objects
                 TerrainObject terrainObject = hit.collider.GetComponent<TerrainObject>();
                 if (terrainObject != null)
                 {
                     temp.Add(terrainObject);
                 }
+
+                // then we seek for a single gridobject
+                if (temp.Count == 0)
+                {
+                    GridObject gridObject = hit.collider.GetComponent<GridObject>();
+                    if (gridObject != null)
+                    {
+                        temp.Add(gridObject);
+                    }
+                }
             }
         }
         else
         {
+            // here we seek for multiple terrain objects
             foreach (TerrainObject terrainObject in TerrainObject.terrainObject)
             {
                 if (terrainObject == null) continue;
@@ -358,13 +376,27 @@ public class InputCommands : AbstractGameEditor, IPointerDownHandler, IPointerUp
                     temp.Add(terrainObject);
                 }
             }
+
+            // if the list size is 0 then we look for gridobjects
+            if (temp.Count == 0)
+            {
+                foreach (GridObject gridObject in GridObject.gridObjects)
+                {
+                    if (gridObject == null) continue;
+                    Vector3 screenPosition = mainCamera.WorldToScreenPoint(gridObject.transform.position);
+                    if (selectionBox.Contains(screenPosition, true))
+                    {
+                        temp.Add(gridObject);
+                    }
+                }
+            }
         }
 
         if (temp.Count == 0)
         {
-            if (selectedTerrainObjects.Count > 0)
+            if (selectedObjects.Count > 0)
             {
-                deselectCommand.InitializePreDeselected(selectedTerrainObjects);
+                deselectCommand.InitializePreDeselected(selectedObjects);
                 commandManager.ExecuteCommand(deselectCommand);
             }
             return;
@@ -373,25 +405,25 @@ public class InputCommands : AbstractGameEditor, IPointerDownHandler, IPointerUp
         // case: shift is pressed
         if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
         {
-            flipSelectCommand.InitializePreSelected(selectedTerrainObjects, temp);
+            flipSelectCommand.InitializePreSelected(selectedObjects, temp);
             commandManager.ExecuteCommand(flipSelectCommand);
         }
         // case: cntl is pressed or nothing is selected
-        else if (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl) || selectedTerrainObjects.Count == 0)
+        else if (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl) || selectedObjects.Count == 0)
         {
-            if (selectCommand.InitializePreSelected(selectedTerrainObjects, temp) > 0)
+            if (selectCommand.InitializePreSelected(selectedObjects, temp) > 0)
                 commandManager.ExecuteCommand(selectCommand);
         }
         // case: nothing is pressed and at least one object is selected while selecting another object
-        else if (selectedTerrainObjects.Count > 0)
+        else if (selectedObjects.Count > 0)
         {
             // if the lists contain the same size and elements, we do nothing
-            if (selectedTerrainObjects.Count == temp.Count)
+            if (selectedObjects.Count == temp.Count)
             {
                 bool contains = true;
-                foreach (TerrainObject terrainObject in selectedTerrainObjects)
+                foreach (SceneObject sceneObjects in selectedObjects)
                 {
-                    if (temp.Contains(terrainObject)) continue;
+                    if (temp.Contains(sceneObjects)) continue;
                     else
                     {
                         contains = false;
@@ -399,7 +431,7 @@ public class InputCommands : AbstractGameEditor, IPointerDownHandler, IPointerUp
                 }
                 if (contains) return;
             }
-            overrideSelectCommand.InitializeSelected(selectedTerrainObjects, temp);
+            overrideSelectCommand.InitializeSelected(selectedObjects, temp);
             commandManager.ExecuteCommand(overrideSelectCommand);
         }
     }
@@ -407,9 +439,9 @@ public class InputCommands : AbstractGameEditor, IPointerDownHandler, IPointerUp
     private void AbortSelection()
     {
         isSelecting = false;
-        if (selectedTerrainObjects.Count > 0)
+        if (selectedObjects.Count > 0)
         {
-            deselectCommand.InitializePreDeselected(selectedTerrainObjects);
+            deselectCommand.InitializePreDeselected(selectedObjects);
             commandManager.ExecuteCommand(deselectCommand);
         }
     }
@@ -418,7 +450,7 @@ public class InputCommands : AbstractGameEditor, IPointerDownHandler, IPointerUp
     #region MovementTool
     void MovementTool()
     {
-        if (selectedTerrainObjects.Count > 0)
+        if (selectedObjects.Count > 0)
         {
             // if a movetoolarrow is selected, ignore these options
             if (currentMoveToolArrow != null) return;
@@ -426,11 +458,11 @@ public class InputCommands : AbstractGameEditor, IPointerDownHandler, IPointerUp
             // if there are objects selected, show the movement tool
             if (!movementToolObject.activeInHierarchy) movementToolObject.SetActive(true);
             centrePoint = Vector3.zero;
-            foreach (var obj in selectedTerrainObjects)
+            foreach (SceneObject obj in selectedObjects)
             {
                 centrePoint += obj.transform.position;
             }
-            centrePoint /= selectedTerrainObjects.Count;
+            centrePoint /= selectedObjects.Count;
 
             /// Just a mention to whoever reads this note... after writing this line of code I was convinced I was a mathmatical genius for a moment :o
             /// Edit: You should take a look at the MoveToolArrow class
@@ -508,9 +540,16 @@ public class InputCommands : AbstractGameEditor, IPointerDownHandler, IPointerUp
     {
         if (currentMoveToolArrow != null)
         {
-            translateCommand.InitializeNewPostition(currentMoveToolArrow.MouseUp());
-            commandManager.ExecuteCommand(translateCommand);
-            currentMoveToolArrow = null;
+            if (selectedObjects[0] as TerrainObject)
+            {
+                translateCommand.InitializeNewPostition(currentMoveToolArrow.MouseUp());
+                commandManager.ExecuteCommand(translateCommand);
+            }
+            else if (selectedObjects[0] as GridObject)
+            {
+
+            }
+                currentMoveToolArrow = null;
         }
 
         if (eventData.button == PointerEventData.InputButton.Left)

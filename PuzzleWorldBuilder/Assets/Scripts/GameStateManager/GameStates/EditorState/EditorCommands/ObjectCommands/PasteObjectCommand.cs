@@ -10,43 +10,43 @@ public class PasteObjectCommand : BaseObjectCommands
     /// </summary>
     /// 
 
-    LinkedList<TerrainObject[]> undoLinkedList;
-    Stack<TerrainObject[]> redoStack;
+    LinkedList<SceneObject[]> undoLinkedList;
+    Stack<SceneObject[]> redoStack;
 
-    LinkedList<TerrainObject[]> undoPrevSelected;
-    Stack<TerrainObject[]> redoPrevSelected;
+    LinkedList<SceneObject[]> undoPrevSelected;
+    Stack<SceneObject[]> redoPrevSelected;
 
     protected override void OnEnable()
     {
         base.OnEnable();
-        undoLinkedList = new LinkedList<TerrainObject[]>();
-        redoStack = new Stack<TerrainObject[]>();
+        undoLinkedList = new LinkedList<SceneObject[]>();
+        redoStack = new Stack<SceneObject[]>();
 
-        undoPrevSelected = new LinkedList<TerrainObject[]>();
-        redoPrevSelected = new Stack<TerrainObject[]>();
+        undoPrevSelected = new LinkedList<SceneObject[]>();
+        redoPrevSelected = new Stack<SceneObject[]>();
     }
 
     public override void Execute()
     {
-        TerrainObject[] currentlySelected = InputCommands.selectedTerrainObjects.ToArray();
-        foreach (TerrainObject terrainObject in currentlySelected)
+        SceneObject[] currentlySelected = InputCommands.selectedObjects.ToArray();
+        foreach (SceneObject sceneObject in currentlySelected)
         {
-            terrainObject.OnDeselection();
+            sceneObject.OnDeselection();
         }
         undoPrevSelected.AddLast(currentlySelected);
 
-        List<TerrainObject> newObj = new List<TerrainObject>();
+        List<SceneObject> newObj = new List<SceneObject>();
         foreach (ClipBoard item in ClipBoard.clipboard)
         {
-            TerrainObject createdObject = CreateObject(item.GetComponent<TerrainObject>());
+            SceneObject createdObject = CreateObject(item.GetComponent<SceneObject>());
             createdObject.name = item.normalName;
             createdObject.OnSelection();
             newObj.Add(createdObject);
         }
 
-        foreach (TerrainObject terrainObject in newObj)
+        foreach (SceneObject sceneObject in newObj)
         {
-            ClipBoard clipBoard = terrainObject.GetComponent<ClipBoard>();
+            ClipBoard clipBoard = sceneObject.GetComponent<ClipBoard>();
             if (clipBoard != null) Destroy(clipBoard);
         }
 
@@ -55,38 +55,38 @@ public class PasteObjectCommand : BaseObjectCommands
 
     public override void Undo()
     {
-        TerrainObject[] undoObjects = undoLinkedList.Last.Value;
+        SceneObject[] undoObjects = undoLinkedList.Last.Value;
         undoLinkedList.RemoveLast();
-        foreach (TerrainObject terrainObject in undoObjects)
+        foreach (SceneObject sceneObject in undoObjects)
         {
-            terrainObject.OnDeletion();
-            terrainObject.OnDeselection();
+            sceneObject.OnDeletion();
+            sceneObject.OnDeselection();
         }
         redoStack.Push(undoObjects);
 
-        TerrainObject[] prevSelected = undoPrevSelected.Last.Value;
+        SceneObject[] prevSelected = undoPrevSelected.Last.Value;
         undoPrevSelected.RemoveLast();
-        foreach (TerrainObject terrainObject in prevSelected)
+        foreach (SceneObject sceneObject in prevSelected)
         {
-            terrainObject.OnSelection();
+            sceneObject.OnSelection();
         }
         redoPrevSelected.Push(prevSelected);
     }
 
     public override void Redo()
     {
-        TerrainObject[] currentlySelected = redoPrevSelected.Pop();
-        foreach (TerrainObject terrainObject in currentlySelected)
+        SceneObject[] currentlySelected = redoPrevSelected.Pop();
+        foreach (SceneObject sceneObject in currentlySelected)
         {
-            terrainObject.OnSelection();
+            sceneObject.OnSelection();
         }
         undoPrevSelected.AddLast(currentlySelected);
 
-        TerrainObject[] redoObjects = redoStack.Pop();
-        foreach (TerrainObject terrainObject in redoObjects)
+        SceneObject[] redoObjects = redoStack.Pop();
+        foreach (SceneObject sceneObject in redoObjects)
         {
-            terrainObject.OnCreation();
-            terrainObject.OnSelection();
+            sceneObject.OnCreation();
+            sceneObject.OnSelection();
         }
         undoLinkedList.AddLast(redoObjects);
     }
@@ -101,9 +101,9 @@ public class PasteObjectCommand : BaseObjectCommands
     {
         while (redoStack.Count > 0)
         {
-            foreach (TerrainObject terrainObject in redoStack.Pop())
+            foreach (SceneObject sceneObject in redoStack.Pop())
             {
-                Destroy(terrainObject.gameObject);
+                Destroy(sceneObject.gameObject);
             }
         }
 

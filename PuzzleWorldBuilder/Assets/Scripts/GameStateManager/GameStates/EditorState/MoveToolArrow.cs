@@ -88,10 +88,10 @@ public class MoveToolArrow : AbstractGameEditor
         Vector3 fromCamToMouseDirection = mousePosition - mainCamera.transform.position;
         offset = fromCamToMouseDirection.normalized * mouseDepth - fromCamToToolDirection.normalized * forwardDepth;
 
-        foreach (TerrainObject terrainObject in InputCommands.selectedTerrainObjects)
+        foreach (SceneObject sceneObject in InputCommands.selectedObjects)
         {
             // for each selected object we define a starting position
-            terrainObject.myStartPos = terrainObject.transform.position;
+            sceneObject.myStartPos = sceneObject.transform.position;
         }
     }
 
@@ -135,12 +135,11 @@ public class MoveToolArrow : AbstractGameEditor
             }
             else resultMove = transform.forward * arrowForwardLength;
         }
-        foreach (TerrainObject terrainObject in InputCommands.selectedTerrainObjects)
+        foreach (SceneObject sceneObject in InputCommands.selectedObjects)
         {
             // Then we aply this result move to every selected object
-            terrainObject.transform.position = terrainObject.myStartPos + resultMove;
+            sceneObject.MoveTo(resultMove);
         }
-
         float newArrowsDepth = arrowsDepth / Mathf.Cos(mouseAngle * Mathf.Deg2Rad);
         arrows.position = mainCamera.transform.position + (toolCentre.position - mainCamera.transform.position).normalized * newArrowsDepth;
     }

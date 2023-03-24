@@ -10,72 +10,72 @@ public class OverrideSelectObjectCommand : BaseObjectCommands
     /// So it's a command activates when other objects in the scene are already selected, and you override this selection.
     /// </summary>
 
-    List<TerrainObject> currentlySelected = new List<TerrainObject>();
-    List<TerrainObject> nextSelected = new List<TerrainObject>();
+    List<SceneObject> currentlySelected = new List<SceneObject>();
+    List<SceneObject> nextSelected = new List<SceneObject>();
 
-    LinkedList<TerrainObject[]> curUndoLinkedList;
-    LinkedList<TerrainObject[]> nextUndoLinkedList;
+    LinkedList<SceneObject[]> curUndoLinkedList;
+    LinkedList<SceneObject[]> nextUndoLinkedList;
 
-    Stack<TerrainObject[]> nextRedoStack;
-    Stack<TerrainObject[]> currentRedoStack;
+    Stack<SceneObject[]> nextRedoStack;
+    Stack<SceneObject[]> currentRedoStack;
 
     protected override void OnEnable()
     {
         base.OnEnable();
-        curUndoLinkedList = new LinkedList<TerrainObject[]>();
-        nextUndoLinkedList = new LinkedList<TerrainObject[]>();
+        curUndoLinkedList = new LinkedList<SceneObject[]>();
+        nextUndoLinkedList = new LinkedList<SceneObject[]>();
 
-        currentRedoStack = new Stack<TerrainObject[]>();
-        nextRedoStack = new Stack<TerrainObject[]>();
+        currentRedoStack = new Stack<SceneObject[]>();
+        nextRedoStack = new Stack<SceneObject[]>();
     }
 
     public override void Execute()
     {
-        foreach (TerrainObject terrainObject in currentlySelected)
+        foreach (SceneObject sceneObject in currentlySelected)
         {
-            terrainObject.OnDeselection();
+            sceneObject.OnDeselection();
         }
         curUndoLinkedList.AddLast(currentlySelected.ToArray());
 
-        foreach (TerrainObject terrainObject in nextSelected)
+        foreach (SceneObject sceneObject in nextSelected)
         {
-            terrainObject.OnSelection();
+            sceneObject.OnSelection();
         }
         nextUndoLinkedList.AddLast(nextSelected.ToArray());
     }
 
     public override void Undo()
     {
-        TerrainObject[] nextSelected = nextUndoLinkedList.Last.Value;
+        SceneObject[] nextSelected = nextUndoLinkedList.Last.Value;
         nextUndoLinkedList.RemoveLast();
-        foreach (TerrainObject terrainObject in nextSelected)
+        foreach (SceneObject sceneObject in nextSelected)
         {
-            terrainObject.OnDeselection();
+            sceneObject.OnDeselection();
         }
         nextRedoStack.Push(nextSelected);
 
-        TerrainObject[] currentlySelected = curUndoLinkedList.Last.Value;
+        SceneObject[] currentlySelected = curUndoLinkedList.Last.Value;
         curUndoLinkedList.RemoveLast();
-        foreach (TerrainObject terrainObject in currentlySelected)
+        foreach (SceneObject sceneObject in currentlySelected)
         {
-            terrainObject.OnSelection();
+            sceneObject.OnSelection();
         }
         currentRedoStack.Push(currentlySelected);
     }
 
     public override void Redo()
     {
-        TerrainObject[] currentlySelected = currentRedoStack.Pop();
-        foreach (TerrainObject terrainObject in currentlySelected)
+        SceneObject[] currentlySelected = currentRedoStack.Pop();
+        foreach (SceneObject sceneObject in currentlySelected)
         {
-            terrainObject.OnDeselection();
+            sceneObject.OnDeselection();
         }
         curUndoLinkedList.AddLast(currentlySelected);
 
-        TerrainObject[] nextSelected = nextRedoStack.Pop();
-        foreach (TerrainObject terrainObject in nextSelected)
+        SceneObject[] nextSelected = nextRedoStack.Pop();
+        foreach (SceneObject sceneObject in nextSelected)
         {
-            terrainObject.OnSelection();
+            sceneObject.OnSelection();
         }
         nextUndoLinkedList.AddLast(nextSelected);
     }
@@ -92,7 +92,7 @@ public class OverrideSelectObjectCommand : BaseObjectCommands
         nextRedoStack.Clear();
     }
 
-    public void InitializeSelected(List<TerrainObject> currentlySelected, List<TerrainObject> nextSelected)
+    public void InitializeSelected(List<SceneObject> currentlySelected, List<SceneObject> nextSelected)
     {
         this.currentlySelected.Clear();
         this.currentlySelected.AddRange(currentlySelected);

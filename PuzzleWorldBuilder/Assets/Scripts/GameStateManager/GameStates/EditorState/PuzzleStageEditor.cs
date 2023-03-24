@@ -24,6 +24,10 @@ public class PuzzleStageEditor : AbstractGameEditor
         {
             puzzleGrid.IncreaseGrid(1, 1);
         }
+        else if (Input.GetKeyUp(KeyCode.D))
+        {
+            puzzleGrid.IncreaseGrid(-1, -1);
+        }
 
         RaycastHit hit;
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);

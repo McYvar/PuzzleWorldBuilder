@@ -5,6 +5,7 @@ using UnityEngine;
 public class TerrainObject : SceneObject
 {
     public static List<TerrainObject> terrainObject = new List<TerrainObject>();
+
     public override void OnCreation()
     {
         meshRenderer.material.SetInt("_UseShader", 0);
@@ -22,14 +23,19 @@ public class TerrainObject : SceneObject
 
     public override void OnSelection()
     {
+        base.OnSelection();
         // outline material has to be the first assigned material to objects, maybe better solution for this later
         meshRenderer.material.SetInt("_UseShader", 1);
-        InputCommands.selectedTerrainObjects.Add(this);
     }
 
     public override void OnDeselection()
     {
+        base.OnDeselection();
         meshRenderer.material.SetInt("_UseShader", 0);
-        InputCommands.selectedTerrainObjects.Remove(this);
+    }
+
+    public override void MoveTo(Vector3 newPos)
+    {
+        transform.position = myStartPos + newPos;
     }
 }
