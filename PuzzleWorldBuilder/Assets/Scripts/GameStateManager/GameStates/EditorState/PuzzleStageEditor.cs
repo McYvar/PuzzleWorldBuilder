@@ -11,7 +11,7 @@ public class PuzzleStageEditor : AbstractGameEditor
 
     public override void EditorAwake()
     {
-        puzzleGrid = new PuzzleGrid(30, 30, Vector3.zero, noneTileMaterials);
+        puzzleGrid = new PuzzleGrid(5, 5, Vector3.zero, noneTileMaterials);
     }
 
     public override void EditorStart()
