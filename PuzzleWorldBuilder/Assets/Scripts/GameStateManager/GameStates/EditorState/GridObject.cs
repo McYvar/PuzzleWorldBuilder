@@ -6,8 +6,8 @@ public class GridObject : SceneObject
     PuzzleGrid sharedGrid;
     public static List<GridObject> gridObjects = new List<GridObject>();
 
-    Color unselectedColor = Color.red;
-    Color selectedColor = Color.yellow;
+    Material unselectedMaterial = null;
+    Material selectedMaterial = null;
 
     protected override void OnEnable()
     {
@@ -19,14 +19,14 @@ public class GridObject : SceneObject
     {
         base.OnSelection();
         Debug.Log("Selected grid: " + name);
-        meshRenderer.material.color = selectedColor;
+        sharedGrid.OnSelectTile(transform.position);
     }
 
     public override void OnDeselection()
     {
         base.OnDeselection();
         Debug.Log("Deselected grid: " + name);
-        meshRenderer.material.color = unselectedColor;
+        sharedGrid.OnDeselectTile(transform.position);
     }
 
     public override void OnDeletion()
@@ -35,12 +35,16 @@ public class GridObject : SceneObject
 
     public void Initialize(PuzzleGrid grid)
     {
+        selectedMaterial = meshRenderer.material;
         sharedGrid = grid;
+    }
+
+    public override void OnStartMove()
+    {
     }
 
     public override void OnFinishMove()
     {
-        meshRenderer.material.color = selectedColor;
     }
 
     public override void MoveTo(Vector3 newPos)

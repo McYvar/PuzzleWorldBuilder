@@ -1,4 +1,6 @@
+using System.Globalization;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 public class PuzzleGrid
 {
@@ -93,29 +95,29 @@ public class PuzzleGrid
         }
     }
 
+    public void OnSelectTile(Vector3 tileChords)
+    {
+        Vector3 offsetChords;
+        FindXZ(tileChords, out offsetChords);
+        tileInformation[(int)offsetChords.x, (int)offsetChords.z].OnSelectTile();
+        tileInformation[(int)offsetChords.x, (int)offsetChords.z].SetTileType(TileType.PLACEABLE_TILE);
+        UpdateNeighbours(tileChords, offsetChords);
+    }
+
+    public void OnDeselectTile(Vector3 tileChords)
+    {
+        Vector3 offsetChords;
+        FindXZ(tileChords, out offsetChords);
+        tileInformation[(int)offsetChords.x, (int)offsetChords.z].OnDeslectTile();
+    }
+
     public void MoveTile(Vector3 tileChords, Vector3 newPos)
     {
         Vector3 offsetChords;
         FindXZ(tileChords, out offsetChords);
-
-        // if the chord gets outside of the grid, the grid grows
         Vector3 relativePos = offsetChords + newPos;
-        if (relativePos.x < 0) IncreaseGrid(-1, 0);
-        if (relativePos.x >= width - 1) IncreaseGrid(1, 0);
-        if (relativePos.z < 0) IncreaseGrid(0, -1);
-        if (relativePos.z >= length - 1) IncreaseGrid(0, 1);
-
-        tileInformation[(int)offsetChords.x, (int)offsetChords.z].SetTileType(TileType.PLACEABLE_TILE);
-        tileInformation[(int)offsetChords.x, (int)offsetChords.z].AddHeight(relativePos.y);
-
+        tileInformation[(int)offsetChords.x, (int)offsetChords.z].SetHeight(relativePos.y);
         UpdateNeighbours(tileChords, offsetChords);
-
-        if (newPos.x != 0 || newPos.z != 0)
-        {
-            //tileInformation[(int)relativePos.x, (int)relativePos.z] = new TileInformation(tileInformation[(int)tileChords.x, (int)tileChords.z], relativePos);
-
-            //tileInformation[(int)tileChords.x, (int)tileChords.z].SetType(TileType.NONE_TILE);
-        }
     }
 
     void UpdateNeighbours(Vector3 tileChords, Vector3 offsetChords)
@@ -143,38 +145,23 @@ public class PuzzleGrid
         float southDifference = HeightDifference(current, south);
         float westDifference = HeightDifference(current, west);
 
-        // from each opposite direction we set the neighbours new height
+        // from each opposite direction we set the neighbours new height inverse
         north.SetSouth(-northDifference);
         east.SetWest(-eastDifference);
         south.SetNorth(-southDifference);
         west.SetEast(-westDifference);
 
-        // if the neighbours type are of NONE, then set it to an edge tile. Edge tile will later become walls
-        if (north.GetTileType() == TileType.NONE_TILE)
-        {
-            north.SetTileType(TileType.EDGE_TILE);
-            current.SetNorth(0);
-        }
+        // if the neighbours type are not placeable, then set it to an edge tile. Edge tile will later become walls
+        if (north.GetTileType() != TileType.PLACEABLE_TILE) north.SetTileType(TileType.EDGE_TILE);
+        if (east.GetTileType() != TileType.PLACEABLE_TILE) east.SetTileType(TileType.EDGE_TILE);
+        if (south.GetTileType() != TileType.PLACEABLE_TILE) south.SetTileType(TileType.EDGE_TILE);
+        if (west.GetTileType() != TileType.PLACEABLE_TILE) west.SetTileType(TileType.EDGE_TILE);
+
         // and from our current tile the height have to be updated too, but not opposite direction
-        else current.SetNorth(northDifference);
-        if (east.GetTileType() == TileType.NONE_TILE)
-        {
-            east.SetTileType(TileType.EDGE_TILE);
-            current.SetEast(0);
-        }
-        else current.SetEast(eastDifference);
-        if (south.GetTileType() == TileType.NONE_TILE)
-        {
-            south.SetTileType(TileType.EDGE_TILE);
-            current.SetSouth(0);
-        }
-        else current.SetSouth(southDifference);
-        if (west.GetTileType() == TileType.NONE_TILE)
-        {
-            west.SetTileType(TileType.EDGE_TILE);
-            current.SetWest(0);
-        }
-        else current.SetWest(westDifference);
+        current.SetNorth(northDifference);
+        current.SetEast(eastDifference);
+        current.SetSouth(southDifference);
+        current.SetWest(westDifference);
 
         // and then we update everything
         north.UpdateMesh();
@@ -186,7 +173,7 @@ public class PuzzleGrid
 
     float HeightDifference(TileInformation current, TileInformation neighbour)
     {
-        return current.GetHeight() - neighbour.GetHeight(); // if n > c --> x > 0, if n < c x < 0
+        return neighbour.GetHeight() - current.GetHeight();
     }
 }
 
@@ -209,6 +196,8 @@ public class TileInformation
     float south;
     float west;
 
+    bool isSelected;
+
     public TileInformation(TileType myType, Vector3 myPosition, params Material[] materials) // materials 0 == none, 1 == edge, 2 == placeable
     {
         north = 0;
@@ -225,25 +214,11 @@ public class TileInformation
         myMeshRenderer = myGameObject.GetComponent<MeshRenderer>();
         myCollider = myGameObject.GetComponent<MeshCollider>();
 
-        FlatTileWithEdgeMesh(materials[0]);
-    }
+        myMesh = new Mesh();
+        myCollider.sharedMesh = myMesh;
+        myGameObject.GetComponent<MeshFilter>().mesh = myMesh;
 
-    public TileInformation(TileInformation copyInformation, Vector3 myPosition)
-    {
-        north = 0;
-        east = 0;
-        south = 0;
-        west = 0;
-        myType = copyInformation.myType;
-        myHeight = copyInformation.myHeight;
-        myMaterials = copyInformation.myMaterials;
-        myGameObject = new GameObject("Tile(" + myPosition.x + ", " + myPosition.z + ")", typeof(MeshRenderer), typeof(MeshFilter), typeof(MeshCollider), typeof(GridObject));
-        myGameObject.transform.position = myPosition;
-
-        myMeshRenderer = myGameObject.GetComponent<MeshRenderer>();
-        myCollider = myGameObject.GetComponent<MeshCollider>();
-
-        UpdateMesh();
+        CubeWithoutBottomSmaller(materials[0], 0, 0, 0, 0);
     }
 
 
@@ -272,9 +247,9 @@ public class TileInformation
         triangles[4] = 2;
         triangles[5] = 3;
 
-        SetNewMesh(vertices, uv, triangles, material);
+        AssignMesh(vertices, uv, triangles, material);
     }
-    void FlatFullTileMesh(Material material)
+    void FlatFullTileMeshOnZero(Material material)
     {
         Vector3[] vertices = new Vector3[4];
         Vector2[] uv = new Vector2[4];
@@ -298,10 +273,140 @@ public class TileInformation
         triangles[4] = 2;
         triangles[5] = 3;
 
-        SetNewMesh(vertices, uv, triangles, material);
+        AssignMesh(vertices, uv, triangles, material);
     }
 
-    void CubeWithoutBottom(Material material)
+    void FlatFullTileMesh(Material material)
+    {
+        Vector3[] vertices = new Vector3[4];
+        Vector2[] uv = new Vector2[4];
+        int[] triangles = new int[6];
+
+        vertices[0] = new Vector3(0f, 0f, 0f) + tileOffset;
+        vertices[1] = new Vector3(0f, 0f, 1f) + tileOffset;
+        vertices[2] = new Vector3(1f, 0f, 1f) + tileOffset;
+        vertices[3] = new Vector3(1f, 0f, 0f) + tileOffset;
+
+        uv[0] = new Vector2(0, 0);
+        uv[1] = new Vector2(0, 1);
+        uv[2] = new Vector2(1, 1);
+        uv[3] = new Vector2(1, 0);
+
+        triangles[0] = 0;
+        triangles[1] = 1;
+        triangles[2] = 3;
+
+        triangles[3] = 1;
+        triangles[4] = 2;
+        triangles[5] = 3;
+
+        AssignMesh(vertices, uv, triangles, material);
+    }
+
+    void CubeWithoutBottomSmaller(Material material, float north, float south, float east, float west)
+    {
+        Vector3[] vertices = new Vector3[20];
+        Vector2[] uv = new Vector2[20];
+        int[] triangles = new int[30];
+
+        // NORTH
+        vertices[0] = new Vector3(0.95f, 0f, 0.95f) + Vector3.down * north + tileOffset;           //[1, 0, 1]
+        vertices[1] = new Vector3(0.05f, 0f, 0.95f) + Vector3.down * north + tileOffset;           //[0, 0, 1]
+        vertices[2] = new Vector3(0.95f, 1f * north, 0.95f) + Vector3.down * north + tileOffset;  //[1, 1, 1]
+        vertices[3] = new Vector3(0.05f, 1f * north, 0.95f) + Vector3.down * north + tileOffset;  //[0, 1, 1]
+        uv[0] = new Vector2(0, 0);
+        uv[1] = new Vector2(1, 0);
+        uv[2] = new Vector2(0, 1);
+        uv[3] = new Vector2(1, 1);
+
+        triangles[0] = 0;
+        triangles[1] = 2;
+        triangles[2] = 3;
+
+        triangles[3] = 0;
+        triangles[4] = 3;
+        triangles[5] = 1;
+
+
+        // SOUTH
+        vertices[4] = new Vector3(0.95f, 1f * south, 0.05f) + Vector3.down * south + tileOffset;  //[1, 1, 0]
+        vertices[5] = new Vector3(0.05f, 1f * south, 0.05f) + Vector3.down * south + tileOffset;  //[0, 1, 0]
+        vertices[6] = new Vector3(0.95f, 0f, 0.05f) + Vector3.down * south + tileOffset;           //[1, 0, 0]
+        vertices[7] = new Vector3(0.05f, 0f, 0.05f) + Vector3.down * south + tileOffset;           //[0, 0, 0]
+        uv[4] = new Vector2(0, 1);
+        uv[5] = new Vector2(1, 1);
+        uv[6] = new Vector2(0, 1);
+        uv[7] = new Vector2(1, 1);
+
+        triangles[6] = 10;
+        triangles[7] = 6;
+        triangles[8] = 7;
+
+        triangles[9] = 10;
+        triangles[10] = 7;
+        triangles[11] = 11;
+
+
+        // TOP
+        vertices[8] = new Vector3(0.95f, 1f * myHeight, 0.95f) + Vector3.down * myHeight + tileOffset;  //[1, 1, 1]
+        vertices[9] = new Vector3(0.05f, 1f * myHeight, 0.95f) + Vector3.down * myHeight + tileOffset;  //[0, 1, 1]
+        vertices[10] = new Vector3(0.95f, 1f * myHeight, 0.05f) + Vector3.down * myHeight + tileOffset; //[1, 1, 0]
+        vertices[11] = new Vector3(0.05f, 1f * myHeight, 0.05f) + Vector3.down * myHeight + tileOffset; //[0, 1, 0]
+        uv[8] = new Vector2(0, 0);
+        uv[9] = new Vector2(1, 0);
+        uv[10] = new Vector2(0, 0);
+        uv[11] = new Vector2(1, 0);
+
+        triangles[12] = 8;
+        triangles[13] = 4;
+        triangles[14] = 5;
+
+        triangles[15] = 8;
+        triangles[16] = 5;
+        triangles[17] = 9;
+
+
+        // WEST
+        vertices[12] = new Vector3(0.05f, 0f, 0.95f) + Vector3.down * west + tileOffset;          //[0, 0, 1]
+        vertices[13] = new Vector3(0.05f, 1f * west, 0.95f) + Vector3.down * west + tileOffset; //[0, 1, 1]
+        vertices[14] = new Vector3(0.05f, 1f * west, 0.05f) + Vector3.down * west + tileOffset; //[0, 1, 0]
+        vertices[15] = new Vector3(0.05f, 0f, 0.05f) + Vector3.down * west + tileOffset;          //[0, 0, 0]
+        uv[12] = new Vector2(0, 0);
+        uv[13] = new Vector2(0, 1);
+        uv[14] = new Vector2(1, 1);
+        uv[15] = new Vector2(1, 0);
+
+        triangles[18] = 12;
+        triangles[19] = 13;
+        triangles[20] = 14;
+
+        triangles[21] = 12;
+        triangles[22] = 14;
+        triangles[23] = 15;
+
+
+        // EAST
+        vertices[16] = new Vector3(0.95f, 0f, 0.05f) + Vector3.down * east + tileOffset;          //[1, 0, 0]
+        vertices[17] = new Vector3(0.95f, 1f * east, 0.05f) + Vector3.down * east + tileOffset; //[1, 1, 0]
+        vertices[18] = new Vector3(0.95f, 1f * east, 0.95f) + Vector3.down * east + tileOffset; //[1, 1, 1]
+        vertices[19] = new Vector3(0.95f, 0f, 0.95f) + Vector3.down * east + tileOffset;          //[1, 0, 1]
+        uv[16] = new Vector2(0, 0);
+        uv[17] = new Vector2(0, 1);
+        uv[18] = new Vector2(1, 1);
+        uv[19] = new Vector2(1, 0);
+
+        triangles[24] = 16;
+        triangles[25] = 17;
+        triangles[26] = 18;
+
+        triangles[27] = 16;
+        triangles[28] = 18;
+        triangles[29] = 19;
+
+        AssignMesh(vertices, uv, triangles, material);
+    }
+
+    void CubeWithoutBottom(Material material, float north, float south, float east, float west)
     {
         Vector3[] vertices = new Vector3[20];
         Vector2[] uv = new Vector2[20];
@@ -385,8 +490,8 @@ public class TileInformation
 
         // EAST
         vertices[16] = new Vector3(1f, 0f, 0f) + Vector3.down * east + tileOffset;          //[1, 0, 0]
-        vertices[17] = new Vector3(1f, 1f * myHeight, 0f) + Vector3.down * myHeight + tileOffset; //[1, 1, 0]
-        vertices[18] = new Vector3(1f, 1f * myHeight, 1f) + Vector3.down * myHeight + tileOffset; //[1, 1, 1]
+        vertices[17] = new Vector3(1f, 1f * east, 0f) + Vector3.down * east + tileOffset; //[1, 1, 0]
+        vertices[18] = new Vector3(1f, 1f * east, 1f) + Vector3.down * east + tileOffset; //[1, 1, 1]
         vertices[19] = new Vector3(1f, 0f, 1f) + Vector3.down * east + tileOffset;          //[1, 0, 1]
         uv[16] = new Vector2(0, 0);
         uv[17] = new Vector2(0, 1);
@@ -401,11 +506,11 @@ public class TileInformation
         triangles[28] = 18;
         triangles[29] = 19;
 
-        SetNewMesh(vertices, uv, triangles, material);
+        AssignMesh(vertices, uv, triangles, material);
     }
 
     // single walls
-    void SouthMesh(Material material)
+    void SouthMesh(Material material, float south)
     {
         Vector3[] vertices = new Vector3[8];
         Vector2[] uv = new Vector2[8];
@@ -448,9 +553,9 @@ public class TileInformation
         triangles[10] = 7;
         triangles[11] = 6;
 
-        SetNewMesh(vertices, uv, triangles, material);
+        AssignMesh(vertices, uv, triangles, material);
     }
-    void NorthMesh(Material material)
+    void NorthMesh(Material material, float north)
     {
         Vector3[] vertices = new Vector3[8];
         Vector2[] uv = new Vector2[8];
@@ -493,9 +598,9 @@ public class TileInformation
         triangles[10] = 7;
         triangles[11] = 6;
 
-        SetNewMesh(vertices, uv, triangles, material);
+        AssignMesh(vertices, uv, triangles, material);
     }
-    void WestMesh(Material material)
+    void WestMesh(Material material, float west)
     {
         Vector3[] vertices = new Vector3[8];
         Vector2[] uv = new Vector2[8];
@@ -538,9 +643,9 @@ public class TileInformation
         triangles[10] = 7;
         triangles[11] = 6;
 
-        SetNewMesh(vertices, uv, triangles, material);
+        AssignMesh(vertices, uv, triangles, material);
     }
-    void EastMesh(Material material)
+    void EastMesh(Material material, float east)
     {
         Vector3[] vertices = new Vector3[8];
         Vector2[] uv = new Vector2[8];
@@ -583,11 +688,11 @@ public class TileInformation
         triangles[10] = 7;
         triangles[11] = 6;
 
-        SetNewMesh(vertices, uv, triangles, material);
+        AssignMesh(vertices, uv, triangles, material);
     }
 
     // double parallel walls
-    void ParallelNorthSouth(Material material)
+    void ParallelNorthSouth(Material material, float north, float south)
     {
         Vector3[] vertices = new Vector3[12];
         Vector2[] uv = new Vector2[12];
@@ -647,9 +752,9 @@ public class TileInformation
         triangles[16] = 11;
         triangles[17] = 10;
 
-        SetNewMesh(vertices, uv, triangles, material);
+        AssignMesh(vertices, uv, triangles, material);
     }
-    void ParallelEastWest(Material material)
+    void ParallelEastWest(Material material, float east, float west)
     {
         Vector3[] vertices = new Vector3[12];
         Vector2[] uv = new Vector2[12];
@@ -709,11 +814,11 @@ public class TileInformation
         triangles[16] = 11;
         triangles[17] = 10;
 
-        SetNewMesh(vertices, uv, triangles, material);
+        AssignMesh(vertices, uv, triangles, material);
     }
 
     // corner walls
-    void CornerSouthWestMesh(Material material)
+    void CornerSouthWestMesh(Material material, float south, float west)
     {
         Vector3[] vertices = new Vector3[12];
         Vector2[] uv = new Vector2[12];
@@ -774,9 +879,9 @@ public class TileInformation
         triangles[16] = 11;
         triangles[17] = 10;
 
-        SetNewMesh(vertices, uv, triangles, material);
+        AssignMesh(vertices, uv, triangles, material);
     }
-    void CornerSouthEastMesh(Material material)
+    void CornerSouthEastMesh(Material material, float south, float east)
     {
         Vector3[] vertices = new Vector3[12];
         Vector2[] uv = new Vector2[12];
@@ -837,9 +942,9 @@ public class TileInformation
         triangles[16] = 11;
         triangles[17] = 10;
 
-        SetNewMesh(vertices, uv, triangles, material);
+        AssignMesh(vertices, uv, triangles, material);
     }
-    void CornerNorthWestMesh(Material material)
+    void CornerNorthWestMesh(Material material, float north, float west)
     {
         Vector3[] vertices = new Vector3[12];
         Vector2[] uv = new Vector2[12];
@@ -900,9 +1005,9 @@ public class TileInformation
         triangles[16] = 11;
         triangles[17] = 10;
 
-        SetNewMesh(vertices, uv, triangles, material);
+        AssignMesh(vertices, uv, triangles, material);
     }
-    void CornerNorthEastMesh(Material material)
+    void CornerNorthEastMesh(Material material, float north, float east)
     {
         Vector3[] vertices = new Vector3[12];
         Vector2[] uv = new Vector2[12];
@@ -963,11 +1068,11 @@ public class TileInformation
         triangles[16] = 11;
         triangles[17] = 10;
 
-        SetNewMesh(vertices, uv, triangles, material);
+        AssignMesh(vertices, uv, triangles, material);
     }
 
     // tripple walls
-    void TrippleSouthEastWestMesh(Material material)
+    void TrippleSouthEastWestMesh(Material material, float south, float east, float west)
     {
         Vector3[] vertices = new Vector3[16];
         Vector2[] uv = new Vector2[16];
@@ -1045,9 +1150,9 @@ public class TileInformation
         triangles[22] = 15;
         triangles[23] = 14;
 
-        SetNewMesh(vertices, uv, triangles, material);
+        AssignMesh(vertices, uv, triangles, material);
     }
-    void TrippleNorthSouthWestMesh(Material material)
+    void TrippleNorthSouthWestMesh(Material material, float north, float south, float west)
     {
         Vector3[] vertices = new Vector3[16];
         Vector2[] uv = new Vector2[16];
@@ -1125,9 +1230,9 @@ public class TileInformation
         triangles[22] = 15;
         triangles[23] = 14;
 
-        SetNewMesh(vertices, uv, triangles, material);
+        AssignMesh(vertices, uv, triangles, material);
     }
-    void TrippleNorthSouthEastMesh(Material material)
+    void TrippleNorthSouthEastMesh(Material material, float north, float south, float east)
     {
         Vector3[] vertices = new Vector3[16];
         Vector2[] uv = new Vector2[16];
@@ -1205,9 +1310,9 @@ public class TileInformation
         triangles[22] = 15;
         triangles[23] = 14;
 
-        SetNewMesh(vertices, uv, triangles, material);
+        AssignMesh(vertices, uv, triangles, material);
     }
-    void TrippleNorthEastWestMesh(Material material)
+    void TrippleNorthEastWestMesh(Material material, float north, float east, float west)
     {
         Vector3[] vertices = new Vector3[16];
         Vector2[] uv = new Vector2[16];
@@ -1286,23 +1391,20 @@ public class TileInformation
         triangles[22] = 15;
         triangles[23] = 14;
 
-        SetNewMesh(vertices, uv, triangles, material);
+        AssignMesh(vertices, uv, triangles, material);
     }
     #endregion
 
-    void SetNewMesh(Vector3[] vertices, Vector2[] uv, int[] triangles, Material material)
+    void AssignMesh(Vector3[] vertices, Vector2[] uv, int[] triangles, Material material)
     {
-        myMesh = new Mesh();
-
         myMesh.vertices = vertices;
         myMesh.uv = uv;
         myMesh.triangles = triangles;
+
         myMesh.RecalculateNormals();
 
-        myCollider.sharedMesh = myMesh;
-        myGameObject.GetComponent<MeshFilter>().mesh = myMesh;
-
         myMeshRenderer.material = material;
+        myCollider.sharedMesh = myMesh;
     }
 
     public void SetTileType(TileType newType)
@@ -1334,7 +1436,7 @@ public class TileInformation
         return myType;
     }
 
-    public void AddHeight(float newHeight)
+    public void SetHeight(float newHeight)
     {
         myHeight = newHeight;
         myGameObject.transform.position = new Vector3(myGameObject.transform.position.x, myHeight + tileOffset.y, myGameObject.transform.position.z);
@@ -1346,88 +1448,125 @@ public class TileInformation
         switch (myType)
         {
             case TileType.NONE_TILE:
-                // set none verts and mats
-                FlatTileWithEdgeMesh(myMaterials[0]);
+                CubeWithoutBottomSmaller(myMaterials[0], 0, 0, 0, 0);
                 break;
 
             case TileType.EDGE_TILE:
-                // set edge verts and mats
-                FlatTileWithEdgeMesh(myMaterials[1]);
-                // later walls on each side
+                SetMesh2(myMaterials[1], north, east, south, west);
                 break;
 
             case TileType.PLACEABLE_TILE:
-                // all neighbours on same height
-                #region a so far failed experiment
-                /*
-                if (myHeight == north && myHeight == east && myHeight == south && myHeight == west)
-                {
-                    FlatFullTileMesh(myMaterials[2]);
-                }
-                else if (myHeight > north && myHeight == east && myHeight == south && myHeight == west)
-                {
-                    NorthMesh(myMaterials[2]);
-                }
-                else if (myHeight == north && myHeight > east && myHeight == south && myHeight == west)
-                {
-                    EastMesh(myMaterials[2]);
-                }
-                else if (myHeight == north && myHeight == east && myHeight > south && myHeight == west)
-                {
-                    SouthMesh(myMaterials[2]);
-                }
-                else if (myHeight == north && myHeight == east && myHeight == south && myHeight > west)
-                {
-                    WestMesh(myMaterials[2]);
-                }
-                else if (myHeight > north && myHeight > east && myHeight == south && myHeight == west)
-                {
-                    CornerNorthEastMesh(myMaterials[2]);
-                }
-                else if (myHeight > north && myHeight == east && myHeight > south && myHeight == west)
-                {
-                    ParallelNorthSouth(myMaterials[2]);
-                }
-                else if (myHeight > north && myHeight == east && myHeight == south && myHeight > west)
-                {
-                    CornerNorthWestMesh(myMaterials[2]);
-                }
-                else if (myHeight == north && myHeight > east && myHeight > south && myHeight == west)
-                {
-                    CornerSouthEastMesh(myMaterials[2]);
-                }
-                else if (myHeight == north && myHeight == east && myHeight > south && myHeight > west)
-                {
-                    CornerSouthWestMesh(myMaterials[2]);
-                }
-                else if (myHeight == north && myHeight > east && myHeight == south && myHeight > west)
-                {
-                    ParallelEastWest(myMaterials[2]);
-                }
-                else if (myHeight > north && myHeight > east && myHeight > south && myHeight == west)
-                {
-                    TrippleNorthSouthEastMesh(myMaterials[2]);
-                }
-                else if (myHeight > north && myHeight == east && myHeight > south && myHeight > west)
-                {
-                    TrippleNorthSouthWestMesh(myMaterials[2]);
-                }
-                else if (myHeight > north && myHeight > east && myHeight == south && myHeight > west)
-                {
-                    TrippleNorthEastWestMesh(myMaterials[2]);
-                }
-                else if (myHeight > north && myHeight > east && myHeight == south && myHeight > west)
-                {
-                    TrippleNorthEastWestMesh(myMaterials[2]);
-                }
-                else if (myHeight > north && myHeight > east && myHeight > south && myHeight > west)
-                {
-                    CubeWithoutBottom(myMaterials[2]);
-                }
-                */
-                #endregion
-                CubeWithoutBottom(myMaterials[2]);
+                if (isSelected) SetMesh2(myMaterials[3], north, east, south, west);
+                else SetMesh2(myMaterials[2], north, east, south, west);
                 break;
+        }
+    }
+
+    void SetMesh2(Material material, float north, float east, float south, float west)
+    {
+        float newNorth = north;
+        if (newNorth > 0) newNorth = 0;
+        float newEast = east;
+        if (newEast > 0) newEast = 0;
+        float newSouth = south;
+        if (newSouth > 0) newSouth = 0;
+        float newWest = west;
+        if (newWest > 0) newWest = 0;
+
+        CubeWithoutBottom(material, -newNorth, -newSouth, -newEast, -newWest);
+    }
+
+    public void OnSelectTile()
+    {
+        isSelected = true;
+    }
+
+    public void OnDeslectTile()
+    {
+        isSelected = false;
+        switch (myType)
+        {
+            case TileType.NONE_TILE:
+                myMeshRenderer.material = myMaterials[0];
+                break;
+
+            case TileType.EDGE_TILE:
+                myMeshRenderer.material = myMaterials[1];
+                break;
+
+            case TileType.PLACEABLE_TILE:
+                myMeshRenderer.material = myMaterials[2];
+                break;
+        }
+    }
+    
+    // This seemed to never work out, even tough everything is checked 10x, when editing alot of meshes at the same time things just broke...
+    void SetMesh(Material material)
+    {
+        Debug.Log(north + " : " + east + " : " + south + " : " + west);
+        if (myHeight == north && myHeight == east && myHeight == south && myHeight == west)
+        {
+            FlatFullTileMeshOnZero(material);
+        }
+        else if (myHeight > north && myHeight == east && myHeight == south && myHeight == west)
+        {
+            NorthMesh(material, - north);
+        }
+        else if (myHeight == north && myHeight > east && myHeight == south && myHeight == west)
+        {
+            EastMesh(material, -east);
+        }
+        else if (myHeight == north && myHeight == east && myHeight > south && myHeight == west)
+        {
+            SouthMesh(material, -south);
+        }
+        else if (myHeight == north && myHeight == east && myHeight == south && myHeight > west)
+        {
+            WestMesh(material, -west);
+        }
+        else if (myHeight > north && myHeight > east && myHeight == south && myHeight == west)
+        {
+            CornerNorthEastMesh(material, -north, -east);
+        }
+        else if (myHeight > north && myHeight == east && myHeight > south && myHeight == west)
+        {
+            ParallelNorthSouth(material, -north, -south);
+        }
+        else if (myHeight > north && myHeight == east && myHeight == south && myHeight > west)
+        {
+            CornerNorthWestMesh(material, -north, -west);
+        }
+        else if (myHeight == north && myHeight > east && myHeight > south && myHeight == west)
+        {
+            CornerSouthEastMesh(material, -south, -east);
+        }
+        else if (myHeight == north && myHeight == east && myHeight > south && myHeight > west)
+        {
+            CornerSouthWestMesh(material, -south, -west);
+        }
+        else if (myHeight == north && myHeight > east && myHeight == south && myHeight > west)
+        {
+            ParallelEastWest(material, -east, -west);
+        }
+        else if (myHeight > north && myHeight > east && myHeight > south && myHeight == west)
+        {
+            TrippleNorthSouthEastMesh(material, -north, -south, -east);
+        }
+        else if (myHeight > north && myHeight == east && myHeight > south && myHeight > west)
+        {
+            TrippleNorthSouthWestMesh(material, -north, -south, -west);
+        }
+        else if (myHeight > north && myHeight > east && myHeight == south && myHeight > west)
+        {
+            TrippleNorthEastWestMesh(material, -north, -east, west);
+        }
+        else if (myHeight == north && myHeight > east && myHeight > south && myHeight > west)
+        {
+            TrippleSouthEastWestMesh(material, -south, -east, -west);
+        }
+        else if (myHeight > north && myHeight > east && myHeight > south && myHeight > west)
+        {
+            CubeWithoutBottom(material, -north, -south, -east, -west);
         }
     }
 

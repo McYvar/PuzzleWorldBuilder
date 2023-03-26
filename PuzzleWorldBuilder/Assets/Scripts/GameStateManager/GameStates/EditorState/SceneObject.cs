@@ -39,7 +39,7 @@ public class SceneObject : AbstractGameEditor
     }
 
     public virtual void MoveTo(Vector3 newPos) { }
-
+    public virtual void OnStartMove() { }
     public virtual void OnFinishMove() { }
 
     public override void EditorAwake()

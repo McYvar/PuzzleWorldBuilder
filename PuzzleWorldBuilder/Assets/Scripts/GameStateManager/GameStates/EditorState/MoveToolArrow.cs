@@ -92,6 +92,7 @@ public class MoveToolArrow : AbstractGameEditor
         {
             // for each selected object we define a starting position
             sceneObject.myStartPos = sceneObject.transform.position;
+            sceneObject.OnStartMove();
         }
     }
 
@@ -147,6 +148,10 @@ public class MoveToolArrow : AbstractGameEditor
     public Vector3 MouseUp()
     {
         doEmission = false;
+        foreach (SceneObject sceneObject in InputCommands.selectedObjects)
+        {
+            sceneObject.OnFinishMove();
+        }
         return resultMove;
     }
 }
