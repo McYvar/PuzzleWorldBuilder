@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using Unity.Mathematics;
+using UnityEngine;
 
 public class SceneObject : AbstractGameEditor
 {
@@ -6,6 +7,11 @@ public class SceneObject : AbstractGameEditor
     [HideInInspector] public Vector3 myStartPos;
     protected MeshRenderer meshRenderer;
     protected Collider anyCollider;
+
+    bool doGridSnap;
+    float snapSize = 1;
+
+    protected Vector3 actualMove;
 
     protected override void OnEnable()
     {
@@ -38,9 +44,24 @@ public class SceneObject : AbstractGameEditor
         InputCommands.selectedObjects.Remove(this);
     }
 
-    public virtual void MoveTo(Vector3 newPos) { }
-    public virtual void OnStartMove() { }
-    public virtual void OnFinishMove() { }
+    public virtual void MoveTo(Vector3 newPos) 
+    {
+        if (doGridSnap)
+        {
+            Vector3 offset = new Vector3(newPos.x % 1, newPos.y % 1, newPos.z % 1);
+            actualMove = newPos - offset;
+            actualMove = new Vector3((int)actualMove.x, (int)actualMove.y, (int)actualMove.z);
+        }
+        else actualMove = newPos;
+    }
+    public virtual void OnStartMove(bool gridSnap)
+    {
+        myStartPos = transform.position;
+        doGridSnap = gridSnap;
+    }
+    public virtual void OnFinishMove()
+    {
+    }
 
     public override void EditorAwake()
     {

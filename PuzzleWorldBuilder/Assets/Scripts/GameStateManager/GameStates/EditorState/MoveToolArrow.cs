@@ -14,14 +14,15 @@ public class MoveToolArrow : AbstractGameEditor
 
     Vector3 resultMove;
 
+    bool doRelativeSnap;
+    bool doGridSnap;
+    float snapSize;
+
     [SerializeField] MeshRenderer myMesh;
     [SerializeField] Collider myCollider;
     [Range(0, 30), SerializeField] float minViewAngle;
-    [SerializeField] bool isFreeMove;
+    [SerializeField] bool doFreeMove;
     bool doEmission;
-
-    [SerializeField] bool doPositionSnap;
-    [SerializeField] float snapSize;
 
     protected override void OnEnable()
     {
@@ -61,8 +62,11 @@ public class MoveToolArrow : AbstractGameEditor
         }
     }
 
-    public void MouseDown(float currentArrowDepth, Vector3 currentToolCentre)
+    public void MouseDown(float currentArrowDepth, Vector3 currentToolCentre, bool relativeSnap, bool gridSnap, float snapSize)
     {
+        doGridSnap = gridSnap;
+        this.snapSize = snapSize;
+        doRelativeSnap = relativeSnap;
         doEmission = true;
         arrowsDepth = currentArrowDepth;
         toolCentre.position = currentToolCentre;
@@ -91,8 +95,7 @@ public class MoveToolArrow : AbstractGameEditor
         foreach (SceneObject sceneObject in InputCommands.selectedObjects)
         {
             // for each selected object we define a starting position
-            sceneObject.myStartPos = sceneObject.transform.position;
-            sceneObject.OnStartMove();
+            sceneObject.OnStartMove(gridSnap);
         }
     }
 
@@ -112,10 +115,13 @@ public class MoveToolArrow : AbstractGameEditor
         // now we need to determine the displaced position vector
         displacement = toolCentre.position - startPos;
 
-        if (isFreeMove)
+        if (doFreeMove)
         {
-            // in the case of a free move, we just set the resultMove to the displacement
-            if (doPositionSnap)
+            if (doGridSnap)
+            {
+                resultMove = new Vector3((int)displacement.x, (int)displacement.y, (int)displacement.z);
+            }
+            else if (doRelativeSnap)
             {
                 int currentSnapX = (int)(displacement.x / snapSize);
                 int currentSnapY = (int)(displacement.y / snapSize);
@@ -126,16 +132,18 @@ public class MoveToolArrow : AbstractGameEditor
         }
         else
         {
-            // the displacement then needs to be translated into the forward direction of this arrow for a non-free move
-            // we use the magnitude of the arrow, and translate this into the lenght of the forward direction using the angle between the two
             float arrowForwardLength = displacement.magnitude * Mathf.Cos(Vector3.Angle(displacement, transform.forward) * Mathf.Deg2Rad);
-            if (doPositionSnap)
+            if (doGridSnap)
             {
-                int currentSnap = (int)(arrowForwardLength / snapSize);
-                resultMove = transform.forward * currentSnap * snapSize;
+                resultMove = transform.forward * (int)arrowForwardLength;
+            }
+            else if (doRelativeSnap)
+            {
+                resultMove = transform.forward * ((int)arrowForwardLength / snapSize);
             }
             else resultMove = transform.forward * arrowForwardLength;
         }
+
         foreach (SceneObject sceneObject in InputCommands.selectedObjects)
         {
             // Then we aply this result move to every selected object
@@ -143,6 +151,7 @@ public class MoveToolArrow : AbstractGameEditor
         }
         float newArrowsDepth = arrowsDepth / Mathf.Cos(mouseAngle * Mathf.Deg2Rad);
         arrows.position = mainCamera.transform.position + (toolCentre.position - mainCamera.transform.position).normalized * newArrowsDepth;
+        Debug.Log(resultMove);
     }
 
     public Vector3 MouseUp()

@@ -108,7 +108,43 @@ public class PuzzleGrid
     {
         Vector3 offsetChords;
         FindXZ(tileChords, out offsetChords);
-        tileInformation[(int)offsetChords.x, (int)offsetChords.z].OnDeslectTile();
+        tileInformation[(int)offsetChords.x, (int)offsetChords.z].OnDeselectTile();
+    }
+
+    public void OnDeleteTile(Vector3 tileChords)
+    {
+        Vector3 offsetChords;
+        FindXZ(tileChords, out offsetChords);
+        tileInformation[(int)offsetChords.x, (int)offsetChords.z].Reset();
+        UpdateNeighbours(tileChords, offsetChords);
+        if (CheckPlaceableNeighbour(offsetChords))
+        {
+            tileInformation[(int)offsetChords.x, (int)offsetChords.z].SetTileType(TileType.EDGE_TILE);
+            tileInformation[(int)offsetChords.x, (int)offsetChords.z].UpdateMesh();
+        }
+
+        // checks if the neighbours neighbours are placable tiles, if not, then they also get reset
+        if (!CheckPlaceableNeighbour(offsetChords + new Vector3(0, 0, 1)) &&
+            tileInformation[(int)(offsetChords + new Vector3(0, 0, 1)).x, (int)(offsetChords + new Vector3(0, 0, 1)).z].GetTileType() == TileType.EDGE_TILE)
+            tileInformation[(int)(offsetChords + new Vector3(0, 0, 1)).x, (int)(offsetChords + new Vector3(0, 0, 1)).z].Reset();
+        if (!CheckPlaceableNeighbour(offsetChords + new Vector3(1, 0, 0)) &&
+            tileInformation[(int)(offsetChords + new Vector3(1, 0, 0)).x, (int)(offsetChords + new Vector3(1, 0, 0)).z].GetTileType() == TileType.EDGE_TILE)
+            tileInformation[(int)(offsetChords + new Vector3(1, 0, 0)).x, (int)(offsetChords + new Vector3(1, 0, 0)).z].Reset();
+        if (!CheckPlaceableNeighbour(offsetChords + new Vector3(0, 0, -1)) &&
+            tileInformation[(int)(offsetChords + new Vector3(0, 0, -1)).x, (int)(offsetChords + new Vector3(0, 0, -1)).z].GetTileType() == TileType.EDGE_TILE)
+            tileInformation[(int)(offsetChords + new Vector3(0, 0, -1)).x, (int)(offsetChords + new Vector3(0, 0, -1)).z].Reset();
+        if (!CheckPlaceableNeighbour(offsetChords + new Vector3(-1, 0, 0)) &&
+            tileInformation[(int)(offsetChords + new Vector3(-1, 0, 0)).x, (int)(offsetChords + new Vector3(-1, 0, 0)).z].GetTileType() == TileType.EDGE_TILE)
+            tileInformation[(int)(offsetChords + new Vector3(-1, 0, 0)).x, (int)(offsetChords + new Vector3(-1, 0, 0)).z].Reset();
+    }
+
+    bool CheckPlaceableNeighbour(Vector3 tileChords)
+    {
+        if (tileInformation[(int)tileChords.x, (int)tileChords.z + 1].GetTileType() == TileType.PLACEABLE_TILE) return true;
+        if (tileInformation[(int)tileChords.x + 1, (int)tileChords.z].GetTileType() == TileType.PLACEABLE_TILE) return true;
+        if (tileInformation[(int)tileChords.x, (int)tileChords.z - 1].GetTileType() == TileType.PLACEABLE_TILE) return true;
+        if (tileInformation[(int)tileChords.x - 1, (int)tileChords.z].GetTileType() == TileType.PLACEABLE_TILE) return true;
+        return false;
     }
 
     public void MoveTile(Vector3 tileChords, Vector3 newPos)
@@ -1414,17 +1450,16 @@ public class TileInformation
         switch (myType)
         {
             case TileType.NONE_TILE:
-                myCollider.enabled = false;
+                myCollider.convex = true;
+                myCollider.isTrigger = true;
                 break;
 
             case TileType.EDGE_TILE:
-                myCollider.enabled = true;
                 myCollider.convex = true;
                 myCollider.isTrigger = true;
                 break;
 
             case TileType.PLACEABLE_TILE:
-                myCollider.enabled = true;
                 myCollider.isTrigger = false;
                 myCollider.convex = false;
                 break;
@@ -1481,7 +1516,7 @@ public class TileInformation
         isSelected = true;
     }
 
-    public void OnDeslectTile()
+    public void OnDeselectTile()
     {
         isSelected = false;
         switch (myType)
@@ -1591,6 +1626,13 @@ public class TileInformation
     public void SetEast(float newEast) { east = newEast; }
     public void SetSouth(float newSouth) { south = newSouth; }
     public void SetWest(float newWest) { west = newWest; }
+
+    public void Reset()
+    {
+        SetTileType(TileType.NONE_TILE);
+        SetHeight(0);
+        UpdateMesh();
+    }
 }
 
 public enum TileType { NONE_TILE = 0, EDGE_TILE = 1, PLACEABLE_TILE = 2 }

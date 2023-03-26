@@ -36,6 +36,7 @@ public class TerrainObject : SceneObject
 
     public override void MoveTo(Vector3 newPos)
     {
-        transform.position = myStartPos + newPos;
+        base.MoveTo(newPos);
+        transform.position = myStartPos + actualMove;
     }
 }

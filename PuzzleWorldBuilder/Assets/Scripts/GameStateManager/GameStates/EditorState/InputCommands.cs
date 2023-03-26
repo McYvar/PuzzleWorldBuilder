@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Net.Security;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
@@ -47,6 +46,10 @@ public class InputCommands : AbstractGameEditor, IPointerDownHandler, IPointerUp
 
     // movement tool
     [SerializeField] GameObject movementToolObject;
+    [SerializeField] GameObject mtUp;
+    [SerializeField] GameObject mtForward;
+    [SerializeField] GameObject mtRight;
+    [SerializeField] GameObject mtCentreSphere;
     [SerializeField] float movementToolDistance;
     Vector3 centrePoint;
 
@@ -153,10 +156,6 @@ public class InputCommands : AbstractGameEditor, IPointerDownHandler, IPointerUp
         {
             Cut();
         }
-        else if (Input.GetKeyDown(KeyCode.Delete))
-        {
-            Delete();
-        }
 #else
         if (Input.GetKeyDown(KeyCode.Z) && (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl)))
         {
@@ -178,10 +177,6 @@ public class InputCommands : AbstractGameEditor, IPointerDownHandler, IPointerUp
         {
             Cut();
         }
-        else if (Input.GetKeyDown(KeyCode.Delete) && (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl)))
-        {
-            Delete();
-        }
 #endif
         if (Input.GetKeyDown(KeyCode.F))
         {
@@ -190,6 +185,10 @@ public class InputCommands : AbstractGameEditor, IPointerDownHandler, IPointerUp
                 doSmooth = true;
                 SetPivot(centrePoint);
             }
+        }
+        else if (Input.GetKeyDown(KeyCode.Delete))
+        {
+            Delete();
         }
     }
 
@@ -232,7 +231,8 @@ public class InputCommands : AbstractGameEditor, IPointerDownHandler, IPointerUp
         /// 03/08/2023 Update: did that anyway
 
         if (selectedObjects.Count > 0)
-            commandManager.ExecuteCommand(copyCommand);
+            if (InputCommands.selectedObjects[0] as GridObject) return;
+        commandManager.ExecuteCommand(copyCommand);
     }
 
     public void Paste()
@@ -241,7 +241,8 @@ public class InputCommands : AbstractGameEditor, IPointerDownHandler, IPointerUp
         /// When pasting a copy, the creation of this copy has to go trough the class handling the creation of objects
         /// in the level editor so the creation of it can be undone.
         if (ClipBoard.clipboard.Count > 0)
-            commandManager.ExecuteCommand(pasteCommand);
+            if (InputCommands.selectedObjects[0] as GridObject) return;
+        commandManager.ExecuteCommand(pasteCommand);
     }
 
     public void Cut()
@@ -249,7 +250,8 @@ public class InputCommands : AbstractGameEditor, IPointerDownHandler, IPointerUp
         /// Cut some object, upon cutting the object should be removed trough the class handling the deletion of objects
         /// so this action can be undone. Also when cutting, an invisible copy of this object is made and put on the "clipboard".
         if (selectedObjects.Count > 0)
-            commandManager.ExecuteCommand(cutCommand);
+            if (InputCommands.selectedObjects[0] as GridObject) return;
+        commandManager.ExecuteCommand(cutCommand);
     }
 
     public void Delete()
@@ -456,7 +458,18 @@ public class InputCommands : AbstractGameEditor, IPointerDownHandler, IPointerUp
             if (currentMoveToolArrow != null) return;
 
             // if there are objects selected, show the movement tool
-            if (!movementToolObject.activeInHierarchy) movementToolObject.SetActive(true);
+            if (selectedObjects[0] as TerrainObject)
+            {
+                mtUp.SetActive(true);
+                mtForward.SetActive(true);
+                mtRight.SetActive(true);
+                mtCentreSphere.SetActive(true);
+            }
+            else if (selectedObjects[0] as GridObject)
+            {
+                mtUp.SetActive(true);
+            }
+
             centrePoint = Vector3.zero;
             foreach (SceneObject obj in selectedObjects)
             {
@@ -468,13 +481,14 @@ public class InputCommands : AbstractGameEditor, IPointerDownHandler, IPointerUp
             /// Edit: You should take a look at the MoveToolArrow class
             float angle = Vector3.Angle(mainCamera.transform.forward, centrePoint - mainCamera.transform.position);
             movementToolObject.transform.position = mainCamera.transform.position + (centrePoint - mainCamera.transform.position).normalized * (movementToolDistance / Mathf.Cos(angle * Mathf.Deg2Rad));
-
-            // each seperate arrow has to get a mousedown function
         }
         else
         {
-            // hide when there are no more objects selected
-            if (movementToolObject.activeInHierarchy) movementToolObject.SetActive(false);
+            // hide the tool
+            mtUp.SetActive(false);
+            mtForward.SetActive(false);
+            mtRight.SetActive(false);
+            mtCentreSphere.SetActive(false);
         }
     }
     #endregion
@@ -497,7 +511,10 @@ public class InputCommands : AbstractGameEditor, IPointerDownHandler, IPointerUp
                 // check if we hit a movement tool
                 if (FoundMoveToolArrow(eventData.position))
                 {
-                    currentMoveToolArrow?.MouseDown(movementToolDistance, centrePoint);
+                    bool relativeSnap = false, gridSnap = false;
+                    if (Input.GetKey(KeyCode.C)) relativeSnap = true;
+                    if (Input.GetKey(KeyCode.X)) gridSnap = true;
+                    currentMoveToolArrow?.MouseDown(movementToolDistance, centrePoint, relativeSnap, gridSnap, 1);
                 }
                 // if we only click down on the background
                 else
@@ -540,16 +557,9 @@ public class InputCommands : AbstractGameEditor, IPointerDownHandler, IPointerUp
     {
         if (currentMoveToolArrow != null)
         {
-            if (selectedObjects[0] as TerrainObject)
-            {
-                translateCommand.InitializeNewPostition(currentMoveToolArrow.MouseUp());
-                commandManager.ExecuteCommand(translateCommand);
-            }
-            else if (selectedObjects[0] as GridObject)
-            {
-
-            }
-                currentMoveToolArrow = null;
+            translateCommand.InitializeNewPostition(currentMoveToolArrow.MouseUp());
+            commandManager.ExecuteCommand(translateCommand);
+            currentMoveToolArrow = null;
         }
 
         if (eventData.button == PointerEventData.InputButton.Left)

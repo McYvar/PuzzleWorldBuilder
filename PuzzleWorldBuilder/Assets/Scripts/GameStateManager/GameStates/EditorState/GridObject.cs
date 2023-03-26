@@ -6,9 +6,6 @@ public class GridObject : SceneObject
     PuzzleGrid sharedGrid;
     public static List<GridObject> gridObjects = new List<GridObject>();
 
-    Material unselectedMaterial = null;
-    Material selectedMaterial = null;
-
     protected override void OnEnable()
     {
         base.OnEnable();
@@ -31,24 +28,17 @@ public class GridObject : SceneObject
 
     public override void OnDeletion()
     {
+        sharedGrid.OnDeleteTile(transform.position);
     }
 
     public void Initialize(PuzzleGrid grid)
     {
-        selectedMaterial = meshRenderer.material;
         sharedGrid = grid;
-    }
-
-    public override void OnStartMove()
-    {
-    }
-
-    public override void OnFinishMove()
-    {
     }
 
     public override void MoveTo(Vector3 newPos)
     {
-        sharedGrid.MoveTile(myStartPos, newPos);
+        base.MoveTo(newPos);
+        sharedGrid.MoveTile(myStartPos, actualMove);
     }
 }
