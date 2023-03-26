@@ -38,10 +38,9 @@ public class SceneObject : AbstractGameEditor
         InputCommands.selectedObjects.Remove(this);
     }
 
-    public virtual void MoveTo(Vector3 newPos)
-    {
+    public virtual void MoveTo(Vector3 newPos) { }
 
-    }
+    public virtual void OnFinishMove() { }
 
     public override void EditorAwake()
     {
