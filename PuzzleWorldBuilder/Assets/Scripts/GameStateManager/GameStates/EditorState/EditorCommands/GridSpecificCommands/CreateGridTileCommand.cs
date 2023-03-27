@@ -20,6 +20,7 @@ public class CreateGridTileCommand : BaseEditorCommand
         foreach (GridObject gridObject in tilesToCreate)
         {
             gridObject.OnCreation();
+            gridObject.OnSelection();
         }
         undoLinkedList.AddLast(tilesToCreate);
     }
@@ -31,6 +32,7 @@ public class CreateGridTileCommand : BaseEditorCommand
         foreach (GridObject gridObject in undoTiles)
         {
             gridObject.OnDeletion();
+            gridObject.OnDeselection();
         }
         redoStack.Push(undoTiles);
     }
@@ -41,6 +43,7 @@ public class CreateGridTileCommand : BaseEditorCommand
         foreach (GridObject gridObject in redoTiles)
         {
             gridObject.OnCreation();
+            gridObject.OnSelection();
         }
         undoLinkedList.AddLast(redoTiles);
     }

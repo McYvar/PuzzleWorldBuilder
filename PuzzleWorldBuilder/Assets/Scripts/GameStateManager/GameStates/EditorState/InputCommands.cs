@@ -113,6 +113,11 @@ public class InputCommands : AbstractGameEditor, IPointerDownHandler, IPointerUp
         {
             smoothPivot = camerasPivot.position;
         }
+
+        if (Input.GetKeyDown(KeyCode.S))
+        {
+            Debug.Log(selectedObjects.Count);
+        }
     }
 
     #region CommandManager
@@ -186,10 +191,10 @@ public class InputCommands : AbstractGameEditor, IPointerDownHandler, IPointerUp
         {
             Cut();
         }
-        if (Input.GetKeyDown(KeyCode.X) && !(Input.GetKey(KeyCode.LeftControl))
+        if (Input.GetKeyDown(KeyCode.X) && !(Input.GetKey(KeyCode.LeftControl)))
             ToggleGridSnap();
 
-        if (Input.GetKeyDown(KeyCode.C) && !(Input.GetKey(KeyCode.LeftControl))
+        if (Input.GetKeyDown(KeyCode.C) && !(Input.GetKey(KeyCode.LeftControl)))
             ToggleRelativeSnap();
 #endif
         if (Input.GetKeyDown(KeyCode.F))
@@ -388,9 +393,9 @@ public class InputCommands : AbstractGameEditor, IPointerDownHandler, IPointerUp
                     GridObject gridObject = hit.collider.GetComponent<GridObject>();
                     if (gridObject != null)
                     {
-                        temp.Add(gridObject);
                         if (!gridObject.isCreated)
                             gridObjectsToCreate.Add(gridObject);
+                        else temp.Add(gridObject);
                     }
                 }
             }
@@ -417,15 +422,15 @@ public class InputCommands : AbstractGameEditor, IPointerDownHandler, IPointerUp
                     Vector3 screenPosition = mainCamera.WorldToScreenPoint(gridObject.transform.position);
                     if (selectionBox.Contains(screenPosition, true))
                     {
-                        temp.Add(gridObject);
                         if (!gridObject.isCreated)
                             gridObjectsToCreate.Add(gridObject);
+                        else temp.Add(gridObject);
                     }
                 }
             }
         }
 
-        if (temp.Count == 0)
+        if (temp.Count == 0 && gridObjectsToCreate.Count == 0)
         {
             if (selectedObjects.Count > 0)
             {

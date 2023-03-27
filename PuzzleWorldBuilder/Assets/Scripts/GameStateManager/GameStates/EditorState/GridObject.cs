@@ -28,7 +28,6 @@ public class GridObject : SceneObject
         sharedGrid.OnDeselectTile(transform.position);
     }
 
-    // here only used in undo of deletion
     public override void OnCreation()
     {
         isCreated = true;
