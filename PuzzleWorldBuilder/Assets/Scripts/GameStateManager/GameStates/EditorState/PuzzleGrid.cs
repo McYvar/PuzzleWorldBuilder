@@ -95,12 +95,20 @@ public class PuzzleGrid
         }
     }
 
+    public void HighlightTile(Vector3 tileChords)
+    {
+        Vector3 offsetChords;
+        FindXZ(tileChords, out offsetChords);
+        currentHighlightedTile?.Unhighlight();
+        currentHighlightedTile = tileInformation[(int)offsetChords.x, (int)offsetChords.z];
+        currentHighlightedTile.Highlight();
+    }
+
     public void OnSelectTile(Vector3 tileChords)
     {
         Vector3 offsetChords;
         FindXZ(tileChords, out offsetChords);
         tileInformation[(int)offsetChords.x, (int)offsetChords.z].OnSelectTile();
-        tileInformation[(int)offsetChords.x, (int)offsetChords.z].SetTileType(TileType.PLACEABLE_TILE);
         UpdateNeighbours(tileChords, offsetChords);
     }
 
@@ -211,6 +219,30 @@ public class PuzzleGrid
     {
         return neighbour.GetHeight() - current.GetHeight();
     }
+
+    public TileInformation GetTile(Vector3 tileChords)
+    {
+        Vector3 offsetChords;
+        FindXZ(tileChords, out offsetChords);
+        return new TileInformation(tileInformation[(int)offsetChords.x, (int)offsetChords.z]);
+    }
+
+    public void CreateTile(Vector3 tileChords)
+    {
+        Vector3 offsetChords;
+        FindXZ(tileChords, out offsetChords);
+        tileInformation[(int)offsetChords.x, (int)offsetChords.z].SetTileType(TileType.PLACEABLE_TILE);
+        UpdateNeighbours(tileChords, offsetChords);
+    }
+
+    public void CreateTile(Vector3 tileChords, TileInformation tile)
+    {
+        Vector3 offsetChords;
+        FindXZ(tileChords, out offsetChords);
+        tileInformation[(int)offsetChords.x, (int)offsetChords.z] = tile;
+        tile.SetHeight(tile.GetHeight());
+        UpdateNeighbours(tileChords, offsetChords);
+    }
 }
 
 public class TileInformation
@@ -255,6 +287,23 @@ public class TileInformation
         myGameObject.GetComponent<MeshFilter>().mesh = myMesh;
 
         CubeWithoutBottomSmaller(materials[0], 0, 0, 0, 0);
+    }
+
+    public TileInformation(TileInformation tileToCopy)
+    {
+        north = tileToCopy.north;
+        east = tileToCopy.east;
+        south = tileToCopy.south;
+        west = tileToCopy.west;
+        myType = tileToCopy.myType;
+        myHeight = tileToCopy.myHeight;
+        myMaterials = tileToCopy.myMaterials;
+        myGameObject = tileToCopy.myGameObject;
+        myMeshRenderer = myGameObject.GetComponent<MeshRenderer>();
+        myCollider = myGameObject.GetComponent<MeshCollider>();
+        myMesh = tileToCopy.myMesh;
+        myCollider.sharedMesh = myMesh;
+        myGameObject.GetComponent<MeshFilter>().mesh = myMesh;
     }
 
 

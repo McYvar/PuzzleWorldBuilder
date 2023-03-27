@@ -37,10 +37,21 @@ public class DeleteObjectCommand : BaseObjectCommands
     {
         SceneObject[] undoSelctedObjects = undoLinkedList.Last.Value;
         undoLinkedList.RemoveLast();
-        foreach (SceneObject sceneObject in undoSelctedObjects)
+        if (undoSelctedObjects[0] as TerrainObject)
         {
-            sceneObject.OnCreation();
-            InputCommands.selectedObjects.Add(sceneObject);
+            foreach (TerrainObject terrainObject in undoSelctedObjects)
+            {
+                terrainObject.OnCreation();
+                InputCommands.selectedObjects.Add(terrainObject);
+            }
+        }
+        else if (undoSelctedObjects[0] as GridObject)
+        {
+            foreach (GridObject gridObject in undoSelctedObjects)
+            {
+                gridObject.OnReCreation();
+                InputCommands.selectedObjects.Add(gridObject);
+            }
         }
         redoStack.Push(undoSelctedObjects);
     }

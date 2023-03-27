@@ -6,29 +6,48 @@ public class GridObject : SceneObject
     PuzzleGrid sharedGrid;
     public static List<GridObject> gridObjects = new List<GridObject>();
 
+    TileInformation lastTileInformation = null;
+    public bool isCreated = false;
+
     protected override void OnEnable()
     {
         base.OnEnable();
         gridObjects.Add(this);
+        isCreated = false;
     }
 
     public override void OnSelection()
     {
         base.OnSelection();
-        Debug.Log("Selected grid: " + name);
         sharedGrid.OnSelectTile(transform.position);
     }
 
     public override void OnDeselection()
     {
         base.OnDeselection();
-        Debug.Log("Deselected grid: " + name);
         sharedGrid.OnDeselectTile(transform.position);
+    }
+
+    // here only used in undo of deletion
+    public override void OnCreation()
+    {
+        isCreated = true;
+        sharedGrid.CreateTile(transform.position);
+        sharedGrid.OnSelectTile(transform.position);
     }
 
     public override void OnDeletion()
     {
+        isCreated = false;
+        lastTileInformation = sharedGrid.GetTile(transform.position);
         sharedGrid.OnDeleteTile(transform.position);
+    }
+
+    public void OnReCreation()
+    {
+        isCreated = true;
+        sharedGrid.CreateTile(transform.position, lastTileInformation);
+        sharedGrid.OnSelectTile(transform.position);
     }
 
     public void Initialize(PuzzleGrid grid)

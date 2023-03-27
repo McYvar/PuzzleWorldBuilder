@@ -28,6 +28,10 @@ public class InputCommands : AbstractGameEditor, IPointerDownHandler, IPointerUp
     [SerializeField] OverrideSelectObjectCommand overrideSelectCommand;
     [SerializeField] FlipSelectionObjectCommand flipSelectCommand;
     [SerializeField] TranslateObjectCommand translateCommand;
+    [SerializeField] RemoveSelectionObjectCommand removeSelectionCommand;
+
+    // all grid specific commands
+    [SerializeField] CreateGridTileCommand createGridTileCommand;
 
     // canvas related
     [SerializeField] Canvas mainCanvas;
@@ -108,11 +112,6 @@ public class InputCommands : AbstractGameEditor, IPointerDownHandler, IPointerUp
         else
         {
             smoothPivot = camerasPivot.position;
-        }
-
-        if (Input.GetKeyDown(KeyCode.S))
-        {
-            Debug.Log(selectedObjects.Count);
         }
     }
 
@@ -364,6 +363,7 @@ public class InputCommands : AbstractGameEditor, IPointerDownHandler, IPointerUp
         Rect selectionBox = new Rect(selectionStartingPoint, selectionEndingPoint - selectionStartingPoint);
 
         List<SceneObject> temp = new List<SceneObject>();
+        List<GridObject> gridObjectsToCreate = new List<GridObject>();
         if (selectionBox.size.magnitude < 5)
         {
             RaycastHit hit;
@@ -389,6 +389,8 @@ public class InputCommands : AbstractGameEditor, IPointerDownHandler, IPointerUp
                     if (gridObject != null)
                     {
                         temp.Add(gridObject);
+                        if (!gridObject.isCreated)
+                            gridObjectsToCreate.Add(gridObject);
                     }
                 }
             }
@@ -416,6 +418,8 @@ public class InputCommands : AbstractGameEditor, IPointerDownHandler, IPointerUp
                     if (selectionBox.Contains(screenPosition, true))
                     {
                         temp.Add(gridObject);
+                        if (!gridObject.isCreated)
+                            gridObjectsToCreate.Add(gridObject);
                     }
                 }
             }
@@ -430,15 +434,24 @@ public class InputCommands : AbstractGameEditor, IPointerDownHandler, IPointerUp
             }
             return;
         }
-
-        // case: shift is pressed
-        if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
+        // case: both sift and control are pressed
+        if ((Input.GetKey(KeyCode.LeftShift) && Input.GetKey(KeyCode.LeftControl)) ||
+            (Input.GetKey(KeyCode.RightShift) && Input.GetKey(KeyCode.RightControl)) ||
+            (Input.GetKey(KeyCode.RightShift) && Input.GetKey(KeyCode.LeftControl)) ||
+            (Input.GetKey(KeyCode.LeftShift) && Input.GetKey(KeyCode.RightControl)))
         {
             flipSelectCommand.InitializePreSelected(selectedObjects, temp);
             commandManager.ExecuteCommand(flipSelectCommand);
         }
-        // case: cntl is pressed or nothing is selected
-        else if (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl) || selectedObjects.Count == 0)
+        // case: cntl is pressed
+        else if (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl))
+        {
+            removeSelectionCommand.InitializePreSelected(selectedObjects, temp);
+            commandManager.ExecuteCommand(removeSelectionCommand);
+            return;
+        }
+        // case: shift is pressed or nothing is selected
+        else if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift) || selectedObjects.Count == 0)
         {
             if (selectCommand.InitializePreSelected(selectedObjects, temp) > 0)
                 commandManager.ExecuteCommand(selectCommand);
@@ -462,6 +475,12 @@ public class InputCommands : AbstractGameEditor, IPointerDownHandler, IPointerUp
             }
             overrideSelectCommand.InitializeSelected(selectedObjects, temp);
             commandManager.ExecuteCommand(overrideSelectCommand);
+        }
+
+        if (gridObjectsToCreate.Count > 0)
+        {
+            createGridTileCommand.InitializeTiles(gridObjectsToCreate.ToArray());
+            commandManager.ExecuteCommand(createGridTileCommand);
         }
     }
 
@@ -607,7 +626,15 @@ public class InputCommands : AbstractGameEditor, IPointerDownHandler, IPointerUp
     #region Pivot
     void RotatePivot(Vector2 mouseDelta)
     {
-        camerasPivot.rotation = Quaternion.Euler(camerasPivot.eulerAngles.x + -mouseDelta.y * rotateAmp, camerasPivot.eulerAngles.y + mouseDelta.x * rotateAmp, 0);
+        float xRot = camerasPivot.localEulerAngles.x;
+        if (xRot > 90 && xRot < 360)
+        {
+            xRot -= 360;
+        }
+        camerasPivot.localRotation = Quaternion.Euler(
+            Mathf.Clamp(xRot + -mouseDelta.y * rotateAmp, -90, 90),
+            camerasPivot.localEulerAngles.y + mouseDelta.x * rotateAmp, 
+            0);
     }
 
     void SetPivot(Vector3 newLocation)

@@ -2,11 +2,12 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class SelectObjectCommand : BaseObjectCommands
+public class RemoveSelectionObjectCommand : BaseObjectCommands
 {
     LinkedList<SceneObject[]> undoLinkedList;
     Stack<SceneObject[]> redoStack;
     List<SceneObject> preSelected = new List<SceneObject>();
+    List<SceneObject> currentlySelected = new List<SceneObject>();
 
     protected override void OnEnable()
     {
@@ -14,14 +15,20 @@ public class SelectObjectCommand : BaseObjectCommands
         undoLinkedList = new LinkedList<SceneObject[]>();
         redoStack = new Stack<SceneObject[]>();
     }
-    
+
     public override void Execute()
     {
+        List<SceneObject> deselected = new List<SceneObject>();
         foreach (SceneObject sceneObject in preSelected)
         {
-            sceneObject.OnSelection();
+            if (currentlySelected.Contains(sceneObject))
+            {
+                sceneObject.OnDeselection();
+                deselected.Add(sceneObject);
+                Debug.Log(sceneObject.name);
+            }
         }
-        undoLinkedList.AddLast(preSelected.ToArray());
+        undoLinkedList.AddLast(deselected.ToArray());
     }
 
     public override void Undo()
@@ -30,7 +37,7 @@ public class SelectObjectCommand : BaseObjectCommands
         undoLinkedList.RemoveLast();
         foreach (SceneObject sceneObject in undoObjects)
         {
-            sceneObject.OnDeselection();
+            sceneObject.OnSelection();
         }
         redoStack.Push(undoObjects);
     }
@@ -38,9 +45,9 @@ public class SelectObjectCommand : BaseObjectCommands
     public override void Redo()
     {
         SceneObject[] redoObjects = redoStack.Pop();
-        foreach (SceneObject sceneObject in preSelected)
+        foreach (SceneObject sceneObject in redoObjects)
         {
-            sceneObject.OnSelection();
+            sceneObject.OnDeselection();
         }
         undoLinkedList.AddLast(redoObjects);
     }
@@ -55,16 +62,12 @@ public class SelectObjectCommand : BaseObjectCommands
         redoStack.Clear();
     }
 
-    public int InitializePreSelected(List<SceneObject> currentlySelected, List<SceneObject> preSelected)
+    public void InitializePreSelected(List<SceneObject> currentlySelected, List<SceneObject> preSelected)
     {
         this.preSelected.Clear();
-        this.preSelected.AddRange(preSelected);
+        this.currentlySelected.Clear();
 
-        foreach(SceneObject sceneObject in currentlySelected)
-        {
-            if (this.preSelected.Contains(sceneObject))
-                this.preSelected.Remove(sceneObject);
-        }
-        return this.preSelected.Count;
+        this.currentlySelected.AddRange(currentlySelected);
+        this.preSelected.AddRange(preSelected);
     }
 }
