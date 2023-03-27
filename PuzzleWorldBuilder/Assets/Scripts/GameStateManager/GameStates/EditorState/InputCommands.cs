@@ -446,8 +446,11 @@ public class InputCommands : AbstractGameEditor, IPointerDownHandler, IPointerUp
         // case: cntl is pressed
         else if (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl))
         {
-            removeSelectionCommand.InitializePreSelected(selectedObjects, temp);
-            commandManager.ExecuteCommand(removeSelectionCommand);
+            if (selectedObjects.Count > 0)
+            {
+                removeSelectionCommand.InitializePreSelected(selectedObjects, temp);
+                commandManager.ExecuteCommand(removeSelectionCommand);
+            }
             return;
         }
         // case: shift is pressed or nothing is selected
