@@ -38,7 +38,6 @@ public class GridObject : SceneObject
 
     public override void MoveTo(Vector3 newPos)
     {
-        base.MoveTo(newPos);
-        sharedGrid.MoveTile(myStartPos, actualMove);
+        sharedGrid.MoveTile(myStartPos, newPos);
     }
 }

@@ -15,8 +15,9 @@ public class MoveToolArrow : AbstractGameEditor
     Vector3 resultMove;
 
     bool doRelativeSnap;
-    bool doGridSnap;
     float snapSize;
+    bool doGridSnap;
+    Vector3 gridOffset; // the grid object, for now, is based on the first selected object
 
     [SerializeField] MeshRenderer myMesh;
     [SerializeField] Collider myCollider;
@@ -95,8 +96,10 @@ public class MoveToolArrow : AbstractGameEditor
         foreach (SceneObject sceneObject in InputCommands.selectedObjects)
         {
             // for each selected object we define a starting position
-            sceneObject.OnStartMove(gridSnap);
+            sceneObject.OnStartMove();
         }
+        Vector3 offsetStartPos = InputCommands.selectedObjects[0].myStartPos;
+        gridOffset = new Vector3(offsetStartPos.x % 1, offsetStartPos.y % 1, offsetStartPos.z % 1);
     }
 
     public void MouseMove()
@@ -119,7 +122,7 @@ public class MoveToolArrow : AbstractGameEditor
         {
             if (doGridSnap)
             {
-                resultMove = new Vector3((int)displacement.x, (int)displacement.y, (int)displacement.z);
+                resultMove = new Vector3((int)displacement.x, (int)displacement.y, (int)displacement.z) - gridOffset;
             }
             else if (doRelativeSnap)
             {
@@ -135,7 +138,9 @@ public class MoveToolArrow : AbstractGameEditor
             float arrowForwardLength = displacement.magnitude * Mathf.Cos(Vector3.Angle(displacement, transform.forward) * Mathf.Deg2Rad);
             if (doGridSnap)
             {
-                resultMove = transform.forward * (int)arrowForwardLength;
+                float angleForwardToGrid = Vector3.Angle(transform.forward, gridOffset);
+                float offsetLenght = gridOffset.magnitude * Mathf.Cos(angleForwardToGrid * Mathf.Deg2Rad);
+                resultMove = transform.forward * (int)arrowForwardLength - transform.forward * offsetLenght;
             }
             else if (doRelativeSnap)
             {
@@ -151,7 +156,6 @@ public class MoveToolArrow : AbstractGameEditor
         }
         float newArrowsDepth = arrowsDepth / Mathf.Cos(mouseAngle * Mathf.Deg2Rad);
         arrows.position = mainCamera.transform.position + (toolCentre.position - mainCamera.transform.position).normalized * newArrowsDepth;
-        Debug.Log(resultMove);
     }
 
     public Vector3 MouseUp()

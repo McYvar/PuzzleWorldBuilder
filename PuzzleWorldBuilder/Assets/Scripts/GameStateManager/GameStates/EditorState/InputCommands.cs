@@ -71,6 +71,9 @@ public class InputCommands : AbstractGameEditor, IPointerDownHandler, IPointerUp
     [SerializeField, Range(0.0f, 50.0f)] float scrollDistBase;
     float scrollAmp;
 
+    bool doRelativeSnap;
+    bool doGridSnap;
+
     public static List<SceneObject> selectedObjects = new List<SceneObject>();
 
     protected override void OnEnable()
@@ -144,7 +147,7 @@ public class InputCommands : AbstractGameEditor, IPointerDownHandler, IPointerUp
         {
             Redo();
         }
-        else if (Input.GetKeyDown(KeyCode.C))
+        else if (Input.GetKeyDown(KeyCode.C) && !Input.GetKey(KeyCode.LeftShift))
         {
             Copy();
         }
@@ -152,10 +155,17 @@ public class InputCommands : AbstractGameEditor, IPointerDownHandler, IPointerUp
         {
             Paste();
         }
-        else if (Input.GetKeyDown(KeyCode.X))
+        else if (Input.GetKeyDown(KeyCode.X) && !Input.GetKey(KeyCode.LeftShift))
         {
             Cut();
         }
+
+        if (Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.X))
+            ToggleGridSnap();
+
+        if (Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.C))
+            ToggleRelativeSnap();
+
 #else
         if (Input.GetKeyDown(KeyCode.Z) && (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl)))
         {
@@ -177,6 +187,11 @@ public class InputCommands : AbstractGameEditor, IPointerDownHandler, IPointerUp
         {
             Cut();
         }
+        if (Input.GetKeyDown(KeyCode.X) && !(Input.GetKey(KeyCode.LeftControl))
+            ToggleGridSnap();
+
+        if (Input.GetKeyDown(KeyCode.C) && !(Input.GetKey(KeyCode.LeftControl))
+            ToggleRelativeSnap();
 #endif
         if (Input.GetKeyDown(KeyCode.F))
         {
@@ -190,6 +205,18 @@ public class InputCommands : AbstractGameEditor, IPointerDownHandler, IPointerUp
         {
             Delete();
         }
+    }
+
+    void ToggleGridSnap()
+    {
+        // later add visual
+        doGridSnap = !doGridSnap;
+    }
+
+    void ToggleRelativeSnap()
+    {
+        // later add visual
+        doRelativeSnap = !doRelativeSnap;
     }
 
     public static void AddKeyCommand(KeyCode keyCode, ICommand command)
@@ -511,10 +538,7 @@ public class InputCommands : AbstractGameEditor, IPointerDownHandler, IPointerUp
                 // check if we hit a movement tool
                 if (FoundMoveToolArrow(eventData.position))
                 {
-                    bool relativeSnap = false, gridSnap = false;
-                    if (Input.GetKey(KeyCode.C)) relativeSnap = true;
-                    if (Input.GetKey(KeyCode.X)) gridSnap = true;
-                    currentMoveToolArrow?.MouseDown(movementToolDistance, centrePoint, relativeSnap, gridSnap, 1);
+                    currentMoveToolArrow?.MouseDown(movementToolDistance, centrePoint, doRelativeSnap, doGridSnap, 1);
                 }
                 // if we only click down on the background
                 else

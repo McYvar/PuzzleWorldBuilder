@@ -8,11 +8,6 @@ public class SceneObject : AbstractGameEditor
     protected MeshRenderer meshRenderer;
     protected Collider anyCollider;
 
-    bool doGridSnap;
-    float snapSize = 1;
-
-    protected Vector3 actualMove;
-
     protected override void OnEnable()
     {
         base.OnEnable();
@@ -46,18 +41,10 @@ public class SceneObject : AbstractGameEditor
 
     public virtual void MoveTo(Vector3 newPos) 
     {
-        if (doGridSnap)
-        {
-            Vector3 offset = new Vector3(newPos.x % 1, newPos.y % 1, newPos.z % 1);
-            actualMove = newPos - offset;
-            actualMove = new Vector3((int)actualMove.x, (int)actualMove.y, (int)actualMove.z);
-        }
-        else actualMove = newPos;
     }
-    public virtual void OnStartMove(bool gridSnap)
+    public virtual void OnStartMove()
     {
         myStartPos = transform.position;
-        doGridSnap = gridSnap;
     }
     public virtual void OnFinishMove()
     {
