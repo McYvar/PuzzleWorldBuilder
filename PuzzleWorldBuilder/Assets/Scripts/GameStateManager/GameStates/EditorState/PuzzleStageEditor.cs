@@ -11,7 +11,7 @@ public class PuzzleStageEditor : AbstractGameEditor
 
     public override void EditorAwake()
     {
-        puzzleGrid = new PuzzleGrid(30, 30, Vector3.zero, noneTileMaterials);
+        //puzzleGrid = new PuzzleGrid(30, 30, Vector3.zero, noneTileMaterials);
     }
 
     public override void EditorStart()
@@ -20,14 +20,7 @@ public class PuzzleStageEditor : AbstractGameEditor
 
     public override void EditorUpdate()
     {
-        if (Input.GetKeyUp(KeyCode.S))
-        {
-            puzzleGrid.IncreaseGrid(1, 1);
-        }
-        else if (Input.GetKeyUp(KeyCode.D))
-        {
-            puzzleGrid.IncreaseGrid(-1, -1);
-        }
+        if (puzzleGrid == null) return;
 
         RaycastHit hit;
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
@@ -44,7 +37,26 @@ public class PuzzleStageEditor : AbstractGameEditor
         return puzzleGrid;
     }
 
-    private void OnDrawGizmos()
+    public void InitializeNewGrid(int maxX, int maxZ, int minX, int minZ, Vector3[] locations, TileType[] tileTypes)
     {
+        puzzleGrid = new PuzzleGrid(maxX, maxZ, Vector3.zero, noneTileMaterials);
+        puzzleGrid.IncreaseGrid(minX, minZ);
+
+        if (locations.Length > 0)
+        {
+            for (int i = 0; i < locations.Length; i++)
+            {
+                if (tileTypes[i] != TileType.NONE_TILE)
+                {
+                    puzzleGrid.CreateTile(locations[i], tileTypes[i]);
+                }
+            }
+        }
+    }
+
+    public void InitializeNewGrid(int maxX, int maxZ, int minX, int minZ)
+    {
+        puzzleGrid = new PuzzleGrid(maxX, maxZ, Vector3.zero, noneTileMaterials);
+        puzzleGrid.IncreaseGrid(minX, minZ);
     }
 }

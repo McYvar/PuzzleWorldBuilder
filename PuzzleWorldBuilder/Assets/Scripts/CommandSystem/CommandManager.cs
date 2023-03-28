@@ -87,5 +87,11 @@ public class CommandManager
     {
         undoListStack.RemoveAt(undoListStack.Count - 1);
     }
+
+    public void ClearAll()
+    {
+        undoListStack.Clear();
+        redoStack.Clear();
+    }
 }
 

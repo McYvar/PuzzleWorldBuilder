@@ -61,6 +61,7 @@ public class InputCommands : AbstractGameEditor, IPointerDownHandler, IPointerUp
 
     // pivot transform
     [SerializeField] Transform camerasPivot;
+    [SerializeField] Vector3 pivotStartPoint;
     Vector3 smoothPivot;
     Vector3 smoothDampRef = Vector3.zero;
     bool doSmooth = false;
@@ -93,6 +94,7 @@ public class InputCommands : AbstractGameEditor, IPointerDownHandler, IPointerUp
     public override void EditorAwake()
     {
         commandManager = new CommandManager(maxUndoAmount);
+        camerasPivot.position = pivotStartPoint;
     }
 
     public override void EditorStart()
@@ -698,13 +700,10 @@ public class InputCommands : AbstractGameEditor, IPointerDownHandler, IPointerUp
     }
     #endregion
 
-    /*
-    private void OnDrawGizmos()
+    public void ResetTool()
     {
-        Gizmos.color = Color.green;
-        Rect selectionBox = new Rect(selectionStartingPoint, selectionEndingPoint - selectionStartingPoint);
-        Vector3 camForward = mainCamera.ScreenToWorldPoint(new Vector3(selectionBox.center.x, selectionBox.center.y, mainCamera.nearClipPlane));
-        Gizmos.DrawLine(mainCamera.transform.position, mainCamera.transform.position + (camForward - mainCamera.transform.position) * 100);
+        commandManager.ClearAll();
+        selectedObjects.Clear();
+        camerasPivot.position = pivotStartPoint;
     }
-    */
 }

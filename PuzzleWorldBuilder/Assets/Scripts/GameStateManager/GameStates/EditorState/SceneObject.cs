@@ -42,10 +42,12 @@ public class SceneObject : AbstractGameEditor
     public virtual void MoveTo(Vector3 newPos) 
     {
     }
+
     public virtual void OnStartMove()
     {
         myStartPos = transform.position;
     }
+
     public virtual void OnFinishMove()
     {
     }

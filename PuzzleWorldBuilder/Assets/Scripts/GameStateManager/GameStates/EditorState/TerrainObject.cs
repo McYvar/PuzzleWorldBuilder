@@ -5,6 +5,13 @@ using UnityEngine;
 public class TerrainObject : SceneObject
 {
     public static List<TerrainObject> terrainObjects = new List<TerrainObject>();
+    public TerrainObjectData myData;
+
+    protected override void OnEnable()
+    {
+        base.OnEnable();
+        myData = new TerrainObjectData();
+    }
 
     public override void OnCreation()
     {
@@ -37,5 +44,17 @@ public class TerrainObject : SceneObject
     public override void MoveTo(Vector3 newPos)
     {
         transform.position = myStartPos + newPos;
+        myData.position = transform.position;
+    }
+}
+
+[System.Serializable]
+public class TerrainObjectData
+{
+    public Vector3 position;
+
+    public TerrainObjectData()
+    {
+        position = Vector3.zero;
     }
 }

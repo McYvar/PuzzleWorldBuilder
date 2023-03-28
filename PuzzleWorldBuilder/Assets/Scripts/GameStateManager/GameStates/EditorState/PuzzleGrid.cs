@@ -165,7 +165,7 @@ public class PuzzleGrid
         UpdateNeighbours(tileChords, offsetChords);
     }
 
-    void UpdateNeighbours(Vector3 tileChords, Vector3 offsetChords)
+    void UpdateNeighbours(Vector3 tileChords, Vector3 offsetChords, bool assignEdgeTiles = true)
     {
         /// <summary>
         /// The neighbours of this tile have to be updated. All TileInformation tiles keep track of the east of their
@@ -197,10 +197,13 @@ public class PuzzleGrid
         west.SetEast(-westDifference);
 
         // if the neighbours type are not placeable, then set it to an edge tile. Edge tile will later become walls
-        if (north.GetTileType() != TileType.PLACEABLE_TILE) north.SetTileType(TileType.EDGE_TILE);
-        if (east.GetTileType() != TileType.PLACEABLE_TILE) east.SetTileType(TileType.EDGE_TILE);
-        if (south.GetTileType() != TileType.PLACEABLE_TILE) south.SetTileType(TileType.EDGE_TILE);
-        if (west.GetTileType() != TileType.PLACEABLE_TILE) west.SetTileType(TileType.EDGE_TILE);
+        if (assignEdgeTiles)
+        {
+            if (north.GetTileType() != TileType.PLACEABLE_TILE) north.SetTileType(TileType.EDGE_TILE);
+            if (east.GetTileType() != TileType.PLACEABLE_TILE) east.SetTileType(TileType.EDGE_TILE);
+            if (south.GetTileType() != TileType.PLACEABLE_TILE) south.SetTileType(TileType.EDGE_TILE);
+            if (west.GetTileType() != TileType.PLACEABLE_TILE) west.SetTileType(TileType.EDGE_TILE);
+        }
 
         // and from our current tile the height have to be updated too, but not opposite direction
         current.SetNorth(northDifference);
@@ -233,9 +236,17 @@ public class PuzzleGrid
         Vector3 offsetChords;
         FindXZ(tileChords, out offsetChords);
         tileInformation[(int)offsetChords.x, (int)offsetChords.z].SetTileType(TileType.PLACEABLE_TILE);
+        tileInformation[(int)offsetChords.x, (int)offsetChords.z].SetHeight(tileChords.y);
         UpdateNeighbours(tileChords, offsetChords);
     }
-
+    public void CreateTile(Vector3 tileChords, TileType tileType)
+    {
+        Vector3 offsetChords;
+        FindXZ(tileChords, out offsetChords);
+        tileInformation[(int)offsetChords.x, (int)offsetChords.z].SetTileType(tileType);
+        tileInformation[(int)offsetChords.x, (int)offsetChords.z].SetHeight(tileChords.y);
+        UpdateNeighbours(tileChords, offsetChords, false);
+    }
     public void CreateTile(Vector3 tileChords, TileInformation tile)
     {
         Vector3 offsetChords;
@@ -256,6 +267,8 @@ public class TileInformation
     Mesh myMesh;
     MeshRenderer myMeshRenderer;
     MeshCollider myCollider;
+
+    GridObject myGridObject;
 
     Vector3 tileOffset = new Vector3(-0.5f, 0, -0.5f);
 
@@ -286,6 +299,8 @@ public class TileInformation
         myMesh = new Mesh();
         myCollider.sharedMesh = myMesh;
         myGameObject.GetComponent<MeshFilter>().mesh = myMesh;
+
+        myGridObject = myGameObject.GetComponent<GridObject>();
 
         CubeWithoutBottomSmaller(materials[0], 0, 0, 0, 0);
     }
@@ -1496,6 +1511,7 @@ public class TileInformation
     public void SetTileType(TileType newType)
     {
         myType = newType;
+        myGridObject.mydata.tileType = myType;
 
         switch (myType)
         {
