@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.UIElements;
 
 public class InputCommands : AbstractGameEditor, IPointerDownHandler, IPointerUpHandler, IPointerMoveHandler, IScrollHandler
 {
@@ -29,6 +30,7 @@ public class InputCommands : AbstractGameEditor, IPointerDownHandler, IPointerUp
     [SerializeField] FlipSelectionObjectCommand flipSelectCommand;
     [SerializeField] TranslateObjectCommand translateCommand;
     [SerializeField] RemoveSelectionObjectCommand removeSelectionCommand;
+    [SerializeField] DuplicateObjectCommand duplicateCommand;
 
     // all grid specific commands
     [SerializeField] CreateGridTileCommand createGridTileCommand;
@@ -163,6 +165,14 @@ public class InputCommands : AbstractGameEditor, IPointerDownHandler, IPointerUp
         {
             Cut();
         }
+        else if (Input.GetKeyDown(KeyCode.D))
+        {
+            Duplicate();
+        }
+        else if (Input.GetKeyDown(KeyCode.A))
+        {
+            SelectAllTerrainObjects();
+        }
 
         if (Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.X))
             ToggleGridSnap();
@@ -190,6 +200,14 @@ public class InputCommands : AbstractGameEditor, IPointerDownHandler, IPointerUp
         else if (Input.GetKeyDown(KeyCode.X) && (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl)))
         {
             Cut();
+        }
+        else if (Input.GetKeyDown(KeyCode.D) && (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl)))
+        {
+            Duplicate();
+        }
+        else if (Input.GetKeyDown(KeyCode.A) && (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl)))
+        {
+            SelectAllTerrainObjects();
         }
         if (Input.GetKeyDown(KeyCode.X) && !(Input.GetKey(KeyCode.LeftControl)))
             ToggleGridSnap();
@@ -262,8 +280,8 @@ public class InputCommands : AbstractGameEditor, IPointerDownHandler, IPointerUp
         /// 03/08/2023 Update: did that anyway
 
         if (selectedObjects.Count > 0)
-            if (InputCommands.selectedObjects[0] as GridObject) return;
-        commandManager.ExecuteCommand(copyCommand);
+            if (selectedObjects[0] as GridObject) return;
+            else commandManager.ExecuteCommand(copyCommand);
     }
 
     public void Paste()
@@ -272,8 +290,8 @@ public class InputCommands : AbstractGameEditor, IPointerDownHandler, IPointerUp
         /// When pasting a copy, the creation of this copy has to go trough the class handling the creation of objects
         /// in the level editor so the creation of it can be undone.
         if (ClipBoard.clipboard.Count > 0)
-            if (InputCommands.selectedObjects[0] as GridObject) return;
-        commandManager.ExecuteCommand(pasteCommand);
+            if (selectedObjects[0] as GridObject) return;
+            else commandManager.ExecuteCommand(pasteCommand);
     }
 
     public void Cut()
@@ -281,14 +299,29 @@ public class InputCommands : AbstractGameEditor, IPointerDownHandler, IPointerUp
         /// Cut some object, upon cutting the object should be removed trough the class handling the deletion of objects
         /// so this action can be undone. Also when cutting, an invisible copy of this object is made and put on the "clipboard".
         if (selectedObjects.Count > 0)
-            if (InputCommands.selectedObjects[0] as GridObject) return;
-        commandManager.ExecuteCommand(cutCommand);
+            if (selectedObjects[0] as GridObject) return;
+            else commandManager.ExecuteCommand(cutCommand);
     }
 
     public void Delete()
     {
         if (selectedObjects.Count > 0)
             commandManager.ExecuteCommand(deleteCommand);
+    }
+
+    public void Duplicate()
+    {
+        if (selectedObjects.Count > 0)
+            if (selectedObjects[0] as GridObject) return;
+            else commandManager.ExecuteCommand(duplicateCommand);
+    }
+
+    public void SelectAllTerrainObjects()
+    {
+        List<SceneObject> terrainObjects = new List<SceneObject>();
+        terrainObjects.AddRange(TerrainObject.terrainObjects);
+        selectCommand.InitializePreSelected(selectedObjects, terrainObjects);
+        commandManager.ExecuteCommand(selectCommand);
     }
     #endregion
 
@@ -403,7 +436,7 @@ public class InputCommands : AbstractGameEditor, IPointerDownHandler, IPointerUp
         else
         {
             // here we seek for multiple terrain objects
-            foreach (TerrainObject terrainObject in TerrainObject.terrainObject)
+            foreach (TerrainObject terrainObject in TerrainObject.terrainObjects)
             {
                 if (terrainObject == null) continue;
                 Vector3 screenPosition = mainCamera.WorldToScreenPoint(terrainObject.transform.position);
@@ -641,7 +674,7 @@ public class InputCommands : AbstractGameEditor, IPointerDownHandler, IPointerUp
         }
         camerasPivot.localRotation = Quaternion.Euler(
             Mathf.Clamp(xRot + -mouseDelta.y * rotateAmp, -90, 90),
-            camerasPivot.localEulerAngles.y + mouseDelta.x * rotateAmp, 
+            camerasPivot.localEulerAngles.y + mouseDelta.x * rotateAmp,
             0);
     }
 

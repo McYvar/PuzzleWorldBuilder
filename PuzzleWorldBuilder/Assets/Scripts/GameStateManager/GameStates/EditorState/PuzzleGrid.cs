@@ -1,3 +1,4 @@
+using System;
 using System.Globalization;
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -1583,8 +1584,9 @@ public class TileInformation
                 break;
         }
     }
-    
+
     // This seemed to never work out, even tough everything is checked 10x, when editing alot of meshes at the same time things just broke...
+    [Obsolete]
     void SetMesh(Material material)
     {
         Debug.Log(north + " : " + east + " : " + south + " : " + west);
