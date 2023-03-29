@@ -64,3 +64,14 @@ public class SceneObject : AbstractGameEditor
     {
     }
 }
+
+[System.Serializable]
+public class SceneObjectData
+{
+    public Vector3 position;
+
+    public SceneObjectData()
+    {
+        position = Vector3.zero;
+    }
+}

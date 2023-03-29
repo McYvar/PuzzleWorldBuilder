@@ -20,7 +20,9 @@ public class AddObjectCommand : BaseObjectCommands
     public override void Execute()
     {
         // Add object, link last object as previous to this one
-        undoLinkedList.AddLast(CreateObject(myObjectPrefab));
+        TerrainObject createdObject = CreateObject(myObjectPrefab) as TerrainObject;
+        createdObject.myData.name = createdObject.name;
+        undoLinkedList.AddLast(createdObject);
     }
 
     public override void Undo()

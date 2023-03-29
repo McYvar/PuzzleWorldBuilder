@@ -6,6 +6,9 @@ public class SavingLoadingSceneObjects : MonoBehaviour, IDataPersistence
     [SerializeField] InputCommands inputCommands;
     [SerializeField] PuzzleStageEditor puzzleStageEditor;
 
+    [SerializeField] Transform parent;
+    [SerializeField] GameObject[] usedPrefabs;
+
     public void NewData()
     {
         inputCommands.ResetTool();
@@ -42,7 +45,22 @@ public class SavingLoadingSceneObjects : MonoBehaviour, IDataPersistence
         {
             foreach (TerrainObjectData terrainObjectData in data.terrainObjectData)
             {
-
+                bool found = false;
+                foreach (GameObject go in usedPrefabs)
+                {
+                    if (go.name == terrainObjectData.name)
+                    {
+                        GameObject loadedObj = Instantiate(go, parent);
+                        loadedObj.transform.position = terrainObjectData.position;
+                        loadedObj.transform.rotation = terrainObjectData.rotation;
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found)
+                {
+                    Debug.LogWarning("No prefab with the name '" + terrainObjectData.name + "' exists");
+                }
             }
         }
 

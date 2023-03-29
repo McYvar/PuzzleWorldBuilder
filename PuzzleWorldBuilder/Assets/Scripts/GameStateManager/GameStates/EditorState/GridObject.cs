@@ -59,7 +59,7 @@ public class GridObject : SceneObject, IDataPersistence
         sharedGrid.OnSelectTile(transform.position);
     }
 
-    public void Initialize(PuzzleGrid grid)
+    public void AssignGrid(PuzzleGrid grid)
     {
         sharedGrid = grid;
     }
@@ -89,9 +89,8 @@ public class GridObject : SceneObject, IDataPersistence
 }
 
 [System.Serializable]
-public class GridObjectData
+public class GridObjectData : SceneObjectData
 {
-    public Vector3 position;
     public TileType tileType;
 
     public GridObjectData()

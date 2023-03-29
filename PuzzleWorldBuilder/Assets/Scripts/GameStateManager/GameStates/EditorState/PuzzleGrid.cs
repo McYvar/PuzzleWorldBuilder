@@ -1684,7 +1684,7 @@ public class TileInformation
 
     public void AssignGridToObject(PuzzleGrid grid)
     {
-        myGameObject.GetComponent<GridObject>().Initialize(grid);
+        myGameObject.GetComponent<GridObject>().AssignGrid(grid);
     }
 
     public float GetHeight() { return myHeight; }
