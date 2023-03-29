@@ -1,5 +1,6 @@
 ﻿using Unity.Mathematics;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 public class SceneObject : AbstractGameEditor
 {
@@ -63,6 +64,8 @@ public class SceneObject : AbstractGameEditor
     public override void EditorUpdate()
     {
     }
+
+    public virtual void InitializeOnLoad() { }
 }
 
 [System.Serializable]

@@ -47,10 +47,11 @@ public class TerrainObject : SceneObject
         myData.position = transform.position;
     }
 
-    public void Initialize(string name)
+    public override void InitializeOnLoad()
     {
+        myData.name = gameObject.name;
         myData.position = transform.position;
-        myData.name = name;
+        myData.rotation = transform.rotation;
     }
 }
 

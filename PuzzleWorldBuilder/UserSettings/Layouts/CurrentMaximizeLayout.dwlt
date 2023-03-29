@@ -25,7 +25,7 @@ MonoBehaviour:
   m_MinSize: {x: 400, y: 200}
   m_MaxSize: {x: 32384, y: 16192}
   vertical: 0
-  controlID: 6793
+  controlID: 13001
 --- !u!114 &2
 MonoBehaviour:
   m_ObjectHideFlags: 52
@@ -142,7 +142,7 @@ MonoBehaviour:
   m_MinSize: {x: 200, y: 200}
   m_MaxSize: {x: 16192, y: 16192}
   vertical: 1
-  controlID: 6794
+  controlID: 13002
 --- !u!114 &4
 MonoBehaviour:
   m_ObjectHideFlags: 52
@@ -167,7 +167,7 @@ MonoBehaviour:
   m_MinSize: {x: 200, y: 100}
   m_MaxSize: {x: 16192, y: 8096}
   vertical: 0
-  controlID: 6795
+  controlID: 13003
 --- !u!114 &5
 MonoBehaviour:
   m_ObjectHideFlags: 52
@@ -503,7 +503,7 @@ MonoBehaviour:
   m_Rotation:
     m_Target: {x: 0.097479954, y: 0.8839742, z: -0.21295263, w: 0.40465695}
     speed: 2
-    m_Value: {x: 0.09747995, y: 0.8839742, z: -0.21295263, w: 0.40465695}
+    m_Value: {x: 0.09747952, y: 0.8839703, z: -0.21295169, w: 0.40465516}
   m_Size:
     m_Target: 24.967308
     speed: 2
@@ -628,7 +628,7 @@ MonoBehaviour:
   m_MinSize: {x: 200, y: 100}
   m_MaxSize: {x: 16192, y: 8096}
   vertical: 0
-  controlID: 6893
+  controlID: 12967
 --- !u!114 &10
 MonoBehaviour:
   m_ObjectHideFlags: 52
@@ -696,7 +696,7 @@ MonoBehaviour:
     m_SkipHidden: 0
     m_SearchArea: 1
     m_Folders:
-    - Assets/Prefabs
+    - Assets/Scripts/GameStateManager/GameStates/EditorState
     m_Globs: []
     m_OriginalText: 
   m_ViewMode: 0
@@ -735,9 +735,9 @@ MonoBehaviour:
       m_Icon: {fileID: 0}
       m_ResourceFile: 
   m_AssetTreeState:
-    scrollPos: {x: 0, y: 0}
-    m_SelectedIDs: a06b0000
-    m_LastClickedID: 27552
+    scrollPos: {x: 0, y: 726.9973}
+    m_SelectedIDs: d8140000
+    m_LastClickedID: 5336
     m_ExpandedIDs: ffffffff00000000d66d0000d86d0000da6d0000dc6d0000de6d0000e06d0000e26d0000e46d0000e66d0000e86d0000ea6d00001e6e0000246e0000
     m_RenameOverlay:
       m_UserAcceptedRename: 0
@@ -763,8 +763,8 @@ MonoBehaviour:
       m_Icon: {fileID: 0}
       m_ResourceFile: 
   m_ListAreaState:
-    m_SelectedInstanceIDs: a06b0000
-    m_LastClickedInstanceID: 27552
+    m_SelectedInstanceIDs: d8140000
+    m_LastClickedInstanceID: 5336
     m_HadKeyboardFocusLastEvent: 0
     m_ExpandedInstanceIDs: c6230000
     m_RenameOverlay:
@@ -1056,7 +1056,7 @@ MonoBehaviour:
     m_SaveData: []
   m_LockTracker:
     m_IsLocked: 0
-  m_LastSelectedObjectID: 26874
+  m_LastSelectedObjectID: 36402
 --- !u!114 &16
 MonoBehaviour:
   m_ObjectHideFlags: 52
@@ -1239,9 +1239,9 @@ MonoBehaviour:
   m_SceneHierarchy:
     m_TreeViewState:
       scrollPos: {x: 0, y: 0}
-      m_SelectedIDs: a06b0000
+      m_SelectedIDs: d8140000
       m_LastClickedID: 0
-      m_ExpandedIDs: b6faffff08fbffff6268000074680000c0680000c4680000f8690000166a0000
+      m_ExpandedIDs: 2470fcffb6faffff08fbffff6268000074680000c0680000c4680000f8690000166a0000ac8d0000c88d0000d88e0000
       m_RenameOverlay:
         m_UserAcceptedRename: 0
         m_Name: 

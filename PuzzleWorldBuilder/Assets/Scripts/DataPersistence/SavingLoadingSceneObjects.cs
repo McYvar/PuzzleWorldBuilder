@@ -53,6 +53,10 @@ public class SavingLoadingSceneObjects : MonoBehaviour, IDataPersistence
                         GameObject loadedObj = Instantiate(go, parent);
                         loadedObj.transform.position = terrainObjectData.position;
                         loadedObj.transform.rotation = terrainObjectData.rotation;
+                        loadedObj.name = go.name;
+                        TerrainObject terrainObject = loadedObj.GetComponent<TerrainObject>();
+                        terrainObject.OnCreation();
+                        terrainObject.InitializeOnLoad();
                         found = true;
                         break;
                     }

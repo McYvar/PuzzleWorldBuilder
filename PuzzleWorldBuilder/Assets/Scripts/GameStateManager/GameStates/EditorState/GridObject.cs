@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
-public class GridObject : SceneObject, IDataPersistence
+public class GridObject : SceneObject
 {
     PuzzleGrid sharedGrid;
     public static List<GridObject> gridObjects = new List<GridObject>();
@@ -17,13 +17,11 @@ public class GridObject : SceneObject, IDataPersistence
         gridObjects.Add(this);
         isCreated = false;
         mydata = new GridObjectData();
-        DataPersistenceManager.instance.AddDataPersistenceObject(this);
     }
 
     protected override void OnDisable()
     {
         base.OnDisable();
-        DataPersistenceManager.instance.RemoveDataPersistenceObject(this);
     }
 
     public override void OnSelection()
@@ -62,6 +60,7 @@ public class GridObject : SceneObject, IDataPersistence
     public void AssignGrid(PuzzleGrid grid)
     {
         sharedGrid = grid;
+        SavePostion();
     }
 
     public override void MoveTo(Vector3 newPos)
@@ -73,18 +72,6 @@ public class GridObject : SceneObject, IDataPersistence
     public void SavePostion()
     {
         mydata.position = transform.position;
-    }
-
-    public void NewData()
-    {
-    }
-
-    public void LoadData(GameData data)
-    {
-    }
-
-    public void SaveData(ref GameData data)
-    {
     }
 }
 
