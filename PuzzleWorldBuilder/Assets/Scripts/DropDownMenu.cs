@@ -42,13 +42,11 @@ public class DropDownMenu : MonoBehaviour
 
         rectTransform = GetComponent<RectTransform>();
         dropDownRect = dropDownObject.GetComponent<RectTransform>();
-        if (emptyGameObj == null) emptyGameObj = new GameObject("Empty");
     }
 
     private void OnDisable()
     {
         BackGroundLayerOptions.AllDropDownMenus.Remove(this);
-        DestroyImmediate(emptyGameObj);
     }
 
     /// <summary>

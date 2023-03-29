@@ -7,9 +7,6 @@ using System.Xml.Serialization;
 
 public class DataPersistenceManager : MonoBehaviour
 {
-    [Header("File Storage Config")]
-    [SerializeField] string fileName;
-
     GameData gameData;
     public static DataPersistenceManager instance { get; private set; }
     FileDataHandler dataHandler;
@@ -18,11 +15,14 @@ public class DataPersistenceManager : MonoBehaviour
     Queue<IDataPersistence> addQueue;
     Queue<IDataPersistence> removeQueue;
 
-    BinaryFormatter bf;
     XmlSerializer xmlFormatter;
+
+    string currentFile = "";
 
     private void Awake()
     {
+        DontDestroyOnLoad(this);
+
         dataPersistenceObjects = new List<IDataPersistence>();
         addQueue = new Queue<IDataPersistence>();
         removeQueue = new Queue<IDataPersistence>();
@@ -35,9 +35,7 @@ public class DataPersistenceManager : MonoBehaviour
 
     private void Start()
     {
-        bf = new BinaryFormatter();
         xmlFormatter = new XmlSerializer(typeof(GameData));
-        dataHandler = new FileDataHandler(Application.persistentDataPath, fileName, xmlFormatter);
         dataPersistenceObjects = FindAllDataPersistenceObjects();
     }
 
@@ -62,13 +60,7 @@ public class DataPersistenceManager : MonoBehaviour
 
     public void LoadFile()
     {
-        gameData = dataHandler.Load();
-
-        if (gameData == null)
-        {
-            Debug.Log("No data was found. Initializing data to defaults");
-            NewFile();
-        }
+        gameData = dataHandler.Load(currentFile);
 
         foreach (IDataPersistence dataPersistenceObj in dataPersistenceObjects)
         {
@@ -78,12 +70,13 @@ public class DataPersistenceManager : MonoBehaviour
 
     public void SaveFile()
     {
+        dataHandler = new FileDataHandler(Application.persistentDataPath, currentFile, xmlFormatter);
         foreach (IDataPersistence dataPersistenceObj in dataPersistenceObjects)
         {
             dataPersistenceObj.SaveData(ref gameData);
         }
 
-        dataHandler.Save(gameData);
+        dataHandler.Save(gameData, currentFile);
     }
 
     public void AddDataPersistenceObject(IDataPersistence objToAdd)

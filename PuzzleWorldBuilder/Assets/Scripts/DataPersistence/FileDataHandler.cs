@@ -12,18 +12,16 @@ public class FileDataHandler
     //BinaryFormatter bf;
     XmlSerializer xmlFormatter;
     string dataDirPath = "";
-    string dataFileName = "";
 
     public FileDataHandler(string dataDirPath, string dataFileName, XmlSerializer formatter)
     {
         xmlFormatter = formatter;
         this.dataDirPath = dataDirPath;
-        this.dataFileName = dataFileName;
     }
 
-    public GameData Load()
+    public GameData Load(string fileName)
     {
-        string fullPath = Path.Combine(dataDirPath, dataFileName);
+        string fullPath = Path.Combine(dataDirPath, fileName + ".PuzzleWorldBuilder");
         GameData loadedData = null;
         if (File.Exists(fullPath))
         {
@@ -40,9 +38,9 @@ public class FileDataHandler
         return loadedData;
     }
 
-    public void Save(GameData data)
+    public void Save(GameData data, string fileName)
     {
-        string fullPath = Path.Combine(dataDirPath, dataFileName);
+        string fullPath = Path.Combine(dataDirPath, fileName + ".PuzzleWorldBuilder");
         try
         {
             Directory.CreateDirectory(Path.GetDirectoryName(fullPath));
