@@ -11,6 +11,10 @@ public class PlayState : BaseState
     {
     }
 
+    public override void OnStart()
+    {
+    }
+
     public override void OnEnter()
     {
     }

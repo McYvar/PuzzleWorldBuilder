@@ -704,6 +704,6 @@ public class InputCommands : AbstractGameEditor, IPointerDownHandler, IPointerUp
     {
         commandManager.ClearAll();
         selectedObjects.Clear();
-        floatingObjectsMenu.SetActive(true);
+        floatingObjectsMenu.transform.localPosition = new Vector3((-Screen.width / 2) + 32, (Screen.height / 2) - 24, 0);
     }
 }

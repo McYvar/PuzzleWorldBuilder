@@ -8,6 +8,10 @@ public class PausedState : BaseState
     {
     }
 
+    public override void OnStart()
+    {
+    }
+
     public override void OnEnter()
     {
     }

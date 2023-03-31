@@ -96,4 +96,11 @@ public class DataPersistenceManager : MonoBehaviour
 
         return new List<IDataPersistence>(dataPersistenceObjects);
     }
+
+    public void AddNewFileAction()
+    {
+        UIListener.listener += NewFile;
+    }
+
+    
 }

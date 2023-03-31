@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.UI;
 
 public class BaseMenuWindow : AbstractGameEditor
 {
@@ -47,4 +48,5 @@ public class BaseMenuWindow : AbstractGameEditor
     {
         return rectTransform;
     }
+
 }

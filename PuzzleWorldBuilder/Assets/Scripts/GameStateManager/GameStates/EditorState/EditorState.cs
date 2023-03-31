@@ -8,9 +8,18 @@ public class EditorState : BaseState
     public static Queue<AbstractGameEditor> newEditorsQueue = new Queue<AbstractGameEditor>();
     public static Queue<AbstractGameEditor> removeEditorsQueue = new Queue<AbstractGameEditor>();
 
+    List<AbstractGameEditor> addedEditors;
+
     public override void OnAwake()
     {
         Editor();
+        EditorsOnAwake();
+    }
+
+    public override void OnStart()
+    {
+        EditorsOnStart();
+        addedEditors.Clear();
     }
 
     public override void OnEnter()
@@ -28,6 +37,9 @@ public class EditorState : BaseState
     public override void OnUpdate()
     {
         Editor();
+        EditorsOnAwake();
+        EditorsOnStart();
+        addedEditors.Clear();
         foreach (AbstractGameEditor editor in editors)
         {
             editor.EditorUpdate();
@@ -36,11 +48,11 @@ public class EditorState : BaseState
 
     void Editor()
     {
-        List<AbstractGameEditor> addedEditor = new List<AbstractGameEditor>();
+        addedEditors = new List<AbstractGameEditor>();
         while (newEditorsQueue.Count > 0)
         {
             AbstractGameEditor editor = newEditorsQueue.Dequeue();
-            addedEditor.Add(editor);
+            addedEditors.Add(editor);
             editors.Add(editor);
         }
 
@@ -52,11 +64,19 @@ public class EditorState : BaseState
                     editors.Remove(editor);
         }
 
-        foreach (AbstractGameEditor editor in addedEditor)
+    }
+
+    public void EditorsOnAwake()
+    {
+        foreach (AbstractGameEditor editor in addedEditors)
         {
             editor.EditorAwake();
         }
-        foreach (AbstractGameEditor editor in addedEditor)
+    }
+
+    public void EditorsOnStart()
+    {
+        foreach (AbstractGameEditor editor in addedEditors)
         {
             editor.EditorStart();
         }

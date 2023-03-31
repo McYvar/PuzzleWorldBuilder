@@ -11,6 +11,12 @@ public class GameStateManager : MonoBehaviour
         DontDestroyOnLoad(this);
         BaseState[] states = GetComponents<BaseState>();
         fsm = new FiniteStateMachine(typeof(EditorState), states);
+        fsm.OnAwake();
+    }
+
+    private void Start()
+    {
+        fsm.OnStart();
     }
 
     private void Update()

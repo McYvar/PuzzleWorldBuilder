@@ -8,6 +8,10 @@ public class MainMenuState : BaseState
     {
     }
 
+    public override void OnStart()
+    {
+    }
+
     public override void OnEnter()
     {
     }

@@ -300,6 +300,7 @@ GameObject:
   - component: {fileID: 3447886939196476396}
   - component: {fileID: 3447886939196476395}
   - component: {fileID: 2697004362880063596}
+  - component: {fileID: 3007565777045278797}
   m_Layer: 5
   m_Name: Prefab_ObjectMenuCategoryButton
   m_TagString: Untagged
@@ -436,6 +437,22 @@ MonoBehaviour:
   text: {fileID: 3447886938819693420}
   activeColor: {r: 0.7924528, g: 0, b: 0, a: 0.7019608}
   normalColor: {r: 0.6509804, g: 0.6509804, b: 0.6509804, a: 0.7019608}
+--- !u!114 &3007565777045278797
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3447886939196476393}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 43c01ff254f6ebb48a838c953c8e915b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  outlineTop: {fileID: 4765848219759120317}
+  outlineBottom: {fileID: 1365771003301832625}
+  outlineLeft: {fileID: 8843835664183844624}
+  outlineRight: {fileID: 2285989223969739140}
 --- !u!1 &4051225965815519685
 GameObject:
   m_ObjectHideFlags: 0
