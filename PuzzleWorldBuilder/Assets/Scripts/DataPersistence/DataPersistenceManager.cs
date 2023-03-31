@@ -4,6 +4,7 @@ using UnityEngine;
 using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Xml.Serialization;
+using TMPro;
 
 public class DataPersistenceManager : MonoBehaviour
 {
@@ -18,10 +19,14 @@ public class DataPersistenceManager : MonoBehaviour
     XmlSerializer xmlFormatter;
 
     string currentFile = "";
+    [SerializeField] TMP_Text inputfieldText;
+
+    bool isSaved;
 
     private void Awake()
     {
         DontDestroyOnLoad(this);
+        isSaved = true; // because nothing is opened yet...
 
         dataPersistenceObjects = new List<IDataPersistence>();
         addQueue = new Queue<IDataPersistence>();
@@ -60,6 +65,7 @@ public class DataPersistenceManager : MonoBehaviour
 
     public void LoadFile()
     {
+        dataHandler = new FileDataHandler(Application.persistentDataPath, currentFile, xmlFormatter);
         gameData = dataHandler.Load(currentFile);
 
         foreach (IDataPersistence dataPersistenceObj in dataPersistenceObjects)
@@ -70,6 +76,10 @@ public class DataPersistenceManager : MonoBehaviour
 
     public void SaveFile()
     {
+        if (GetSavedState()) return;
+        SetSavedState(true);
+        Debug.Log(currentFile);
+
         dataHandler = new FileDataHandler(Application.persistentDataPath, currentFile, xmlFormatter);
         foreach (IDataPersistence dataPersistenceObj in dataPersistenceObjects)
         {
@@ -97,10 +107,23 @@ public class DataPersistenceManager : MonoBehaviour
         return new List<IDataPersistence>(dataPersistenceObjects);
     }
 
-    public void AddNewFileAction()
+    public void SetSavedState(bool saveState)
     {
-        UIListener.listener += NewFile;
+        isSaved = saveState;
     }
 
-    
+    public bool GetSavedState()
+    {
+        return isSaved;
+    }
+
+    public void SetFileName(string name)
+    {
+        currentFile = name;
+    }
+
+    public string GetFileName()
+    {
+        return currentFile;
+    }
 }

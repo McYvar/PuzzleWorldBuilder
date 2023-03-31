@@ -23,12 +23,15 @@ public class CommandManager
             Push(command);
             redoStack.Clear();
         }
-        Debug.Log("Executed: " + command.GetType());
+        //Debug.Log("Executed: " + command.GetType());
 
         if (undoListStack.Count > maxUndoAmount)
         {
             RemoveAtBottom();
         }
+
+        // update save state since a change was made
+        DataPersistenceManager.instance.SetSavedState(false);
     }
 
     public void UndoCommand()
@@ -38,11 +41,7 @@ public class CommandManager
             ICommand command = Pop();
             command.Undo();
             redoStack.Push(command);
-            Debug.Log("Undo: " + command.GetType());
-        }
-        else
-        {
-            Debug.Log("Nothing left to undo!");
+            //Debug.Log("Undo: " + command.GetType());
         }
     }
 
@@ -53,11 +52,7 @@ public class CommandManager
             ICommand command = redoStack.Pop();
             command.Redo();
             Push(command);
-            Debug.Log("Redo: " + command.GetType());
-        }
-        else
-        {
-            Debug.Log("Nothing left to redo!");
+            //Debug.Log("Redo: " + command.GetType());
         }
     }
 

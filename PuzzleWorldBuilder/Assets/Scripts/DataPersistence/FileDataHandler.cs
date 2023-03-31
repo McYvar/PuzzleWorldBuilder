@@ -9,9 +9,9 @@ using System.Xml.Serialization;
 
 public class FileDataHandler
 {
-    //BinaryFormatter bf;
     XmlSerializer xmlFormatter;
     string dataDirPath = "";
+    string fileExtention = "puzzlebuildtool";
 
     public FileDataHandler(string dataDirPath, string dataFileName, XmlSerializer formatter)
     {
@@ -21,7 +21,7 @@ public class FileDataHandler
 
     public GameData Load(string fileName)
     {
-        string fullPath = Path.Combine(dataDirPath, fileName + ".PuzzleWorldBuilder");
+        string fullPath = Path.Combine(dataDirPath, fileName + "." + fileExtention);
         GameData loadedData = null;
         if (File.Exists(fullPath))
         {
@@ -40,7 +40,7 @@ public class FileDataHandler
 
     public void Save(GameData data, string fileName)
     {
-        string fullPath = Path.Combine(dataDirPath, fileName + ".PuzzleWorldBuilder");
+        string fullPath = Path.Combine(dataDirPath, fileName + "." + fileExtention);
         try
         {
             Directory.CreateDirectory(Path.GetDirectoryName(fullPath));

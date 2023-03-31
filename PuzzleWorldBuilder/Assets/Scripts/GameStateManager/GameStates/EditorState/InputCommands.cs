@@ -117,11 +117,6 @@ public class InputCommands : AbstractGameEditor, IPointerDownHandler, IPointerUp
         {
             smoothPivot = camerasPivot.position;
         }
-
-        if (Input.GetKeyDown(KeyCode.S))
-        {
-            Debug.Log(selectedObjects.Count);
-        }
     }
 
     #region CommandManager
