@@ -85,8 +85,16 @@ public class CommandManager
 
     public void ClearAll()
     {
+        foreach (ICommand command in undoListStack)
+        {
+            command.ClearFirstUndo();
+        }
         undoListStack.Clear();
-        redoStack.Clear();
+
+        while (redoStack.Count > 0)
+        {
+            redoStack.Pop().ClearRedo();
+        }
     }
 }
 

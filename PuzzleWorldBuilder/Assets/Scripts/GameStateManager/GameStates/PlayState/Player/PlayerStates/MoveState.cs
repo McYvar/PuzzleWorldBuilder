@@ -30,6 +30,17 @@ public class MoveState : BaseState
 
     public override void OnEnter()
     {
+        FindObjects[] found = FindObjectsOfType<FindObjects>();
+        foreach (FindObjects foundObj in found)
+        {
+            if (foundObj.name == "CamerasPivot")
+            {
+                mainCamera = foundObj.transform;
+                break;
+            }
+        }
+
+        rb.isKinematic = false;
         rb.useGravity = true;
         Physics.gravity = -transform.up * 9.81f;
     }

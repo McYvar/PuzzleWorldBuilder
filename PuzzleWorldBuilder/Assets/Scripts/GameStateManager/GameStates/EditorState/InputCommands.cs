@@ -171,6 +171,10 @@ public class InputCommands : AbstractGameEditor, IPointerDownHandler, IPointerUp
         {
             SelectAllTerrainObjects();
         }
+        else if (Input.GetKeyDown(KeyCode.S))
+        {
+            DataPersistenceManager.instance.SaveFile();
+        }
 
         if (Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.X))
             ToggleGridSnap();
@@ -206,6 +210,10 @@ public class InputCommands : AbstractGameEditor, IPointerDownHandler, IPointerUp
         else if (Input.GetKeyDown(KeyCode.A) && (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl)))
         {
             SelectAllTerrainObjects();
+        }
+        else if (Input.GetKeyDown(KeyCode.S) && (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl)))
+        {
+            DataPersistenceManager.instance.SaveFile();
         }
         if (Input.GetKeyDown(KeyCode.X) && !(Input.GetKey(KeyCode.LeftControl)))
             ToggleGridSnap();
@@ -699,6 +707,10 @@ public class InputCommands : AbstractGameEditor, IPointerDownHandler, IPointerUp
     {
         commandManager.ClearAll();
         selectedObjects.Clear();
-        floatingObjectsMenu.transform.localPosition = new Vector3((-Screen.width / 2) + 32, (Screen.height / 2) - 24, 0);
+
+        camerasPivot.transform.position = new Vector3(15, 0, 5);
+        camerasPivot.transform.rotation = Quaternion.Euler(45, 0, 0);
+        mainCamera.transform.localPosition = new Vector3(0, 0, -10);
+        mainCamera.transform.localRotation = Quaternion.identity;
     }
 }

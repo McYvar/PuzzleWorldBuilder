@@ -9,6 +9,7 @@ public class PlayState : BaseState
     public static Queue<AbstractGameRunner> removeRunnesQueue = new Queue<AbstractGameRunner>();
 
     List<AbstractGameRunner> addedRunners;
+    [SerializeField] InputCommands inputCommands;
 
     public override void OnAwake()
     {
@@ -47,6 +48,14 @@ public class PlayState : BaseState
         foreach (AbstractGameRunner runner in runners)
         {
             runner.RunnerUpdate();
+        }
+
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            stateManager.SwitchState(typeof(EditorState));
+            DataPersistenceManager.instance.LoadFile();
+            inputCommands.transform.parent.gameObject.SetActive(true);
+            inputCommands.ResetTool();
         }
     }
 
