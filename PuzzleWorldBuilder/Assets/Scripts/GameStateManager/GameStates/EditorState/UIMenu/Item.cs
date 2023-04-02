@@ -13,12 +13,13 @@ public class Item : AbstractGameEditor
         base.OnEnable();
     }
 
-    public void Initialize(CommandManager commandManager, Transform parent)
+    public void Initialize(CommandManager commandManager, Transform parent, Transform spawnPivot)
     {
         this.commandManager = commandManager;
         addObject = GetComponent<AddObjectCommand>();
         addObject.addToUndo = true;
         addObject.SetParent(parent);
+        addObject.SetSpawnPivot(spawnPivot);
     }
 
     public void AddItemToScene()

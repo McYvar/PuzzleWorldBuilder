@@ -5,13 +5,13 @@ using UnityEngine;
 public class AirMovementState : MoveState
 {
     [SerializeField] float airMoveForce;
-
     float jumpDelay;
 
     public override void OnEnter()
     {
         base.OnEnter();
         jumpDelay = 0;
+        rb.velocity += groundObjectVelocity;
     }
 
     public override void OnFixedUpdate()
@@ -31,12 +31,6 @@ public class AirMovementState : MoveState
             jumpDelay += Time.deltaTime;
             return;
         }
-
-        Ray ray = new Ray(transform.position, -transform.up);
-        float sphereRadius = 0.4f;
-        if (Physics.SphereCast(ray, sphereRadius, transform.localScale.y - (sphereRadius / 2) + 0.01f))
-        {
-            stateManager.SwitchState(typeof(GroundMovementState));
-        }
+        if (isGrounded) stateManager.SwitchState(typeof(GroundMovementState));
     }
 }

@@ -61,7 +61,6 @@ public class IdleState : BaseState
             smoothTime);
 
         float lerpValue = Mathf.InverseLerp((head.position - startPos).magnitude, 0, (head.position - mainCamera.position).magnitude);
-        Debug.Log(lerpValue);
 
         mainCameraPivot.rotation =
             Quaternion.Slerp(pivotStartRot,

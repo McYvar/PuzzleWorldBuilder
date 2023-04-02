@@ -16,12 +16,14 @@ public class AddObjectCommand : BaseObjectCommands
     [SerializeField] SceneObject myObjectPrefab;
     LinkedList<SceneObject> undoLinkedList = new LinkedList<SceneObject>();
     Stack<SceneObject> redoStack = new Stack<SceneObject>();
+    Transform spawnPivot;
 
     public override void Execute()
     {
         // Add object, link last object as previous to this one
         TerrainObject createdObject = CreateObject(myObjectPrefab) as TerrainObject;
         createdObject.myData.name = createdObject.name;
+        createdObject.transform.position = spawnPivot.position;
         undoLinkedList.AddLast(createdObject);
     }
 
@@ -57,5 +59,10 @@ public class AddObjectCommand : BaseObjectCommands
         {
             Destroy(redoStack.Pop().gameObject);
         }
+    }
+
+    public void SetSpawnPivot(Transform pivot)
+    {
+        spawnPivot = pivot;
     }
 }

@@ -26,6 +26,8 @@ public class ObjectMenu : BaseMenuWindow
     [SerializeField] InputCommands inputCommands;
     [SerializeField] Transform objectListTransform;
 
+    [SerializeField] Transform spawnPivot;
+
     public override void EditorStart()
     {
         base.EditorStart();
@@ -76,7 +78,7 @@ public class ObjectMenu : BaseMenuWindow
 
                 // then inside this newly created item frame we put an image inside with specific offsets and assign the 
                 Item currentItem = categories[categoryIterator].items[itemIterator];
-                currentItem.Initialize(inputCommands.GetCommandManager(), objectListTransform);
+                currentItem.Initialize(inputCommands.GetCommandManager(), objectListTransform, spawnPivot);
                 ObjectMenuItemSpace currentItemSpace = newItem.GetComponent<ObjectMenuItemSpace>();
                 currentItemSpace.button.image.sprite = currentItem.sprite;
                 currentItemSpace.button.onClick.AddListener(() => currentItem.AddItemToScene());
