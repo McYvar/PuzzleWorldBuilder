@@ -63,7 +63,7 @@ public class InputCommands : AbstractGameEditor, IPointerDownHandler, IPointerUp
     [SerializeField] Transform camerasPivot;
     Vector3 smoothPivot;
     Vector3 smoothDampRef = Vector3.zero;
-    bool doSmooth = false;
+    bool doSmooth;
 
     bool isTranslatingPivot = false;
     float minTranslateAmp = 0;
@@ -99,6 +99,7 @@ public class InputCommands : AbstractGameEditor, IPointerDownHandler, IPointerUp
 
     public override void EditorStart()
     {
+        doSmooth = true;
     }
 
     public override void EditorUpdate()
@@ -287,8 +288,7 @@ public class InputCommands : AbstractGameEditor, IPointerDownHandler, IPointerUp
         /// When pasting a copy, the creation of this copy has to go trough the class handling the creation of objects
         /// in the level editor so the creation of it can be undone.
         if (ClipBoard.clipboard.Count > 0)
-            if (selectedObjects[0] as GridObject) return;
-            else commandManager.ExecuteCommand(pasteCommand);
+            commandManager.ExecuteCommand(pasteCommand);
     }
 
     public void Cut()

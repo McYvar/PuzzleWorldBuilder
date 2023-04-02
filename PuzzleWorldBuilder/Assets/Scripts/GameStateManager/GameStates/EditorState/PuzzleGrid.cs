@@ -1511,7 +1511,6 @@ public class TileInformation
     public void SetTileType(TileType newType)
     {
         myType = newType;
-        myGridObject.mydata.tileType = myType;
 
         switch (myType)
         {

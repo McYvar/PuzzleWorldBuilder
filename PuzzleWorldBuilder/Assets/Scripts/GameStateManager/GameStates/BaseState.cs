@@ -17,4 +17,5 @@ public abstract class BaseState : MonoBehaviour
     public abstract void OnExit();
     public abstract void OnUpdate();
     public abstract void OnFixedUpdate();
+    public abstract void OnLateUpdate();
 }

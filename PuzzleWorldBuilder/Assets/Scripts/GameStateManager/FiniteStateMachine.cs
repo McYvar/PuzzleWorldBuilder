@@ -16,10 +16,11 @@ public class FiniteStateMachine
             state.Initialize(this);
             stateDictionary.Add(state.GetType(), state);
         }
+        OnAwake();
         SwitchState(startState);
     }
 
-    public void OnAwake()
+    void OnAwake()
     {
         foreach (BaseState state in stateDictionary.Values)
         {
@@ -45,6 +46,11 @@ public class FiniteStateMachine
         currentState?.OnFixedUpdate();
     }
 
+    public void OnLateUpdate()
+    {
+        currentState?.OnLateUpdate();
+    }
+
     public void SwitchState(System.Type newStateStype)
     {
         currentState?.OnExit();
@@ -52,4 +58,8 @@ public class FiniteStateMachine
         currentState?.OnEnter();
     }
 
+    public void DebugCurrentState()
+    {
+        Debug.Log(currentState);
+    }
 }

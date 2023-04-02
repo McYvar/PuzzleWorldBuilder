@@ -27,4 +27,8 @@ public class PausedState : BaseState
     public override void OnUpdate()
     {
     }
+
+    public override void OnLateUpdate()
+    {
+    }
 }

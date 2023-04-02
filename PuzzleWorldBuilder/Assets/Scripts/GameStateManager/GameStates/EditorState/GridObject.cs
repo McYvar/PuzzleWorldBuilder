@@ -60,18 +60,17 @@ public class GridObject : SceneObject
     public void AssignGrid(PuzzleGrid grid)
     {
         sharedGrid = grid;
-        SavePostion();
     }
 
     public override void MoveTo(Vector3 newPos)
     {
         sharedGrid.MoveTile(myStartPos, newPos);
-        SavePostion();
     }
 
-    public void SavePostion()
+    public override void SaveObject()
     {
         mydata.position = transform.position;
+        mydata.tileType = sharedGrid.GetTile(transform.position).GetTileType();
     }
 }
 

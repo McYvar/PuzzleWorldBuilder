@@ -56,7 +56,6 @@ public class SavingLoadingSceneObjects : MonoBehaviour, IDataPersistence
                         loadedObj.name = go.name;
                         TerrainObject terrainObject = loadedObj.GetComponent<TerrainObject>();
                         terrainObject.OnCreation();
-                        terrainObject.InitializeOnLoad();
                         found = true;
                         break;
                     }
@@ -89,12 +88,13 @@ public class SavingLoadingSceneObjects : MonoBehaviour, IDataPersistence
             }
             puzzleStageEditor.InitializeNewGrid(maxX + 1, maxZ + 1, minX, minZ, positions.ToArray(), tileTypes.ToArray());
         }
-
+        /*
         foreach (GridObject gridObject in GridObject.gridObjects)
         {
             if (gridObject.mydata.tileType == TileType.PLACEABLE_TILE) gridObject.isCreated = true;
             gridObject.SavePostion();
         }
+        */
     }
 
     public void SaveData(ref GameData data)
@@ -105,6 +105,7 @@ public class SavingLoadingSceneObjects : MonoBehaviour, IDataPersistence
         {
             foreach (TerrainObject terrainObject in TerrainObject.terrainObjects)
             {
+                terrainObject.SaveObject();
                 data.terrainObjectData.Add(terrainObject.myData);
             }
         }
@@ -115,6 +116,7 @@ public class SavingLoadingSceneObjects : MonoBehaviour, IDataPersistence
         {
             foreach (GridObject gridObject in GridObject.gridObjects)
             {
+                gridObject.SaveObject();
                 data.gridObjectData.Add(gridObject.mydata);
             }
         }

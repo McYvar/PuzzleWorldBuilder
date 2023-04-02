@@ -65,7 +65,7 @@ public class SceneObject : AbstractGameEditor
     {
     }
 
-    public virtual void InitializeOnLoad() { }
+    public virtual void SaveObject() { }
 }
 
 [System.Serializable]

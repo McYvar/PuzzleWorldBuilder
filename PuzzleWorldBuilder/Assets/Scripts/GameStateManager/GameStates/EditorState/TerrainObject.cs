@@ -13,6 +13,12 @@ public class TerrainObject : SceneObject
         myData = new TerrainObjectData();
     }
 
+    public override void EditorStart()
+    {
+        base.EditorStart();
+        SaveObject();
+    }
+
     public override void OnCreation()
     {
         meshRenderer.material.SetInt("_UseShader", 0);
@@ -47,7 +53,7 @@ public class TerrainObject : SceneObject
         myData.position = transform.position;
     }
 
-    public override void InitializeOnLoad()
+    public override void SaveObject()
     {
         myData.name = gameObject.name;
         myData.position = transform.position;

@@ -30,9 +30,7 @@ public class EditorState : BaseState
     {
     }
 
-    public override void OnFixedUpdate()
-    {
-    }
+    public override void OnFixedUpdate() { }
 
     public override void OnUpdate()
     {
@@ -66,7 +64,7 @@ public class EditorState : BaseState
 
     }
 
-    public void EditorsOnAwake()
+    void EditorsOnAwake()
     {
         foreach (AbstractGameEditor editor in addedEditors)
         {
@@ -74,7 +72,7 @@ public class EditorState : BaseState
         }
     }
 
-    public void EditorsOnStart()
+    void EditorsOnStart()
     {
         foreach (AbstractGameEditor editor in addedEditors)
         {
@@ -86,5 +84,9 @@ public class EditorState : BaseState
     {
         // code for saving the current level and then play it!
         stateManager.SwitchState(typeof(PlayState));
+    }
+
+    public override void OnLateUpdate()
+    {
     }
 }

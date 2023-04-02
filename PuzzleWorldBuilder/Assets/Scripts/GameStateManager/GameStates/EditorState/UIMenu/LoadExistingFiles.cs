@@ -10,7 +10,6 @@ public class LoadExistingFiles : AbstractGameEditor
     [SerializeField] GameObject framePrefab;
     [SerializeField] GameObject topLevelParent;
     RectTransform myRect;
-    float parentHeight = 600;
 
     public override void EditorAwake()
     {

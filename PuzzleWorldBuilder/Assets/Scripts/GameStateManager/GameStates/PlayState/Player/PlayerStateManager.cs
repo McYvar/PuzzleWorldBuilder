@@ -2,36 +2,35 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class GameStateManager : MonoBehaviour
+public class PlayerStateManager : AbstractGameRunner
 {
     [SerializeField] BaseState startState;
     FiniteStateMachine fsm;
 
-    private void Awake()
-    {
-        DontDestroyOnLoad(this);
+    public override void RunnerAwake() 
+    { 
         BaseState[] states = GetComponents<BaseState>();
         fsm = new FiniteStateMachine(startState.GetType(), states);
     }
 
-    private void Start()
+    public override void RunnerStart() 
     {
         fsm?.OnStart();
     }
 
-    private void Update()
-    {
-        fsm?.OnUpdate();
-    }
-
-    private void FixedUpdate()
+    public override void RunnerFixedUpdate()
     {
         fsm?.OnFixedUpdate();
     }
 
-    private void LateUpdate()
+    public override void RunnerLateUpdate()
     {
         fsm?.OnLateUpdate();
+    }
+
+    public override void RunnerUpdate()
+    {
+        fsm?.OnUpdate();
     }
 
     public void SwitchState(System.Type state)
