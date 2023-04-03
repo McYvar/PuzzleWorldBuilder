@@ -3,7 +3,7 @@ using UnityEngine;
 [RequireComponent(typeof(Rigidbody))]
 public class MoveState : BaseState
 {
-    [SerializeField] Transform mainCamera;
+    [SerializeField] static Transform mainCamera;
     [SerializeField] Transform head;
 
     protected Rigidbody rb;
