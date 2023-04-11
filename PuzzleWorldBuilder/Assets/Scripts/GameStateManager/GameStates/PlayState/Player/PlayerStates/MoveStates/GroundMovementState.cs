@@ -15,23 +15,16 @@ public class GroundMovementState : MoveState
     {
         base.OnEnter();
         isGrounded = true;
-        /*
-        if (rb.velocity.magnitude > maxEntryForce) // should be converted to vertical only
-        {
-            recoveryDelay = 0;
-            Debug.Log("entry force was " + rb.velocity.magnitude + ", recovering!");
-        }
-        */
         recoveryTimer = 0;
     }
 
     public override void OnFixedUpdate()
     {
         base.OnFixedUpdate();
-        Vector3 resultMove = head.forward * verticalInput * groundMoveForce + 
-            head.right * horizontalInput * groundMoveForce;
+        Vector3 resultMove = head.forward * verticalInput + 
+            head.right * horizontalInput;
 
-        rb.AddForce(resultMove);
+        rb.AddForce(resultMove.normalized * groundMoveForce);
     }
 
     public override void OnUpdate()
@@ -50,7 +43,7 @@ public class GroundMovementState : MoveState
             return;
         }
 
-        if (Input.GetKey(KeyCode.Space)) Jump();
+        if (Input.GetKeyDown(KeyCode.Space)) Jump();
     }
 
     public override void OnLateUpdate()

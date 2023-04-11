@@ -19,7 +19,8 @@ public class MoveState : BaseState, IGravity
     protected static Vector3 groundObjectVelocity;
 
     [SerializeField] float sensitivity;
-    [SerializeField, Range(0, 1)] float slerpSpeed;
+    [SerializeField, Range(0, 0.2f)] float slerpSpeed;
+    [SerializeField] LayerMask castLayers;
 
     public override void OnAwake()
     {
@@ -33,7 +34,6 @@ public class MoveState : BaseState, IGravity
     public override void OnEnter()
     {
         rb.isKinematic = false;
-        rb.useGravity = false;
     }
 
     public override void OnExit()
@@ -48,7 +48,8 @@ public class MoveState : BaseState, IGravity
     {
         InputDetection();
         GroundDetection();
-        Physics.gravity = -transform.up * 9.81f;
+
+        if (rb.useGravity) RotateTowardsGravity(Physics.gravity);
     }
 
     public override void OnLateUpdate()
@@ -75,7 +76,8 @@ public class MoveState : BaseState, IGravity
         if (Physics.SphereCast(ray,
             sphereRadius,
             out hit,
-            transform.localScale.y - sphereRadius + 0.1f))
+            transform.localScale.y - sphereRadius + 0.1f,
+            castLayers))
         {
             if (hit.collider != null)
             {
@@ -106,18 +108,33 @@ public class MoveState : BaseState, IGravity
         mainCamera.localEulerAngles = new Vector3(xRot,
                                                   mainCamera.localEulerAngles.y + horizontalMouse.y,
                                                   mainCamera.localEulerAngles.z);
+    }
 
-        Debug.DrawLine(head.position, head.position + head.transform.forward);
+    public void OnEnterZone()
+    {
     }
 
     public void SetGravity(Vector3 direction)
     {
+        rb.useGravity = false;
         rb.AddForce(direction);
-        //transform.eulerAngles = Vector3.RotateTowards(-transform.up, direction, Time.deltaTime, 0.0f);
+        RotateTowardsGravity(direction);
+    }
+
+    public void OnExitZone()
+    {
+        rb.useGravity = true;
     }
 
     public Vector3 GetPosition()
     {
         return transform.position;
+    }
+
+    void RotateTowardsGravity(Vector3 direction)
+    {
+        transform.rotation = Quaternion.Slerp(transform.rotation,
+            Quaternion.FromToRotation(Vector3.down, direction),
+            slerpSpeed);
     }
 }

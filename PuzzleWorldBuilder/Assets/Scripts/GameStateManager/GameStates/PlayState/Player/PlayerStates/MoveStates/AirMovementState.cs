@@ -17,10 +17,10 @@ public class AirMovementState : MoveState
     public override void OnFixedUpdate()
     {
         base.OnFixedUpdate();
-        Vector3 resultMove = head.forward * verticalInput * airMoveForce +
-            head.right * horizontalInput * airMoveForce;
+        Vector3 resultMove = head.forward * verticalInput +
+            head.right * horizontalInput;
 
-        rb.AddForce(resultMove);
+        rb.AddForce(resultMove.normalized * airMoveForce);
     }
 
     public override void OnUpdate()

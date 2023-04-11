@@ -47,6 +47,15 @@ public class GravityBehaviour : AbstractGameRunner
 
     }
 
+    private void OnTriggerEnter(Collider other)
+    {
+        IGravity obj = other.GetComponent<IGravity>();
+        if (obj != null)
+        {
+            obj.OnEnterZone();
+        }
+    }
+
     private void OnTriggerStay(Collider other)
     {
         IGravity obj = other.GetComponent<IGravity>();
@@ -66,12 +75,23 @@ public class GravityBehaviour : AbstractGameRunner
             }
         }
     }
+
+    private void OnTriggerExit(Collider other)
+    {
+        IGravity obj = other.GetComponent<IGravity>();
+        if (obj != null)
+        {
+            obj.OnExitZone();
+        }
+    }
 }
 
 public enum GravityType { STATIC_ZONE = 0, GRAVITY_POINT_PULL = 1, GRAVITY_POINT_PUSH = 2 }
 
 public interface IGravity
 {
+    void OnEnterZone();
     void SetGravity(Vector3 direction);
+    void OnExitZone();
     Vector3 GetPosition();
 }
