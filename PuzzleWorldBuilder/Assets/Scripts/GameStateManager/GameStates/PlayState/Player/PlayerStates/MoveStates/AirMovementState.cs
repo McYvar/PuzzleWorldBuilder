@@ -16,8 +16,9 @@ public class AirMovementState : MoveState
 
     public override void OnFixedUpdate()
     {
-        Vector3 resultMove = transform.forward * verticalInput * airMoveForce +
-            transform.right * horizontalInput * airMoveForce;
+        base.OnFixedUpdate();
+        Vector3 resultMove = head.forward * verticalInput * airMoveForce +
+            head.right * horizontalInput * airMoveForce;
 
         rb.AddForce(resultMove);
     }

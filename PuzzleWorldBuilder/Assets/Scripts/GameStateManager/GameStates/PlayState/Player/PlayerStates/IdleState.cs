@@ -30,19 +30,6 @@ public class IdleState : BaseState
 
     public override void OnEnter()
     {
-        FindObjects[] found = FindObjectsOfType<FindObjects>();
-        foreach (FindObjects foundObj in found)
-        {
-            if (foundObj.name == "CamerasPivot")
-            {
-                mainCameraPivot = foundObj.transform;
-            }
-            if (foundObj.name == "MainCamera")
-            {
-                mainCamera = foundObj.transform;
-            }
-        }
-
         rb.constraints = RigidbodyConstraints.FreezeRotation;
         rb.useGravity = false;
 

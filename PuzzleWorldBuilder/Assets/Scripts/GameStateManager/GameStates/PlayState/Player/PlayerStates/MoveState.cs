@@ -1,23 +1,25 @@
 using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody))]
-public class MoveState : BaseState
+public class MoveState : BaseState, IGravity
 {
-    [SerializeField] static Transform mainCamera;
-    [SerializeField] Transform head;
+    [SerializeField] protected Transform cameraPivot;
+    [SerializeField] protected Transform mainCamera;
+    [SerializeField] protected Transform head;
 
     protected Rigidbody rb;
     protected float horizontalInput;
     protected float verticalInput;
 
     protected float upInput;
-    
+
     protected bool isGrounded;
 
     protected static MovingPlatform platform;
     protected static Vector3 groundObjectVelocity;
 
     [SerializeField] float sensitivity;
+    [SerializeField, Range(0, 1)] float slerpSpeed;
 
     public override void OnAwake()
     {
@@ -30,19 +32,8 @@ public class MoveState : BaseState
 
     public override void OnEnter()
     {
-        FindObjects[] found = FindObjectsOfType<FindObjects>();
-        foreach (FindObjects foundObj in found)
-        {
-            if (foundObj.name == "CamerasPivot")
-            {
-                mainCamera = foundObj.transform;
-                break;
-            }
-        }
-
         rb.isKinematic = false;
-        rb.useGravity = true;
-        Physics.gravity = -transform.up * 9.81f;
+        rb.useGravity = false;
     }
 
     public override void OnExit()
@@ -57,27 +48,12 @@ public class MoveState : BaseState
     {
         InputDetection();
         GroundDetection();
+        Physics.gravity = -transform.up * 9.81f;
     }
 
     public override void OnLateUpdate()
     {
-        // replace w/ cam movement
-        mainCamera.position = head.position;
-        Vector3 headEuler = head.eulerAngles +
-            new Vector3(-Input.GetAxis("Mouse Y") * sensitivity, 0, 0);
-        if (headEuler.x > 180) headEuler.x -= 360;
-        if (headEuler.x < 180) headEuler.x += 360;
-        headEuler.x = Mathf.Clamp(headEuler.x, 270, 450);
-        head.eulerAngles = headEuler;
-        mainCamera.eulerAngles = head.eulerAngles;
-
-        Vector3 bodyEuler = transform.eulerAngles +
-            new Vector3(0, Input.GetAxis("Mouse X") * sensitivity, 0);
-        if (bodyEuler.y > 180) headEuler.y -= 360;
-        if (bodyEuler.y < 180) headEuler.y += 360;
-        transform.eulerAngles = bodyEuler;
-
-        //transform.rotation = Quaternion.LookRotation(transform.forward, -Physics.gravity);
+        CameraMovement();
     }
 
     void InputDetection()
@@ -85,7 +61,7 @@ public class MoveState : BaseState
         horizontalInput = 0;
         if (Input.GetKey(KeyCode.D)) horizontalInput += 1;
         if (Input.GetKey(KeyCode.A)) horizontalInput -= 1;
-
+        
         verticalInput = 0;
         if (Input.GetKey(KeyCode.W)) verticalInput += 1;
         if (Input.GetKey(KeyCode.S)) verticalInput -= 1;
@@ -112,5 +88,36 @@ public class MoveState : BaseState
             isGrounded = false;
             platform = null;
         }
+    }
+
+    void CameraMovement()
+    {
+        cameraPivot.position = head.position;
+        cameraPivot.rotation = transform.rotation;
+
+        Vector3 horizontalMouse = new Vector3(0, Input.GetAxis("Mouse X") * sensitivity, 0);
+        Vector3 verticalMouse = new Vector3(-Input.GetAxis("Mouse Y") * sensitivity, 0);
+
+        head.localEulerAngles += horizontalMouse;
+        float xRot = mainCamera.localEulerAngles.x + verticalMouse.x;
+        if (xRot > 180) xRot -= 360;
+        if (xRot < 180) xRot += 360;
+        xRot = Mathf.Clamp(xRot, 270, 450);
+        mainCamera.localEulerAngles = new Vector3(xRot,
+                                                  mainCamera.localEulerAngles.y + horizontalMouse.y,
+                                                  mainCamera.localEulerAngles.z);
+
+        Debug.DrawLine(head.position, head.position + head.transform.forward);
+    }
+
+    public void SetGravity(Vector3 direction)
+    {
+        rb.AddForce(direction);
+        //transform.eulerAngles = Vector3.RotateTowards(-transform.up, direction, Time.deltaTime, 0.0f);
+    }
+
+    public Vector3 GetPosition()
+    {
+        return transform.position;
     }
 }

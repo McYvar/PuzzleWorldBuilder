@@ -7,12 +7,6 @@ public class GroundMovementState : MoveState
     [SerializeField] float groundMoveForce;
     [SerializeField] float jumpForce;
 
-    Vector3 deltaGroundObjectPosition;
-    Vector3 lastGroundObjectPosition;
-
-    Vector3 deltaGroundObjectEuler;
-    Vector3 lastGroundObjectEuler;
-
     Vector3 deltaPos;
     float recoveryTimer;
     [SerializeField] float maxRecoveryTime;
@@ -33,8 +27,9 @@ public class GroundMovementState : MoveState
 
     public override void OnFixedUpdate()
     {
-        Vector3 resultMove = transform.forward * verticalInput * groundMoveForce + 
-            transform.right * horizontalInput * groundMoveForce;
+        base.OnFixedUpdate();
+        Vector3 resultMove = head.forward * verticalInput * groundMoveForce + 
+            head.right * horizontalInput * groundMoveForce;
 
         rb.AddForce(resultMove);
     }

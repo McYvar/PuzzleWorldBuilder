@@ -4,11 +4,13 @@ using UnityEngine;
 
 public class MovingPlatform : AbstractGameRunner
 {
+    [SerializeField] Vector3 moveVector;
     Vector3 lastPos;
-    public Vector3 deltaPos;
+    [HideInInspector] public Vector3 deltaPos;
 
+    [SerializeField] Vector3 rotateVector;
     Vector3 lastEuler;
-    public Vector3 deltaEuler;
+    [HideInInspector] public Vector3 deltaEuler;
 
     public override void RunnerAwake()
     {
@@ -22,6 +24,28 @@ public class MovingPlatform : AbstractGameRunner
 
     public override void RunnerUpdate()
     {
+        UpdateDelta();
+
+        if (Input.GetKey(KeyCode.E))
+        {
+            transform.position += moveVector * Time.deltaTime;
+        }
+        if (Input.GetKey(KeyCode.R))
+        {
+            transform.eulerAngles += rotateVector * Time.deltaTime;
+        }
+    }
+
+    public override void RunnerFixedUpdate()
+    {
+    }
+
+    public override void RunnerLateUpdate()
+    {
+    }
+
+    void UpdateDelta()
+    {
         deltaPos = transform.position - lastPos;
         lastPos = transform.position;
 
@@ -33,13 +57,5 @@ public class MovingPlatform : AbstractGameRunner
         if (deltaEuler.z > 180) deltaEuler.z -= 360;
         if (deltaEuler.z < 180) deltaEuler.z += 360;
         lastEuler = transform.eulerAngles;
-    }
-
-    public override void RunnerFixedUpdate()
-    {
-    }
-
-    public override void RunnerLateUpdate()
-    {
     }
 }
