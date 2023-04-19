@@ -9,14 +9,14 @@ public class GridObject : SceneObject
     TileInformation lastTileInformation = null;
     public bool isCreated = false;
 
-    public GridObjectData mydata;
+    public GridObjectData myData;
 
     protected override void OnEnable()
     {
         base.OnEnable();
         gridObjects.Add(this);
         isCreated = false;
-        mydata = new GridObjectData();
+        myData = new GridObjectData();
     }
 
     protected override void OnDisable()
@@ -69,8 +69,18 @@ public class GridObject : SceneObject
 
     public override void SaveObject()
     {
-        mydata.position = transform.position;
-        mydata.tileType = sharedGrid.GetTile(transform.position).GetTileType();
+        myData.position = transform.position;
+        myData.tileType = sharedGrid.GetTile(transform.position).GetTileType();
+    }
+
+    public void OnPlayMode()
+    {
+        sharedGrid.MakeNonPlayInvisible(transform.position);
+    }
+
+    public void OnEditMode()
+    {
+        sharedGrid.MakeNonPlayVisable(transform.position);
     }
 }
 

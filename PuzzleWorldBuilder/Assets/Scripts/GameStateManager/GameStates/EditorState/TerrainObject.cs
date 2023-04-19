@@ -73,9 +73,9 @@ public class TerrainObjectData : SceneObjectData
     public string name;
     public Quaternion rotation;
 
-    public TerrainObjectData()
+    public TerrainObjectData() : base()
     {
-        position = Vector3.zero;
+        name = null;
         rotation = Quaternion.identity;
     }
 }

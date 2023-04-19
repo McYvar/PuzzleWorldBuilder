@@ -53,4 +53,9 @@ public class PlayerStateManager : AbstractGameRunner
     {
         fsm?.SwitchState(state);
     }
+
+    public void OnStopPlayMode()
+    {
+        fsm.SwitchState(typeof(IdleState));
+    }
 }

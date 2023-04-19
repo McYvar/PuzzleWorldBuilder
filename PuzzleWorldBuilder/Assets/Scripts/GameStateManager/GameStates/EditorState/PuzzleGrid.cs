@@ -255,6 +255,22 @@ public class PuzzleGrid
         tile.SetHeight(tile.GetHeight());
         UpdateNeighbours(tileChords, offsetChords);
     }
+
+    public void MakeNonPlayInvisible(Vector3 tileChords)
+    {
+        Vector3 offsetChords;
+        FindXZ(tileChords, out offsetChords);
+        if (tileInformation[(int)offsetChords.x, (int)offsetChords.z].GetTileType() == TileType.NONE_TILE)
+            tileInformation[(int)offsetChords.x, (int)offsetChords.z].TurnOffMesh();
+    }
+
+    public void MakeNonPlayVisable(Vector3 tileChords)
+    {
+        Vector3 offsetChords;
+        FindXZ(tileChords, out offsetChords);
+        if (tileInformation[(int)offsetChords.x, (int)offsetChords.z].GetTileType() == TileType.NONE_TILE)
+            tileInformation[(int)offsetChords.x, (int)offsetChords.z].TurnOnMesh();
+    }
 }
 
 public class TileInformation
@@ -303,6 +319,7 @@ public class TileInformation
         myGridObject = myGameObject.GetComponent<GridObject>();
 
         CubeWithoutBottomSmaller(materials[0], 0, 0, 0, 0);
+        SetTileType(TileType.NONE_TILE);
     }
 
     public TileInformation(TileInformation tileToCopy)
@@ -1560,6 +1577,8 @@ public class TileInformation
                 else SetMesh2(myMaterials[2], north, east, south, west);
                 break;
         }
+
+        myMesh.RecalculateBounds();
     }
 
     void SetMesh2(Material material, float north, float east, float south, float west)
@@ -1698,6 +1717,16 @@ public class TileInformation
         SetTileType(TileType.NONE_TILE);
         SetHeight(0);
         UpdateMesh();
+    }
+
+    public void TurnOffMesh()
+    {
+        myMeshRenderer.enabled = false;
+    }
+
+    public void TurnOnMesh()
+    {
+        myMeshRenderer.enabled = true;
     }
 }
 

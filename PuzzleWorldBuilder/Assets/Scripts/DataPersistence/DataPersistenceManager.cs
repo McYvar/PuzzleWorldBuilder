@@ -65,6 +65,12 @@ public class DataPersistenceManager : MonoBehaviour
 
     public void LoadFile()
     {
+        if (currentFile == null)
+        {
+            NewFile();
+            return;
+        }
+
         dataHandler = new FileDataHandler(Application.persistentDataPath, currentFile, xmlFormatter);
         gameData = dataHandler.Load(currentFile);
 

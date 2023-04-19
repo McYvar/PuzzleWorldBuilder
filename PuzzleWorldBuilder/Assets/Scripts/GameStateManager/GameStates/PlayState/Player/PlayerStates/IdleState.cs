@@ -10,14 +10,14 @@ public class IdleState : BaseState
     [SerializeField] Transform mainCameraPivot;
     [SerializeField] Transform mainCamera;
     [SerializeField] Transform head;
-    [SerializeField, Range(0f, 1f)] float smoothTime;
-
-    Vector3 pivotRef = Vector3.zero;
-    Vector3 camRef = Vector3.zero;
     
-    Vector3 startPos;
+    Vector3 cameraStartPos;
+    Vector3 pivotStartPos;
     Quaternion cameraStartRot;
     Quaternion pivotStartRot;
+
+    [SerializeField] float transitionTime = 3f;
+    float transitionTimer = 0;
 
     public override void OnAwake()
     {
@@ -30,16 +30,21 @@ public class IdleState : BaseState
 
     public override void OnEnter()
     {
-        rb.constraints = RigidbodyConstraints.FreezeRotation;
         rb.useGravity = false;
+        rb.velocity = Vector3.zero;
+        rb.constraints = RigidbodyConstraints.FreezeRotation;
 
-        startPos = mainCamera.position;
-        cameraStartRot = mainCamera.rotation;
+        pivotStartPos = mainCameraPivot.position;
+        cameraStartPos = mainCamera.position;
         pivotStartRot = mainCameraPivot.rotation;
+        cameraStartRot = mainCamera.rotation;
+
+        transitionTimer = transitionTime;
     }
 
     public override void OnExit()
     {
+        rb.useGravity = true;
     }
 
     public override void OnFixedUpdate()
@@ -48,19 +53,17 @@ public class IdleState : BaseState
 
     public override void OnUpdate()
     {
+        float lerpValue = Mathf.InverseLerp(transitionTime, 0, transitionTimer);
+
         mainCameraPivot.position =
-            Vector3.SmoothDamp(mainCameraPivot.position,
+            Vector3.Lerp(pivotStartPos,
             head.position,
-            ref camRef,
-            smoothTime);
+            lerpValue);
 
         mainCamera.position =
-            Vector3.SmoothDamp(mainCamera.position,
+            Vector3.Lerp(cameraStartPos,
             mainCameraPivot.position,
-            ref pivotRef,
-            smoothTime);
-
-        float lerpValue = Mathf.InverseLerp((head.position - startPos).magnitude, 0, (head.position - mainCamera.position).magnitude);
+            lerpValue);
 
         mainCameraPivot.rotation =
             Quaternion.Slerp(pivotStartRot,
@@ -69,13 +72,18 @@ public class IdleState : BaseState
 
         mainCamera.rotation =
             Quaternion.Slerp(cameraStartRot,
-            transform.rotation,
+            head.rotation,
             lerpValue);
-        if (Vector3.Distance(head.position, mainCameraPivot.position) < 0.1f &&
-            Vector3.Distance(mainCamera.localPosition, Vector3.zero) < 0.1f)
+        if (transitionTimer <= 0)
         {
+            mainCameraPivot.position = head.position;
+            mainCamera.position = mainCameraPivot.position;
+            mainCameraPivot.rotation = Quaternion.Euler(0, 0, 0);
+            mainCamera.rotation = head.rotation;
+
             SwitchToMoveState();
         }
+        else transitionTimer -= Time.deltaTime;
     }
 
     public void SwitchToMoveState()

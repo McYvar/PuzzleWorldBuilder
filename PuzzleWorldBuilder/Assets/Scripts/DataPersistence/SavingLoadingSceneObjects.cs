@@ -9,11 +9,14 @@ public class SavingLoadingSceneObjects : MonoBehaviour, IDataPersistence
     [SerializeField] Transform parent;
     [SerializeField] GameObject[] usedPrefabs;
 
+    [SerializeField] GameObject player;
+
     public void NewData()
     {
         inputCommands.ResetTool();
         ClearObjects();
         puzzleStageEditor.InitializeNewGrid(30, 30, 0, 0);
+        player.transform.position = new Vector3(15, 3, 15);
     }
 
     void ClearObjects()
@@ -38,9 +41,10 @@ public class SavingLoadingSceneObjects : MonoBehaviour, IDataPersistence
 
     public void LoadData(GameData data)
     {
+        if (data == null) return;
         inputCommands.ResetTool();
         ClearObjects();
-        // loading terrain objects
+
         if (data.terrainObjectData.Count > 0)
         {
             foreach (TerrainObjectData terrainObjectData in data.terrainObjectData)
@@ -88,13 +92,9 @@ public class SavingLoadingSceneObjects : MonoBehaviour, IDataPersistence
             }
             puzzleStageEditor.InitializeNewGrid(maxX + 1, maxZ + 1, minX, minZ, positions.ToArray(), tileTypes.ToArray());
         }
-        /*
-        foreach (GridObject gridObject in GridObject.gridObjects)
-        {
-            if (gridObject.mydata.tileType == TileType.PLACEABLE_TILE) gridObject.isCreated = true;
-            gridObject.SavePostion();
-        }
-        */
+
+        // loading player
+        player.transform.position = data.playerPosition;
     }
 
     public void SaveData(ref GameData data)
@@ -117,8 +117,12 @@ public class SavingLoadingSceneObjects : MonoBehaviour, IDataPersistence
             foreach (GridObject gridObject in GridObject.gridObjects)
             {
                 gridObject.SaveObject();
-                data.gridObjectData.Add(gridObject.mydata);
+                data.gridObjectData.Add(gridObject.myData);
             }
         }
+
+        PlayerObject playerObject = player.GetComponent<PlayerObject>();
+        playerObject.SaveObject();
+        data.playerPosition = playerObject.myData.position;
     }
 }

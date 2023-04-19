@@ -11,6 +11,8 @@ public class PlayState : BaseState
     List<AbstractGameRunner> addedRunners;
     [SerializeField] InputCommands inputCommands;
 
+    [SerializeField] PlayerStateManager playerStateManager;
+
     public override void OnAwake()
     {
         Runners();
@@ -25,10 +27,17 @@ public class PlayState : BaseState
 
     public override void OnEnter()
     {
+        playerStateManager.SwitchState(typeof(IdleState));
+
+        foreach (GridObject go in GridObject.gridObjects)
+        {
+            go.OnPlayMode();
+        }
     }
 
     public override void OnExit()
     {
+        playerStateManager.OnStopPlayMode();
     }
 
     public override void OnFixedUpdate()
@@ -52,7 +61,7 @@ public class PlayState : BaseState
 
         if (Input.GetKeyDown(KeyCode.Escape))
         {
-            stateManager.SwitchState(typeof(EditorState));
+            stateManager.SwitchState(typeof(EditorState)); // has to switch to an ingame ui menu instead of to edit state later
             DataPersistenceManager.instance.LoadFile();
             inputCommands.transform.parent.gameObject.SetActive(true);
             inputCommands.ResetTool();

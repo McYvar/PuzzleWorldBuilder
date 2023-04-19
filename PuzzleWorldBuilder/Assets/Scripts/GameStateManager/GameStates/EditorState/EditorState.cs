@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class EditorState : BaseState
@@ -9,6 +10,7 @@ public class EditorState : BaseState
     public static Queue<AbstractGameEditor> removeEditorsQueue = new Queue<AbstractGameEditor>();
 
     List<AbstractGameEditor> addedEditors;
+    [SerializeField] InputCommands inputCommands;
 
     public override void OnAwake()
     {
@@ -24,6 +26,10 @@ public class EditorState : BaseState
 
     public override void OnEnter()
     {
+        foreach (GridObject go in GridObject.gridObjects)
+        {
+            go.OnEditMode();
+        }
     }
 
     public override void OnExit()

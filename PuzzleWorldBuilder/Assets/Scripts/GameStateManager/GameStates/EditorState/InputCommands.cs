@@ -286,8 +286,8 @@ public class InputCommands : AbstractGameEditor, IPointerDownHandler, IPointerUp
         /// 03/08/2023 Update: did that anyway
 
         if (selectedObjects.Count > 0)
-            if (selectedObjects[0] as GridObject) return;
-            else commandManager.ExecuteCommand(copyCommand);
+            if (selectedObjects[0] as TerrainObject && !(selectedObjects[0] as PlayerObject))
+                commandManager.ExecuteCommand(copyCommand);
     }
 
     public void Paste()
@@ -304,21 +304,22 @@ public class InputCommands : AbstractGameEditor, IPointerDownHandler, IPointerUp
         /// Cut some object, upon cutting the object should be removed trough the class handling the deletion of objects
         /// so this action can be undone. Also when cutting, an invisible copy of this object is made and put on the "clipboard".
         if (selectedObjects.Count > 0)
-            if (selectedObjects[0] as GridObject) return;
-            else commandManager.ExecuteCommand(cutCommand);
+            if (selectedObjects[0] as TerrainObject && !(selectedObjects[0] as PlayerObject))
+                commandManager.ExecuteCommand(cutCommand);
     }
 
     public void Delete()
     {
         if (selectedObjects.Count > 0)
-            commandManager.ExecuteCommand(deleteCommand);
+            if (selectedObjects[0] as PlayerObject) return;
+            else commandManager.ExecuteCommand(deleteCommand);
     }
 
     public void Duplicate()
     {
         if (selectedObjects.Count > 0)
-            if (selectedObjects[0] as GridObject) return;
-            else commandManager.ExecuteCommand(duplicateCommand);
+            if (selectedObjects[0] as TerrainObject && !(selectedObjects[0] as PlayerObject))
+                commandManager.ExecuteCommand(duplicateCommand);
     }
 
     public void SelectAllTerrainObjects()
@@ -327,6 +328,15 @@ public class InputCommands : AbstractGameEditor, IPointerDownHandler, IPointerUp
         terrainObjects.AddRange(TerrainObject.terrainObjects);
         selectCommand.InitializePreSelected(selectedObjects, terrainObjects);
         commandManager.ExecuteCommand(selectCommand);
+    }
+
+    public void DeselectAll()
+    {
+        if (selectedObjects.Count > 0)
+        {
+            deselectCommand.InitializePreDeselected(selectedObjects);
+            commandManager.ExecuteCommand(deselectCommand);
+        }
     }
     #endregion
 
@@ -443,7 +453,7 @@ public class InputCommands : AbstractGameEditor, IPointerDownHandler, IPointerUp
             // here we seek for multiple terrain objects
             foreach (TerrainObject terrainObject in TerrainObject.terrainObjects)
             {
-                if (terrainObject == null) continue;
+                if (terrainObject == null || terrainObject as PlayerObject) continue;
                 Vector3 screenPosition = mainCamera.WorldToScreenPoint(terrainObject.transform.position);
                 if (selectionBox.Contains(screenPosition, true))
                 {
@@ -705,6 +715,7 @@ public class InputCommands : AbstractGameEditor, IPointerDownHandler, IPointerUp
 
     public void ResetTool()
     {
+        DeselectAll();
         commandManager.ClearAll();
         selectedObjects.Clear();
 
