@@ -1,9 +1,7 @@
 using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
-using UnityEngine.UIElements;
 
 public class InputCommands : AbstractGameEditor, IPointerDownHandler, IPointerUpHandler, IPointerMoveHandler, IScrollHandler
 {
@@ -239,7 +237,7 @@ public class InputCommands : AbstractGameEditor, IPointerDownHandler, IPointerUp
         }
     }
 
-    void ToggleGridSnap()
+    public void ToggleGridSnap()
     {
         if (doGridSnap)
         {
@@ -248,12 +246,13 @@ public class InputCommands : AbstractGameEditor, IPointerDownHandler, IPointerUp
         }
         else
         {
+            if (doRelativeSnap) ToggleRelativeSnap();
             doGridSnap = true;
-            gridSnapToggle.color = new Color(gridSnapToggle.color.r, gridSnapToggle.color.g, gridSnapToggle.color.b, 64);
+            gridSnapToggle.color = new Color(gridSnapToggle.color.r, gridSnapToggle.color.g, gridSnapToggle.color.b, 0.5f);
         }
     }
 
-    void ToggleRelativeSnap()
+    public void ToggleRelativeSnap()
     {
         if (doRelativeSnap)
         {
@@ -262,8 +261,9 @@ public class InputCommands : AbstractGameEditor, IPointerDownHandler, IPointerUp
         }
         else
         {
+            if (doGridSnap) ToggleGridSnap();
             doRelativeSnap = true;
-            relativeSnapToggle.color = new Color(relativeSnapToggle.color.r, relativeSnapToggle.color.g, relativeSnapToggle.color.b, 64);
+            relativeSnapToggle.color = new Color(relativeSnapToggle.color.r, relativeSnapToggle.color.g, relativeSnapToggle.color.b, 0.5f);
         }
     }
 
