@@ -24,9 +24,8 @@ public class CustomizableMenuManager : EditorBase
         instance = this;
     }
 
-    protected override void Start()
+    protected void Start()
     {
-        base.Start();
         UpdateMenu();
     }
 

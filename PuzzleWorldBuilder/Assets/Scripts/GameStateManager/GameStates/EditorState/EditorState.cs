@@ -11,14 +11,6 @@ public class EditorState : BaseState
 
     [SerializeField] InputCommands inputCommands;
 
-    public override void OnAwake()
-    {
-    }
-
-    public override void OnStart()
-    {
-    }
-
     public override void OnEnter()
     {
         foreach (GridObject go in GridObject.gridObjects)
@@ -41,7 +33,6 @@ public class EditorState : BaseState
 
     public override void OnUpdate()
     {
-        Debug.Log(editors.Count);
         foreach (EditorBase editor in editors)
         {
             editor.OnUpdate();

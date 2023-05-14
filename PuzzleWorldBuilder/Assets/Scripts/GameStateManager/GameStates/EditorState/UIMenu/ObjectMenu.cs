@@ -28,9 +28,8 @@ public class ObjectMenu : BaseMenuWindow
 
     [SerializeField] Transform spawnPivot;
 
-    protected override void Start()
+    protected void Start()
     {
-        base.Start();
         CreateCategoryItems();
         UpdateSizeDelta();
         DisplayCategory(currentCategory);

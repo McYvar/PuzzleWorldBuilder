@@ -2,10 +2,10 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class EditorBase : BaseState
+public class RunnerBase : BaseState
 {
-    protected virtual void OnEnable() => EditorState.editorsAddQueue.Enqueue(this);
-    protected virtual void OnDisable() => EditorState.editorsRemoveQueue.Enqueue(this);
+    private void OnEnable() => PlayState.newRunnesQueue.Enqueue(this);
+    private void OnDisable() => PlayState.removeRunnesQueue.Enqueue(this);
 
     public override void OnEnter() { }
 

@@ -16,24 +16,7 @@ public class FiniteStateMachine
             state.Initialize(this);
             stateDictionary.Add(state.GetType(), state);
         }
-        OnAwake();
         SwitchState(startState);
-    }
-
-    void OnAwake()
-    {
-        foreach (BaseState state in stateDictionary.Values)
-        {
-            state.OnAwake();
-        }
-    }
-
-    public void OnStart()
-    {
-        foreach (BaseState state in stateDictionary.Values)
-        {
-            state.OnStart();
-        }
     }
 
     public void OnUpdate()

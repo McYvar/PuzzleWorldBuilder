@@ -10,9 +10,8 @@ public class CustomizableBorder : EditorBase, IBorderCustomization
     [SerializeField] Image outlineLeft;
     [SerializeField] Image outlineRight;
 
-    protected override void Start()
+    protected void Start()
     {
-        base.Start();
         CustomizableMenuManager.instance.AddMeToBorders(this);
     }
 

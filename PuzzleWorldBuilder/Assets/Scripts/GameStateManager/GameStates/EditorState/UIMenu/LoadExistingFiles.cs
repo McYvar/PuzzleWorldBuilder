@@ -11,9 +11,8 @@ public class LoadExistingFiles : EditorBase
     [SerializeField] GameObject topLevelParent;
     RectTransform myRect;
 
-    protected override void Start()
+    protected void Start()
     {
-        base.Start();
         myRect = GetComponent<RectTransform>();
         myRect.pivot = new Vector2(0, 1);
         UpdateList();

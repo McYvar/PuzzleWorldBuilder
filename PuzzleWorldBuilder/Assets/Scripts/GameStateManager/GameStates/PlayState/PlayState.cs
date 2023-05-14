@@ -4,26 +4,13 @@ using UnityEngine;
 
 public class PlayState : BaseState
 {
-    public static List<AbstractGameRunner> runners = new List<AbstractGameRunner>();
-    public static Queue<AbstractGameRunner> newRunnesQueue = new Queue<AbstractGameRunner>();
-    public static Queue<AbstractGameRunner> removeRunnesQueue = new Queue<AbstractGameRunner>();
+    public static List<RunnerBase> runners = new List<RunnerBase>();
+    public static Queue<RunnerBase> newRunnesQueue = new Queue<RunnerBase>();
+    public static Queue<RunnerBase> removeRunnesQueue = new Queue<RunnerBase>();
 
-    List<AbstractGameRunner> addedRunners;
     [SerializeField] InputCommands inputCommands;
 
     [SerializeField] PlayerStateManager playerStateManager;
-
-    public override void OnAwake()
-    {
-        Runners();
-        RunnersOnAwake();
-    }
-
-    public override void OnStart()
-    {
-        RunnersOnStart();
-        addedRunners.Clear();
-    }
 
     public override void OnEnter()
     {
@@ -42,21 +29,27 @@ public class PlayState : BaseState
 
     public override void OnFixedUpdate()
     {
-        foreach (AbstractGameRunner runner in runners)
+        foreach (RunnerBase runner in runners)
         {
-            runner.RunnerFixedUpdate();
+            runner.OnFixedUpdate();
         }
     }
 
     public override void OnUpdate()
     {
-        Runners();
-        RunnersOnAwake();
-        RunnersOnStart();
-        addedRunners.Clear();
-        foreach (AbstractGameRunner runner in runners)
+        foreach (RunnerBase runner in runners)
         {
-            runner.RunnerUpdate();
+            runner.OnUpdate();
+        }
+
+        while (newRunnesQueue.Count > 0)
+        {
+            runners.Add(newRunnesQueue.Dequeue());
+        }
+
+        while (removeRunnesQueue.Count > 0)
+        {
+            runners.Remove(removeRunnesQueue.Dequeue());
         }
 
         if (Input.GetKeyDown(KeyCode.Escape))
@@ -70,44 +63,9 @@ public class PlayState : BaseState
 
     public override void OnLateUpdate()
     {
-        foreach (AbstractGameRunner runner in runners)
+        foreach (RunnerBase runner in runners)
         {
-            runner.RunnerLateUpdate();
-        }
-    }
-
-    void Runners()
-    {
-        addedRunners = new List<AbstractGameRunner>();
-        while (newRunnesQueue.Count > 0)
-        {
-            AbstractGameRunner runner = newRunnesQueue.Dequeue();
-            addedRunners.Add(runner);
-            runners.Add(runner);
-        }
-
-        while (removeRunnesQueue.Count > 0)
-        {
-            AbstractGameRunner runner = removeRunnesQueue.Dequeue();
-            if (runner != null) 
-                if (runners.Contains(runner))
-                    runners.Remove(runner);
-        }
-    }
-
-    void RunnersOnAwake()
-    {
-        foreach (AbstractGameRunner runner in addedRunners)
-        {
-            runner.RunnerAwake();
-        }
-    }
-    
-    void RunnersOnStart()
-    {
-        foreach (AbstractGameRunner runner in addedRunners)
-        {
-            runner.RunnerStart();
+            runner.OnLateUpdate();
         }
     }
 

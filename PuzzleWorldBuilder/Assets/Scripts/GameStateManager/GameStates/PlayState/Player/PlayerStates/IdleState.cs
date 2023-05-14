@@ -19,13 +19,9 @@ public class IdleState : BaseState
     [SerializeField] float transitionTime = 3f;
     float transitionTimer = 0;
 
-    public override void OnAwake()
+    private void Awake()
     {
         rb = GetComponent<Rigidbody>();
-    }
-
-    public override void OnStart()
-    {
     }
 
     public override void OnEnter()

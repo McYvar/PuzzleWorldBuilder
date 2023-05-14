@@ -7,9 +7,8 @@ public class CustomizableMenu : EditorBase, IMenuCustomization
 {
     [SerializeField] Image menu;
 
-    protected override void Start()
+    protected void Start()
     {
-        base.Start();
         CustomizableMenuManager.instance.AddMeToMenus(this);
     }
 

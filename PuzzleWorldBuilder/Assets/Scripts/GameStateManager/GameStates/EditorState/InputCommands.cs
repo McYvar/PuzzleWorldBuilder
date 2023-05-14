@@ -99,9 +99,8 @@ public class InputCommands : EditorBase, IPointerDownHandler, IPointerUpHandler,
         commandManager = new CommandManager(maxUndoAmount);
     }
 
-    protected override void Start()
+    protected void Start()
     {
-        base.Start();
         doSmooth = true;
     }
 

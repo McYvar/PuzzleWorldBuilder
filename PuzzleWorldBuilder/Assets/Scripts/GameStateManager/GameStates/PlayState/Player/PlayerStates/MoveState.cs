@@ -22,13 +22,9 @@ public class MoveState : BaseState, IGravity
     [SerializeField, Range(0, 0.2f)] float slerpSpeed;
     [SerializeField] LayerMask castLayers;
 
-    public override void OnAwake()
+    private void Awake()
     {
         rb = GetComponent<Rigidbody>();
-    }
-
-    public override void OnStart()
-    {
     }
 
     public override void OnEnter()

@@ -17,11 +17,6 @@ public class GameStateManager : MonoBehaviour
         fsm = new FiniteStateMachine(startState.GetType(), states);
     }
 
-    private void Start()
-    {
-        fsm?.OnStart();
-    }
-
     private void Update()
     {
         fsm?.OnUpdate();
