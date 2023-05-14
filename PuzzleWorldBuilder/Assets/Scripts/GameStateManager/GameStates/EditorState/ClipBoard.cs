@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-public class ClipBoard : AbstractGameEditor
+public class ClipBoard : EditorBase
 {
     public static List<ClipBoard> clipboard = new List<ClipBoard>();
     public string normalName;
@@ -21,17 +21,5 @@ public class ClipBoard : AbstractGameEditor
     public void RemoveFromClipBoard()
     {
         clipboard.Remove(this);
-    }
-
-    public override void EditorAwake()
-    {
-    }
-
-    public override void EditorStart()
-    {
-    }
-
-    public override void EditorUpdate()
-    {
     }
 }

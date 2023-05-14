@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class InputCommands : AbstractGameEditor, IPointerDownHandler, IPointerUpHandler, IPointerMoveHandler, IScrollHandler
+public class InputCommands : EditorBase, IPointerDownHandler, IPointerUpHandler, IPointerMoveHandler, IScrollHandler
 {
     /// <summary>
     /// Date: 03/08/2023, By: Yvar
@@ -94,18 +94,20 @@ public class InputCommands : AbstractGameEditor, IPointerDownHandler, IPointerUp
         Zoom(0);
     }
 
-    public override void EditorAwake()
+    protected void Awake()
     {
         commandManager = new CommandManager(maxUndoAmount);
     }
 
-    public override void EditorStart()
+    protected override void Start()
     {
+        base.Start();
         doSmooth = true;
     }
 
-    public override void EditorUpdate()
+    public override void OnUpdate()
     {
+        base.OnUpdate();
         CommandManagerUpdater();
         BasicKeys();
         SelectionProcess();
@@ -423,6 +425,7 @@ public class InputCommands : AbstractGameEditor, IPointerDownHandler, IPointerUp
         }
         return false;
     }
+
     void StartSelection(Vector2 mouseLocation)
     {
         selectionStartingPoint = mouseLocation;

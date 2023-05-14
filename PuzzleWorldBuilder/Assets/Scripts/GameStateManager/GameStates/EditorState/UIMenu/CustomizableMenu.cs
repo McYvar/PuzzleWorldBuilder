@@ -3,21 +3,14 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class CustomizableMenu : AbstractGameEditor, IMenuCustomization
+public class CustomizableMenu : EditorBase, IMenuCustomization
 {
     [SerializeField] Image menu;
 
-    public override void EditorAwake()
+    protected override void Start()
     {
-    }
-
-    public override void EditorStart()
-    {
+        base.Start();
         CustomizableMenuManager.instance.AddMeToMenus(this);
-    }
-
-    public override void EditorUpdate()
-    {
     }
 
     public void SetMenuColor(Color newColor)

@@ -2,24 +2,16 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PuzzleStageEditor : AbstractGameEditor
+public class PuzzleStageEditor : EditorBase
 {
     [SerializeField] Material[] noneTileMaterials;
     PuzzleGrid puzzleGrid;
 
     GridObject currentGridObject;
 
-    public override void EditorAwake()
+    public override void OnUpdate()
     {
-        //puzzleGrid = new PuzzleGrid(30, 30, Vector3.zero, noneTileMaterials);
-    }
-
-    public override void EditorStart()
-    {
-    }
-
-    public override void EditorUpdate()
-    {
+        base.OnUpdate();
         if (puzzleGrid == null) return;
 
         RaycastHit hit;

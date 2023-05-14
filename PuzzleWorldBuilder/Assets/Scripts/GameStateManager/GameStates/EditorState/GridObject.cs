@@ -19,11 +19,6 @@ public class GridObject : SceneObject
         myData = new GridObjectData();
     }
 
-    protected override void OnDisable()
-    {
-        base.OnDisable();
-    }
-
     public override void OnSelection()
     {
         base.OnSelection();

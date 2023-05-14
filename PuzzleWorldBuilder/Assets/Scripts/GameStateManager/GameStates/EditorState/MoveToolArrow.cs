@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class MoveToolArrow : AbstractGameEditor
+public class MoveToolArrow : EditorBase
 {
     [SerializeField] Camera mainCamera;
     [SerializeField] Transform toolCentre;
@@ -27,19 +27,10 @@ public class MoveToolArrow : AbstractGameEditor
 
     protected override void OnEnable()
     {
-        base.OnEnable();
         arrows = transform.parent;
     }
 
-    public override void EditorAwake()
-    {
-    }
-
-    public override void EditorStart()
-    {
-    }
-
-    public override void EditorUpdate()
+    public override void OnUpdate()
     {
         float angle = Vector3.Angle(mainCamera.transform.forward, transform.forward);
         if (angle < minViewAngle || angle > 180 - minViewAngle)

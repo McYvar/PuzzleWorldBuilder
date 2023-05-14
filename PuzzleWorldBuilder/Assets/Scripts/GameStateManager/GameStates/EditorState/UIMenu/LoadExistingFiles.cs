@@ -5,25 +5,18 @@ using System.IO;
 using TMPro;
 using UnityEngine.UI;
 
-public class LoadExistingFiles : AbstractGameEditor
+public class LoadExistingFiles : EditorBase
 {
     [SerializeField] GameObject framePrefab;
     [SerializeField] GameObject topLevelParent;
     RectTransform myRect;
 
-    public override void EditorAwake()
+    protected override void Start()
     {
-    }
-
-    public override void EditorStart()
-    {
+        base.Start();
         myRect = GetComponent<RectTransform>();
         myRect.pivot = new Vector2(0, 1);
         UpdateList();
-    }
-
-    public override void EditorUpdate()
-    {
     }
 
     public void UpdateList()

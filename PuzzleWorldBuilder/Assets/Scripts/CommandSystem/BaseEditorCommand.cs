@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class BaseEditorCommand : AbstractGameEditor, ICommand
+public class BaseEditorCommand : EditorBase, ICommand
 {
     [SerializeField] KeyCode baseKey;
 
@@ -37,18 +37,6 @@ public class BaseEditorCommand : AbstractGameEditor, ICommand
     }
 
     public virtual void ClearRedo()
-    {
-    }
-
-    public override void EditorAwake()
-    {
-    }
-
-    public override void EditorStart()
-    {
-    }
-
-    public override void EditorUpdate()
     {
     }
 }

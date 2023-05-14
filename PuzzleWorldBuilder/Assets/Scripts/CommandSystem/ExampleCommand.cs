@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public class ExampleCommand : AbstractGameEditor, ICommand
+public class ExampleCommand : EditorBase, ICommand
 {
     [SerializeField] KeyCode exampleKey;
 
@@ -40,18 +40,6 @@ public class ExampleCommand : AbstractGameEditor, ICommand
     }
 
     public void ClearRedo()
-    {
-    }
-
-    public override void EditorAwake()
-    {
-    }
-
-    public override void EditorStart()
-    {
-    }
-
-    public override void EditorUpdate()
     {
     }
 }

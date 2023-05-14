@@ -46,7 +46,6 @@ public class PlayerStateManager : AbstractGameRunner
     public override void RunnerUpdate()
     {
         fsm?.OnUpdate();
-        fsm?.DebugCurrentState();
     }
 
     public void SwitchState(System.Type state)

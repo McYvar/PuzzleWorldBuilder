@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
 
-public class CustomizableMenuManager : MonoBehaviour
+public class CustomizableMenuManager : EditorBase
 {
     [SerializeField] Color currentBorderColor;
     [SerializeField] Color currentMenuColor;
@@ -12,7 +12,7 @@ public class CustomizableMenuManager : MonoBehaviour
 
     public static CustomizableMenuManager instance { get; private set; }
 
-    private void Awake()
+    protected void Awake()
     {
         borders = new List<IBorderCustomization>();
         menus = new List<IMenuCustomization>();
@@ -24,8 +24,9 @@ public class CustomizableMenuManager : MonoBehaviour
         instance = this;
     }
 
-    private void Start()
+    protected override void Start()
     {
+        base.Start();
         UpdateMenu();
     }
 
