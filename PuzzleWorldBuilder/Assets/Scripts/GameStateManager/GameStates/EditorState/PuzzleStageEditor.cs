@@ -29,6 +29,7 @@ public class PuzzleStageEditor : AbstractGameEditor
         {
             currentGridObject = hit.collider.GetComponent<GridObject>();
             if (currentGridObject != null) puzzleGrid.HighlightTile((int)hit.collider.transform.position.x, (int)hit.collider.transform.position.z);
+            else puzzleGrid.UnhighLightCurrentTile();
         }
     }
 

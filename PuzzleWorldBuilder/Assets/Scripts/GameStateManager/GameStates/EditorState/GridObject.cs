@@ -75,12 +75,12 @@ public class GridObject : SceneObject
 
     public void OnPlayMode()
     {
-        sharedGrid.MakeNonPlayInvisible(transform.position);
+        sharedGrid.OnPlayMode(transform.position);
     }
 
     public void OnEditMode()
     {
-        sharedGrid.MakeNonPlayVisable(transform.position);
+        sharedGrid.OnEditMode(transform.position);
     }
 }
 

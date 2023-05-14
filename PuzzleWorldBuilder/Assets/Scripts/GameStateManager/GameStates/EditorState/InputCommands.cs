@@ -1,6 +1,8 @@
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.UI;
 using UnityEngine.UIElements;
 
 public class InputCommands : AbstractGameEditor, IPointerDownHandler, IPointerUpHandler, IPointerMoveHandler, IScrollHandler
@@ -83,6 +85,8 @@ public class InputCommands : AbstractGameEditor, IPointerDownHandler, IPointerUp
     public static List<SceneObject> selectedObjects = new List<SceneObject>();
 
     [SerializeField] GameObject floatingObjectsMenu;
+    [SerializeField] RawImage gridSnapToggle;
+    [SerializeField] RawImage relativeSnapToggle;
 
     protected override void OnEnable()
     {
@@ -237,14 +241,30 @@ public class InputCommands : AbstractGameEditor, IPointerDownHandler, IPointerUp
 
     void ToggleGridSnap()
     {
-        // later add visual
-        doGridSnap = !doGridSnap;
+        if (doGridSnap)
+        {
+            doGridSnap = false;
+            gridSnapToggle.color = new Color(gridSnapToggle.color.r, gridSnapToggle.color.g, gridSnapToggle.color.b, 0);
+        }
+        else
+        {
+            doGridSnap = true;
+            gridSnapToggle.color = new Color(gridSnapToggle.color.r, gridSnapToggle.color.g, gridSnapToggle.color.b, 64);
+        }
     }
 
     void ToggleRelativeSnap()
     {
-        // later add visual
-        doRelativeSnap = !doRelativeSnap;
+        if (doRelativeSnap)
+        {
+            doRelativeSnap = false;
+            relativeSnapToggle.color = new Color(relativeSnapToggle.color.r, relativeSnapToggle.color.g, relativeSnapToggle.color.b, 0);
+        }
+        else
+        {
+            doRelativeSnap = true;
+            relativeSnapToggle.color = new Color(relativeSnapToggle.color.r, relativeSnapToggle.color.g, relativeSnapToggle.color.b, 64);
+        }
     }
 
     public static void AddKeyCommand(KeyCode keyCode, ICommand command)
