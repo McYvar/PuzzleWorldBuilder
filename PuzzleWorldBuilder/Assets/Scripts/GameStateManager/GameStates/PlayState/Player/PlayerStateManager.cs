@@ -22,7 +22,7 @@ public class PlayerStateManager : RunnerBase
     [SerializeField] BaseState startState;
     FiniteStateMachine fsm;
 
-    private void Awake()
+    private void Start()
     {
         BaseState[] states = GetComponents<BaseState>();
         fsm = new FiniteStateMachine(startState.GetType(), states);

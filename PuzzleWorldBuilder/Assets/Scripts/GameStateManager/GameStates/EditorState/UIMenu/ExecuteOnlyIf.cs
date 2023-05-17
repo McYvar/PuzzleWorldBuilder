@@ -32,4 +32,10 @@ public class ExecuteOnlyIf : MonoBehaviour
 
         else ifTrueEvents.Invoke();
     }
+
+    public void AFileIsOpenened()
+    {
+        if (DataPersistenceManager.didLoad) ifTrueEvents.Invoke();
+        else ifFalseEvents.Invoke();
+    }
 }

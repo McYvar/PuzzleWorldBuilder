@@ -9,7 +9,7 @@ public class GameStateManager : MonoBehaviour
 
     public static GameStateManager Instance;
 
-    private void Awake()
+    private void Start()
     {
         Instance = this;
         DontDestroyOnLoad(this);

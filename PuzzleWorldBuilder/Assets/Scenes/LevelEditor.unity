@@ -6197,7 +6197,7 @@ MonoBehaviour:
   selectionLineBottom: {fileID: 649760384}
   selectionLineLeft: {fileID: 941917491}
   selectionLineRight: {fileID: 1662533163}
-  selectionWidth: 0.5
+  selectionWidth: 1
   mainCamera: {fileID: 963194227}
   overlayCamera: {fileID: 995031004}
   overlayLayer:
@@ -9629,6 +9629,7 @@ GameObject:
   - component: {fileID: 1341379587}
   - component: {fileID: 1341379586}
   - component: {fileID: 1341379585}
+  - component: {fileID: 1341379588}
   m_Layer: 0
   m_Name: Button4
   m_TagString: Untagged
@@ -9739,6 +9740,30 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
+      - m_Target: {fileID: 1341379588}
+        m_TargetAssemblyTypeName: ExecuteOnlyIf, Assembly-CSharp
+        m_MethodName: InvokeIfSaved
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 964170774}
+        m_TargetAssemblyTypeName: InputCommands, Assembly-CSharp
+        m_MethodName: AddExitToListener
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
       - m_Target: {fileID: 1539174168}
         m_TargetAssemblyTypeName: DropDownMenu, Assembly-CSharp
         m_MethodName: HideMenu
@@ -9751,6 +9776,51 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+--- !u!114 &1341379588
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1341379583}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6c02049de5712254481f25ed2fd9752f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ifTrueEvents:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 964170774}
+        m_TargetAssemblyTypeName: InputCommands, Assembly-CSharp
+        m_MethodName: ExitTool
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+  ifFalseEvents:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 1539174169}
+        m_TargetAssemblyTypeName: GotoNextUI, Assembly-CSharp
+        m_MethodName: OpenMenu
+        m_Mode: 2
+        m_Arguments:
+          m_ObjectArgument: {fileID: 542130588}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.GameObject, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+  invokeIfInvalid:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1 &1349533507
 GameObject:
   m_ObjectHideFlags: 0
@@ -10400,6 +10470,7 @@ GameObject:
   - component: {fileID: 1376965237}
   - component: {fileID: 1376965236}
   - component: {fileID: 1376965235}
+  - component: {fileID: 1376965238}
   m_Layer: 0
   m_Name: Button0
   m_TagString: Untagged
@@ -10510,9 +10581,60 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
+      - m_Target: {fileID: 1376965238}
+        m_TargetAssemblyTypeName: ExecuteOnlyIf, Assembly-CSharp
+        m_MethodName: AFileIsOpenened
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
       - m_Target: {fileID: 1539174168}
         m_TargetAssemblyTypeName: DropDownMenu, Assembly-CSharp
         m_MethodName: HideMenu
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+--- !u!114 &1376965238
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1376965233}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6c02049de5712254481f25ed2fd9752f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ifTrueEvents:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 964170774}
+        m_TargetAssemblyTypeName: InputCommands, Assembly-CSharp
+        m_MethodName: DeselectAll
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 1718619379}
+        m_TargetAssemblyTypeName: DataPersistenceManager, Assembly-CSharp
+        m_MethodName: SaveFile
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -10546,30 +10668,12 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
-      - m_Target: {fileID: 1718619379}
-        m_TargetAssemblyTypeName: DataPersistenceManager, Assembly-CSharp
-        m_MethodName: SaveFile
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-      - m_Target: {fileID: 964170774}
-        m_TargetAssemblyTypeName: InputCommands, Assembly-CSharp
-        m_MethodName: DeselectAll
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+  ifFalseEvents:
+    m_PersistentCalls:
+      m_Calls: []
+  invokeIfInvalid:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!224 &1417730040 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 1806575387789474434, guid: f1c1da794201b074082e615036c1ef04, type: 3}
@@ -14010,7 +14114,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0, g: 1, b: 0.13646793, a: 1}
+  m_Color: {r: 0.002580996, g: 0.5471698, b: 0.07732851, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -14958,6 +15062,7 @@ GameObject:
   - component: {fileID: 1942997021}
   - component: {fileID: 1942997020}
   - component: {fileID: 1942997019}
+  - component: {fileID: 1942997022}
   m_Layer: 5
   m_Name: PlayButton
   m_TagString: Untagged
@@ -15030,57 +15135,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1539174168}
-        m_TargetAssemblyTypeName: DropDownMenu, Assembly-CSharp
-        m_MethodName: HideMenu
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-      - m_Target: {fileID: 1605163292}
-        m_TargetAssemblyTypeName: EditorState, Assembly-CSharp
-        m_MethodName: SwitchToPlayState
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-      - m_Target: {fileID: 1718619379}
-        m_TargetAssemblyTypeName: DataPersistenceManager, Assembly-CSharp
-        m_MethodName: SaveFile
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-      - m_Target: {fileID: 964170774}
-        m_TargetAssemblyTypeName: InputCommands, Assembly-CSharp
-        m_MethodName: DeselectAll
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-      - m_Target: {fileID: 80568637}
-        m_TargetAssemblyTypeName: GotoNextUI, Assembly-CSharp
-        m_MethodName: CloseMe
+      - m_Target: {fileID: 1942997022}
+        m_TargetAssemblyTypeName: ExecuteOnlyIf, Assembly-CSharp
+        m_MethodName: AFileIsOpenened
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -15128,6 +15185,75 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1942997017}
   m_CullTransparentMesh: 1
+--- !u!114 &1942997022
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1942997017}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6c02049de5712254481f25ed2fd9752f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ifTrueEvents:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 964170774}
+        m_TargetAssemblyTypeName: InputCommands, Assembly-CSharp
+        m_MethodName: DeselectAll
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 1718619379}
+        m_TargetAssemblyTypeName: DataPersistenceManager, Assembly-CSharp
+        m_MethodName: SaveFile
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 1605163292}
+        m_TargetAssemblyTypeName: EditorState, Assembly-CSharp
+        m_MethodName: SwitchToPlayState
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+  ifFalseEvents:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 0}
+        m_TargetAssemblyTypeName: 
+        m_MethodName: 
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: 
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+  invokeIfInvalid:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!114 &1952135969 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 1806575387574821163, guid: f1c1da794201b074082e615036c1ef04, type: 3}

@@ -22,6 +22,7 @@ public class DataPersistenceManager : MonoBehaviour
     [SerializeField] TMP_Text inputfieldText;
 
     bool isSaved;
+    public static bool didLoad;
 
     private void Awake()
     {
@@ -36,6 +37,7 @@ public class DataPersistenceManager : MonoBehaviour
             Debug.LogError("Found more than one Data Persistence Manager in scene");
         }
         instance = this;
+        didLoad = false;
     }
 
     private void Start()
@@ -61,6 +63,7 @@ public class DataPersistenceManager : MonoBehaviour
         {
             dataPersistenceObj.NewData();
         }
+        didLoad = true;
     }
 
     public void LoadFile()
@@ -78,6 +81,7 @@ public class DataPersistenceManager : MonoBehaviour
         {
             dataPersistenceObj.LoadData(gameData);
         }
+        didLoad = true;
     }
 
     public void SaveFile()

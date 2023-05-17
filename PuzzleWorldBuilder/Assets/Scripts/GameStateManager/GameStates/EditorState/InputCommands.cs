@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -745,5 +746,20 @@ public class InputCommands : EditorBase, IPointerDownHandler, IPointerUpHandler,
         camerasPivot.transform.rotation = Quaternion.Euler(45, 0, 0);
         mainCamera.transform.localPosition = new Vector3(0, 0, -10);
         mainCamera.transform.localRotation = Quaternion.identity;
+    }
+
+    public void AddExitToListener()
+    {
+        UIListener.listener = null;
+        UIListener.listener = ExitTool;
+    }
+
+    public void ExitTool()
+    {
+#if UNITY_EDITOR
+        EditorApplication.isPlaying = false;
+#else
+        Application.Quit();
+#endif
     }
 }
