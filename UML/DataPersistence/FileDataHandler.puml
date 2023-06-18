@@ -1,0 +1,10 @@
+@startuml
+class FileDataHandler {
+    dataDirPath : string = ""
+    fileExtention : string = "puzzlebuildtool"
+    + FileDataHandler(dataDirPath:string, dataFileName:string, formatter:XmlSerializer)
+    + Load(fileName:string) : GameData
+    + Save(data:GameData, fileName:string) : void
+}
+FileDataHandler --> "xmlFormatter" XmlSerializer
+@enduml

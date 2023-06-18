@@ -1,0 +1,20 @@
+@startuml
+class PlayState {
+    + <<override>> OnEnter() : void
+    + <<override>> OnExit() : void
+    + <<override>> OnFixedUpdate() : void
+    + <<override>> OnUpdate() : void
+    + <<override>> OnLateUpdate() : void
+    + SwitchToEditState() : void
+}
+class "List`1"<T> {
+}
+class "Queue`1"<T> {
+}
+BaseState <|-- PlayState
+PlayState o-> "runners<RunnerBase>" "List`1"
+PlayState o-> "newRunnesQueue<RunnerBase>" "Queue`1"
+PlayState o-> "removeRunnesQueue<RunnerBase>" "Queue`1"
+PlayState --> "inputCommands" InputCommands
+PlayState --> "playerStateManager" PlayerStateManager
+@enduml

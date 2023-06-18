@@ -1,0 +1,8 @@
+@startuml
+class BaseMenuWindow {
+    + <<override>> OnUpdate() : void
+    MenuOutline() : void
+    + GetRectTransform() : RectTransform
+}
+EditorBase <|-- BaseMenuWindow
+@enduml

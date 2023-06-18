@@ -1,0 +1,18 @@
+@startuml
+class TranslateObjectCommand {
+    + <<override>> Execute() : void
+    + <<override>> Undo() : void
+    + <<override>> Redo() : void
+    + <<override>> ClearFirstUndo() : void
+    + <<override>> ClearRedo() : void
+    + InitializeNewPostition(newPostition:Vector3) : void
+}
+class "LinkedList`1"<T> {
+}
+class "Stack`1"<T> {
+}
+BaseObjectCommands <|-- TranslateObjectCommand
+TranslateObjectCommand o-> "positionToTranslate" Vector3
+TranslateObjectCommand --> "undoLinkedList<Vector3>" "LinkedList`1"
+TranslateObjectCommand --> "redoStack<Vector3>" "Stack`1"
+@enduml

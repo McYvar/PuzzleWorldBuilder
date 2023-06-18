@@ -1,0 +1,89 @@
+@startuml
+class PuzzleGrid {
+    width : int
+    length : int
+    + PuzzleGrid(width:int, length:int, origin:Vector3, materials:Material[])
+    + IncreaseGrid(addWidth:int, addLength:int) : void
+    FindXZ(position:Vector3, x:int, z:int) : void
+    FindXZ(current:Vector3, offset:Vector3) : void
+    + HighlightTile(x:int, z:int) : void
+    + HighlightTile(tileChords:Vector3) : void
+    + UnhighLightCurrentTile() : void
+    + OnSelectTile(tileChords:Vector3) : void
+    + OnDeselectTile(tileChords:Vector3) : void
+    + OnDeleteTile(tileChords:Vector3) : void
+    CheckPlaceableNeighbour(tileChords:Vector3) : bool
+    + MoveTile(tileChords:Vector3, newPos:Vector3) : void
+    UpdateNeighbours(tileChords:Vector3, offsetChords:Vector3, assignEdgeTiles:bool) : void
+    HeightDifference(current:TileInformation, neighbour:TileInformation) : float
+    + GetTile(tileChords:Vector3) : TileInformation
+    + CreateTile(tileChords:Vector3) : void
+    + CreateTile(tileChords:Vector3, tileType:TileType) : void
+    + CreateTile(tileChords:Vector3, tile:TileInformation) : void
+    + OnPlayMode(tileChords:Vector3) : void
+    + OnEditMode(tileChords:Vector3) : void
+}
+class TileInformation {
+    myHeight : float
+    north : float
+    east : float
+    south : float
+    west : float
+    isSelected : bool
+    + TileInformation(myType:TileType, myPosition:Vector3, materials:Material[])
+    + TileInformation(tileToCopy:TileInformation)
+    FlatTileWithEdgeMesh(material:Material) : void
+    FlatFullTileMeshOnZero(material:Material) : void
+    FlatFullTileMesh(material:Material) : void
+    CubeWithoutBottomSmaller(material:Material, north:float, south:float, east:float, west:float) : void
+    CubeWithoutBottom(material:Material, north:float, south:float, east:float, west:float) : void
+    SouthMesh(material:Material, south:float) : void
+    NorthMesh(material:Material, north:float) : void
+    WestMesh(material:Material, west:float) : void
+    EastMesh(material:Material, east:float) : void
+    ParallelNorthSouth(material:Material, north:float, south:float) : void
+    ParallelEastWest(material:Material, east:float, west:float) : void
+    CornerSouthWestMesh(material:Material, south:float, west:float) : void
+    CornerSouthEastMesh(material:Material, south:float, east:float) : void
+    CornerNorthWestMesh(material:Material, north:float, west:float) : void
+    CornerNorthEastMesh(material:Material, north:float, east:float) : void
+    TrippleSouthEastWestMesh(material:Material, south:float, east:float, west:float) : void
+    TrippleNorthSouthWestMesh(material:Material, north:float, south:float, west:float) : void
+    TrippleNorthSouthEastMesh(material:Material, north:float, south:float, east:float) : void
+    TrippleNorthEastWestMesh(material:Material, north:float, east:float, west:float) : void
+    AssignMesh(vertices:Vector3[], uv:Vector2[], triangles:int[], material:Material) : void
+    + SetTileType(newType:TileType) : void
+    + GetTileType() : TileType
+    + SetHeight(newHeight:float) : void
+    + UpdateMesh() : void
+    SetMesh2(material:Material, north:float, east:float, south:float, west:float) : void
+    + OnSelectTile() : void
+    + OnDeselectTile() : void
+    SetMesh(material:Material) : void
+    + Highlight() : void
+    + Unhighlight() : void
+    + AssignGridToObject(grid:PuzzleGrid) : void
+    + GetHeight() : float
+    + SetNorth(newNorth:float) : void
+    + SetEast(newEast:float) : void
+    + SetSouth(newSouth:float) : void
+    + SetWest(newWest:float) : void
+    + Reset() : void
+    + TurnOffMesh() : void
+    + TurnOnMesh() : void
+}
+enum TileType {
+    NONE_TILE= 0,
+    EDGE_TILE= 1,
+    PLACEABLE_TILE= 2,
+}
+PuzzleGrid o-> "negativeOffset" Vector3
+PuzzleGrid --> "currentHighlightedTile" TileInformation
+TileInformation --> "myType" TileType
+TileInformation --> "myGameObject" GameObject
+TileInformation --> "myMesh" Mesh
+TileInformation --> "myMeshRenderer" MeshRenderer
+TileInformation --> "myCollider" MeshCollider
+TileInformation --> "myGridObject" GridObject
+TileInformation o-> "tileOffset" Vector3
+@enduml

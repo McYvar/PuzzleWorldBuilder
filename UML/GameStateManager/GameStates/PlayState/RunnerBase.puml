@@ -1,0 +1,10 @@
+@startuml
+class RunnerBase {
+    + <<override>> OnEnter() : void
+    + <<override>> OnExit() : void
+    + <<override>> OnUpdate() : void
+    + <<override>> OnFixedUpdate() : void
+    + <<override>> OnLateUpdate() : void
+}
+BaseState <|-- RunnerBase
+@enduml

@@ -1,0 +1,12 @@
+@startuml
+class PlayerStateManager {
+    + <<override>> OnFixedUpdate() : void
+    + <<override>> OnLateUpdate() : void
+    + <<override>> OnUpdate() : void
+    + SwitchState(state:System.Type) : void
+    + OnStopPlayMode() : void
+}
+RunnerBase <|-- PlayerStateManager
+PlayerStateManager --> "startState" BaseState
+PlayerStateManager --> "fsm" FiniteStateMachine
+@enduml

@@ -1,0 +1,27 @@
+@startuml
+class GridObject {
+    + isCreated : bool = false
+    + <<override>> OnSelection() : void
+    + <<override>> OnDeselection() : void
+    + <<override>> OnCreation() : void
+    + <<override>> OnDeletion() : void
+    + OnReCreation() : void
+    + AssignGrid(grid:PuzzleGrid) : void
+    + <<override>> MoveTo(newPos:Vector3) : void
+    + <<override>> SaveObject() : void
+    + OnPlayMode() : void
+    + OnEditMode() : void
+}
+class GridObjectData {
+    + GridObjectData()
+}
+class "List`1"<T> {
+}
+SceneObject <|-- GridObject
+GridObject --> "sharedGrid" PuzzleGrid
+GridObject o-> "gridObjects<GridObject>" "List`1"
+GridObject o-> "lastTileInformation" TileInformation
+GridObject --> "myData" GridObjectData
+SceneObjectData <|-- GridObjectData
+GridObjectData --> "tileType" TileType
+@enduml

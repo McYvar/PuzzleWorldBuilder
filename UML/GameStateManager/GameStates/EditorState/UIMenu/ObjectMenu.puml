@@ -1,0 +1,28 @@
+@startuml
+class ObjectMenu {
+    spaceBetweenItems : float
+    edgeWidthOffset : float
+    edgeHeightOffset : float
+    maxItemsInARow : int
+    currentCategory : int = 0
+    navigator : int = 0
+    + <<override>> OnUpdate() : void
+    UpdateSizeDelta() : void
+    CreateCategoryItems() : void
+    + DisplayCategory(category:int) : void
+}
+class Category <<struct>> {
+    + name : string
+}
+class "List`1"<T> {
+}
+BaseMenuWindow <|-- ObjectMenu
+ObjectMenu --> "objectMenuItemSpacePrefab" ObjectMenuItemSpace
+ObjectMenu --> "categoryButtonPrefab" ObjectMenuItemSpace
+ObjectMenu --> "inputCommands" InputCommands
+ObjectMenu --> "objectListTransform" Transform
+ObjectMenu --> "spawnPivot" Transform
+Category --> "items<Item>" "List`1"
+Category --> "parentObjectTransforms<Transform>" "List`1"
+Category --> "button" ObjectMenuItemSpace
+@enduml

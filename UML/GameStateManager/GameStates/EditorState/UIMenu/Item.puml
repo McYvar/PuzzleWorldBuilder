@@ -1,0 +1,10 @@
+@startuml
+class Item {
+    + Initialize(commandManager:CommandManager, parent:Transform, spawnPivot:Transform) : void
+    + AddItemToScene() : void
+}
+EditorBase <|-- Item
+Item --> "sprite" Sprite
+Item --> "commandManager" CommandManager
+Item --> "addObject" AddObjectCommand
+@enduml

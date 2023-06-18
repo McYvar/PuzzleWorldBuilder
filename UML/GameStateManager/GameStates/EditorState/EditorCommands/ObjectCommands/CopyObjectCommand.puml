@@ -1,0 +1,6 @@
+@startuml
+class CopyObjectCommand {
+    + <<override>> Execute() : void
+}
+BaseObjectCommands <|-- CopyObjectCommand
+@enduml

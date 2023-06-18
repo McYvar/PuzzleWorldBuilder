@@ -1,0 +1,13 @@
+@startuml
+class BaseEditorCommand {
+    + addToUndo : bool <<get>> <<set>>
+    + <<virtual>> Execute() : void
+    + <<virtual>> Undo() : void
+    + <<virtual>> Redo() : void
+    + <<virtual>> ClearFirstUndo() : void
+    + <<virtual>> ClearRedo() : void
+}
+EditorBase <|-- BaseEditorCommand
+ICommand <|-- BaseEditorCommand
+BaseEditorCommand --> "baseKey" KeyCode
+@enduml

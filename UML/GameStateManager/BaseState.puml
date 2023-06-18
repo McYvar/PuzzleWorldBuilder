@@ -1,0 +1,11 @@
+@startuml
+abstract class BaseState {
+    + Initialize(stateManager:FiniteStateMachine) : void
+    + {abstract} OnEnter() : void
+    + {abstract} OnExit() : void
+    + {abstract} OnUpdate() : void
+    + {abstract} OnFixedUpdate() : void
+    + {abstract} OnLateUpdate() : void
+}
+MonoBehaviour <|-- BaseState
+@enduml

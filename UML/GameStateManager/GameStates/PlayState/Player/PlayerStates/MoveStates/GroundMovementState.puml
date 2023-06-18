@@ -1,0 +1,16 @@
+@startuml
+class GroundMovementState {
+    groundMoveForce : float
+    jumpForce : float
+    recoveryTimer : float
+    maxRecoveryTime : float
+    + <<override>> OnEnter() : void
+    + <<override>> OnFixedUpdate() : void
+    + <<override>> OnUpdate() : void
+    + <<override>> OnLateUpdate() : void
+    Jump() : void
+    FollowPlatform() : void
+}
+MoveState <|-- GroundMovementState
+GroundMovementState --> "deltaPos" Vector3
+@enduml

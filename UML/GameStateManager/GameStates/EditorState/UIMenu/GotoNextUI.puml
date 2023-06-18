@@ -1,0 +1,8 @@
+@startuml
+class GotoNextUI {
+    + OpenMenu(newMenu:GameObject) : void
+    + CloseMe() : void
+    + AddOpenMenuAction(newMenu:GameObject) : void
+}
+MonoBehaviour <|-- GotoNextUI
+@enduml

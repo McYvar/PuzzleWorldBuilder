@@ -1,0 +1,10 @@
+@startuml
+class EditorBase {
+    + <<override>> OnEnter() : void
+    + <<override>> OnExit() : void
+    + <<override>> OnUpdate() : void
+    + <<override>> OnFixedUpdate() : void
+    + <<override>> OnLateUpdate() : void
+}
+BaseState <|-- EditorBase
+@enduml

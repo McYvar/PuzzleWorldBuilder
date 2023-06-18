@@ -1,0 +1,30 @@
+@startuml
+class DataPersistenceManager {
+    currentFile : string = ""
+    isSaved : bool
+    + {static} didLoad : bool
+    + NewFile() : void
+    + LoadFile() : void
+    + SaveFile() : void
+    + AddDataPersistenceObject(objToAdd:IDataPersistence) : void
+    + RemoveDataPersistenceObject(objToRemove:IDataPersistence) : void
+    FindAllDataPersistenceObjects() : List<IDataPersistence>
+    + SetSavedState(saveState:bool) : void
+    + GetSavedState() : bool
+    + SetFileName(name:string) : void
+    + GetFileName() : string
+}
+class "List`1"<T> {
+}
+class "Queue`1"<T> {
+}
+MonoBehaviour <|-- DataPersistenceManager
+DataPersistenceManager --> "gameData" GameData
+DataPersistenceManager --> "instance" DataPersistenceManager
+DataPersistenceManager --> "dataHandler" FileDataHandler
+DataPersistenceManager --> "dataPersistenceObjects<IDataPersistence>" "List`1"
+DataPersistenceManager --> "addQueue<IDataPersistence>" "Queue`1"
+DataPersistenceManager --> "removeQueue<IDataPersistence>" "Queue`1"
+DataPersistenceManager --> "xmlFormatter" XmlSerializer
+DataPersistenceManager --> "inputfieldText" TMP_Text
+@enduml

@@ -1,0 +1,10 @@
+@startuml
+class FiniteStateMachine {
+    + FiniteStateMachine(startState:System.Type, states:BaseState[])
+    + OnUpdate() : void
+    + OnFixedUpdate() : void
+    + OnLateUpdate() : void
+    + SwitchState(newStateStype:System.Type) : void
+    + DebugCurrentState() : void
+}
+@enduml

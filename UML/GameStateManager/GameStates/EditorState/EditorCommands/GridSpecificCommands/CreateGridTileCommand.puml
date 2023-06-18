@@ -1,0 +1,17 @@
+@startuml
+class CreateGridTileCommand {
+    + <<override>> Execute() : void
+    + <<override>> Undo() : void
+    + <<override>> Redo() : void
+    + <<override>> ClearFirstUndo() : void
+    + <<override>> ClearRedo() : void
+    + InitializeTiles(tiles:GridObject[]) : void
+}
+class "Stack`1"<T> {
+}
+class "LinkedList`1"<T> {
+}
+BaseEditorCommand <|-- CreateGridTileCommand
+CreateGridTileCommand --> "redoStack<GridObject[]>" "Stack`1"
+CreateGridTileCommand --> "undoLinkedList<GridObject[]>" "LinkedList`1"
+@enduml

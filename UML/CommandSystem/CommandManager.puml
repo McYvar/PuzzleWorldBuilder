@@ -1,0 +1,14 @@
+@startuml
+class CommandManager {
+    + {static} globalMaxUndoAmount : int = 0
+    + CommandManager(maxUndoAmount:int)
+    + ExecuteCommand(command:ICommand) : void
+    + UndoCommand() : void
+    + RedoCommand() : void
+    + Push(item:ICommand) : void
+    + Pop() : ICommand
+    + RemoveAtBottom() : void
+    + RemoveAtTop() : void
+    + ClearAll() : void
+}
+@enduml

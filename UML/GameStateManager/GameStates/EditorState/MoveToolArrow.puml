@@ -1,0 +1,27 @@
+@startuml
+class MoveToolArrow {
+    arrowsDepth : float
+    forwardDepth : float
+    doRelativeSnap : bool
+    snapSize : float
+    doGridSnap : bool
+    minViewAngle : float
+    doFreeMove : bool
+    doEmission : bool
+    + <<override>> OnUpdate() : void
+    + MouseDown(currentArrowDepth:float, currentToolCentre:Vector3, relativeSnap:bool, gridSnap:bool, snapSize:float) : void
+    + MouseMove() : void
+    + MouseUp() : Vector3
+}
+EditorBase <|-- MoveToolArrow
+MoveToolArrow --> "mainCamera" Camera
+MoveToolArrow --> "toolCentre" Transform
+MoveToolArrow --> "arrows" Transform
+MoveToolArrow --> "startPos" Vector3
+MoveToolArrow --> "offset" Vector3
+MoveToolArrow --> "displacement" Vector3
+MoveToolArrow --> "resultMove" Vector3
+MoveToolArrow --> "gridOffset" Vector3
+MoveToolArrow --> "myMesh" MeshRenderer
+MoveToolArrow --> "myCollider" Collider
+@enduml

@@ -1,0 +1,22 @@
+@startuml
+class BackGroundLayerOptions {
+    + OnPointerDown(eventData:PointerEventData) : void
+    + OnPointerUp(eventData:PointerEventData) : void
+    + {static} ClearDropdowns() : void
+    + OpenFloatingDropDown(eventData:PointerEventData) : void
+}
+class "List`1"<T> {
+}
+EditorBase <|-- BackGroundLayerOptions
+IPointerUpHandler <|-- BackGroundLayerOptions
+IPointerDownHandler <|-- BackGroundLayerOptions
+BackGroundLayerOptions o-> "AllDropDownMenus<DropDownMenu>" "List`1"
+BackGroundLayerOptions --> "FloatingDropDownMenu" DropDownMenu
+BackGroundLayerOptions --> "backGroundCanvas" Canvas
+BackGroundLayerOptions --> "leftClickUp" UnityEvent
+BackGroundLayerOptions --> "middleClickUp" UnityEvent
+BackGroundLayerOptions --> "rightClickUp" UnityEvent
+BackGroundLayerOptions --> "leftClickDown" UnityEvent
+BackGroundLayerOptions --> "middleClickDown" UnityEvent
+BackGroundLayerOptions --> "rightClickDown" UnityEvent
+@enduml

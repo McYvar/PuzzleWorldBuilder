@@ -1,0 +1,11 @@
+@startuml
+class PlayerObject {
+    + <<override>> SaveObject() : void
+}
+class PlayerObjectData {
+    + PlayerObjectData()
+}
+TerrainObject <|-- PlayerObject
+PlayerObject --> "myData" PlayerObjectData
+TerrainObjectData <|-- PlayerObjectData
+@enduml

@@ -1,0 +1,11 @@
+@startuml
+class CustomizableBorder {
+    + SetBorderColor(newColor:Color) : void
+}
+EditorBase <|-- CustomizableBorder
+IBorderCustomization <|-- CustomizableBorder
+CustomizableBorder --> "outlineTop" Image
+CustomizableBorder --> "outlineBottom" Image
+CustomizableBorder --> "outlineLeft" Image
+CustomizableBorder --> "outlineRight" Image
+@enduml

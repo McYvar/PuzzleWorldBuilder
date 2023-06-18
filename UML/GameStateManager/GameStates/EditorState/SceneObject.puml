@@ -1,0 +1,19 @@
+@startuml
+class SceneObject {
+    + <<virtual>> OnCreation() : void
+    + <<virtual>> OnDeletion() : void
+    + OnInvisibe() : void
+    + <<virtual>> OnSelection() : void
+    + <<virtual>> OnDeselection() : void
+    + <<virtual>> MoveTo(newPos:Vector3) : void
+    + <<virtual>> OnStartMove() : void
+    + <<virtual>> OnFinishMove() : void
+    + <<virtual>> SaveObject() : void
+}
+class SceneObjectData {
+    + SceneObjectData()
+}
+EditorBase <|-- SceneObject
+SceneObject --> "myStartPos" Vector3
+SceneObjectData --> "position" Vector3
+@enduml

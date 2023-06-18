@@ -1,0 +1,10 @@
+@startuml
+class MainMenuState {
+    + <<override>> OnEnter() : void
+    + <<override>> OnExit() : void
+    + <<override>> OnFixedUpdate() : void
+    + <<override>> OnUpdate() : void
+    + <<override>> OnLateUpdate() : void
+}
+BaseState <|-- MainMenuState
+@enduml

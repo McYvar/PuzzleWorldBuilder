@@ -1,0 +1,9 @@
+@startuml
+class ObjectMenuItemSpace {
+}
+BaseMenuWindow <|-- ObjectMenuItemSpace
+ObjectMenuItemSpace --> "button" Button
+ObjectMenuItemSpace --> "text" TMP_Text
+ObjectMenuItemSpace --> "activeColor" Color
+ObjectMenuItemSpace --> "normalColor" Color
+@enduml

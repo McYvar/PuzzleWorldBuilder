@@ -1,0 +1,19 @@
+@startuml
+class EditorState {
+    + <<override>> OnEnter() : void
+    + <<override>> OnExit() : void
+    + <<override>> OnFixedUpdate() : void
+    + <<override>> OnUpdate() : void
+    + <<override>> OnLateUpdate() : void
+    + SwitchToPlayState() : void
+}
+class "Queue`1"<T> {
+}
+class "List`1"<T> {
+}
+BaseState <|-- EditorState
+EditorState o-> "editorsAddQueue<EditorBase>" "Queue`1"
+EditorState o-> "editorsRemoveQueue<EditorBase>" "Queue`1"
+EditorState o-> "editors<EditorBase>" "List`1"
+EditorState --> "inputCommands" InputCommands
+@enduml

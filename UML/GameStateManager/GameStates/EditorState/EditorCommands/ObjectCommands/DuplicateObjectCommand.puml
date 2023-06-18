@@ -1,0 +1,18 @@
+@startuml
+class DuplicateObjectCommand {
+    + <<override>> Execute() : void
+    + <<override>> Undo() : void
+    + <<override>> Redo() : void
+    + <<override>> ClearFirstUndo() : void
+    + <<override>> ClearRedo() : void
+}
+class "LinkedList`1"<T> {
+}
+class "Stack`1"<T> {
+}
+BaseObjectCommands <|-- DuplicateObjectCommand
+DuplicateObjectCommand --> "undoLinkedList<SceneObject[]>" "LinkedList`1"
+DuplicateObjectCommand --> "redoStack<SceneObject[]>" "Stack`1"
+DuplicateObjectCommand --> "prevUndoLinkedList<SceneObject[]>" "LinkedList`1"
+DuplicateObjectCommand --> "prevRedoStack<SceneObject[]>" "Stack`1"
+@enduml

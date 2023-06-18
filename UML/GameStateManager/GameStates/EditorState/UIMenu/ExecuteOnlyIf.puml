@@ -1,0 +1,11 @@
+@startuml
+class ExecuteOnlyIf {
+    + InvokeIfSaved() : void
+    + InvokeIfFileDoesntExists() : void
+    + AFileIsOpenened() : void
+}
+MonoBehaviour <|-- ExecuteOnlyIf
+ExecuteOnlyIf --> "ifTrueEvents" UnityEvent
+ExecuteOnlyIf --> "ifFalseEvents" UnityEvent
+ExecuteOnlyIf --> "invokeIfInvalid" UnityEvent
+@enduml

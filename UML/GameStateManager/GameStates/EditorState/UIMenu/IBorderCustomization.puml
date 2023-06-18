@@ -1,0 +1,8 @@
+@startuml
+interface IBorderCustomization {
+    SetBorderColor(newColor:Color) : void
+}
+interface IMenuCustomization {
+    SetMenuColor(newColor:Color) : void
+}
+@enduml

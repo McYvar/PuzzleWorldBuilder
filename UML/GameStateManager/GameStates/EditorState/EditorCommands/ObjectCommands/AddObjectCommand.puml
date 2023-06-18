@@ -1,0 +1,19 @@
+@startuml
+class AddObjectCommand {
+    + <<override>> Execute() : void
+    + <<override>> Undo() : void
+    + <<override>> Redo() : void
+    + <<override>> ClearFirstUndo() : void
+    + <<override>> ClearRedo() : void
+    + SetSpawnPivot(pivot:Transform) : void
+}
+class "LinkedList`1"<T> {
+}
+class "Stack`1"<T> {
+}
+BaseObjectCommands <|-- AddObjectCommand
+AddObjectCommand --> "myObjectPrefab" SceneObject
+AddObjectCommand o-> "undoLinkedList<SceneObject>" "LinkedList`1"
+AddObjectCommand o-> "redoStack<SceneObject>" "Stack`1"
+AddObjectCommand --> "spawnPivot" Transform
+@enduml

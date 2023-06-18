@@ -1,0 +1,9 @@
+@startuml
+class GameStateManager {
+    + SwitchState(state:System.Type) : void
+}
+MonoBehaviour <|-- GameStateManager
+GameStateManager --> "startState" BaseState
+GameStateManager --> "fsm" FiniteStateMachine
+GameStateManager --> "Instance" GameStateManager
+@enduml

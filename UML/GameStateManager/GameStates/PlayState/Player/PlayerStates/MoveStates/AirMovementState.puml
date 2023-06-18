@@ -1,0 +1,10 @@
+@startuml
+class AirMovementState {
+    airMoveForce : float
+    jumpDelay : float
+    + <<override>> OnEnter() : void
+    + <<override>> OnFixedUpdate() : void
+    + <<override>> OnUpdate() : void
+}
+MoveState <|-- AirMovementState
+@enduml

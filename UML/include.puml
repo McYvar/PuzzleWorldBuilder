@@ -1,0 +1,969 @@
+@startuml
+class DropDownMenu {
+    buttonWidth : float
+    buttonHeight : float
+    textOffset : float
+    display : bool = false
+    visibleOnEdit : bool = false
+    hideMainButtonText : bool
+    canvasScale : float
+    + DisplayMenu() : void
+    + HideMenu() : void
+    + ToggleMenu() : void
+    + AddButtonToMenu() : void
+    + RemoveButtonFromMenu() : void
+    + ClearButtons() : void
+    + CopyBaseButton(parent:Button, copy:Button) : Button
+    + DisplayDropDownOnLocation(x:float, y:float) : void
+}
+class "List`1"<T> {
+}
+MonoBehaviour <|-- DropDownMenu
+DropDownMenu --> "dropDownObject" GameObject
+DropDownMenu --> "dropDownRect" RectTransform
+DropDownMenu o-> "buttons<Button>" "List`1"
+DropDownMenu --> "dropDownImage" Sprite
+DropDownMenu o-> "buttonTexts<TextMeshProUGUI>" "List`1"
+DropDownMenu --> "rectTransform" RectTransform
+DropDownMenu --> "emptyGameObj" GameObject
+DropDownMenu --> "mainButtonText" TextMeshProUGUI
+DropDownMenu --> "ParentCanvas" Canvas
+class DebugVerts {
+}
+MonoBehaviour <|-- DebugVerts
+DebugVerts --> "mesh" MeshFilter
+DebugVerts o-> "offset" Vector3
+class ExampleCommand {
+    addToUndoSystem : bool = true
+    + addToUndo : bool <<get>> <<set>>
+    + Execute() : void
+    + Undo() : void
+    + Redo() : void
+    + ClearFirstUndo() : void
+    + ClearRedo() : void
+}
+EditorBase <|-- ExampleCommand
+ICommand <|-- ExampleCommand
+ExampleCommand --> "exampleKey" KeyCode
+interface ICommand {
+    addToUndo : bool <<get>> <<set>>
+    Execute() : void
+    Undo() : void
+    Redo() : void
+    ClearFirstUndo() : void
+    ClearRedo() : void
+}
+class CommandManager {
+    + {static} globalMaxUndoAmount : int = 0
+    + CommandManager(maxUndoAmount:int)
+    + ExecuteCommand(command:ICommand) : void
+    + UndoCommand() : void
+    + RedoCommand() : void
+    + Push(item:ICommand) : void
+    + Pop() : ICommand
+    + RemoveAtBottom() : void
+    + RemoveAtTop() : void
+    + ClearAll() : void
+}
+class BaseEditorCommand {
+    + addToUndo : bool <<get>> <<set>>
+    + <<virtual>> Execute() : void
+    + <<virtual>> Undo() : void
+    + <<virtual>> Redo() : void
+    + <<virtual>> ClearFirstUndo() : void
+    + <<virtual>> ClearRedo() : void
+}
+EditorBase <|-- BaseEditorCommand
+ICommand <|-- BaseEditorCommand
+BaseEditorCommand --> "baseKey" KeyCode
+class FiniteStateMachine {
+    + FiniteStateMachine(startState:System.Type, states:BaseState[])
+    + OnUpdate() : void
+    + OnFixedUpdate() : void
+    + OnLateUpdate() : void
+    + SwitchState(newStateStype:System.Type) : void
+    + DebugCurrentState() : void
+}
+class GameStateManager {
+    + SwitchState(state:System.Type) : void
+}
+MonoBehaviour <|-- GameStateManager
+GameStateManager --> "startState" BaseState
+GameStateManager --> "fsm" FiniteStateMachine
+GameStateManager --> "Instance" GameStateManager
+abstract class BaseState {
+    + Initialize(stateManager:FiniteStateMachine) : void
+    + {abstract} OnEnter() : void
+    + {abstract} OnExit() : void
+    + {abstract} OnUpdate() : void
+    + {abstract} OnFixedUpdate() : void
+    + {abstract} OnLateUpdate() : void
+}
+MonoBehaviour <|-- BaseState
+class SavingLoadingSceneObjects {
+    + NewData() : void
+    ClearObjects() : void
+    + LoadData(data:GameData) : void
+    + SaveData(data:GameData) : void
+}
+MonoBehaviour <|-- SavingLoadingSceneObjects
+IDataPersistence <|-- SavingLoadingSceneObjects
+SavingLoadingSceneObjects --> "inputCommands" InputCommands
+SavingLoadingSceneObjects --> "puzzleStageEditor" PuzzleStageEditor
+SavingLoadingSceneObjects --> "parent" Transform
+SavingLoadingSceneObjects --> "player" GameObject
+class FileDataHandler {
+    dataDirPath : string = ""
+    fileExtention : string = "puzzlebuildtool"
+    + FileDataHandler(dataDirPath:string, dataFileName:string, formatter:XmlSerializer)
+    + Load(fileName:string) : GameData
+    + Save(data:GameData, fileName:string) : void
+}
+FileDataHandler --> "xmlFormatter" XmlSerializer
+class DataPersistenceManager {
+    currentFile : string = ""
+    isSaved : bool
+    + {static} didLoad : bool
+    + NewFile() : void
+    + LoadFile() : void
+    + SaveFile() : void
+    + AddDataPersistenceObject(objToAdd:IDataPersistence) : void
+    + RemoveDataPersistenceObject(objToRemove:IDataPersistence) : void
+    FindAllDataPersistenceObjects() : List<IDataPersistence>
+    + SetSavedState(saveState:bool) : void
+    + GetSavedState() : bool
+    + SetFileName(name:string) : void
+    + GetFileName() : string
+}
+class "List`1"<T> {
+}
+class "Queue`1"<T> {
+}
+MonoBehaviour <|-- DataPersistenceManager
+DataPersistenceManager --> "gameData" GameData
+DataPersistenceManager --> "instance" DataPersistenceManager
+DataPersistenceManager --> "dataHandler" FileDataHandler
+DataPersistenceManager --> "dataPersistenceObjects<IDataPersistence>" "List`1"
+DataPersistenceManager --> "addQueue<IDataPersistence>" "Queue`1"
+DataPersistenceManager --> "removeQueue<IDataPersistence>" "Queue`1"
+DataPersistenceManager --> "xmlFormatter" XmlSerializer
+DataPersistenceManager --> "inputfieldText" TMP_Text
+interface IDataPersistence {
+    NewData() : void
+    LoadData(data:GameData) : void
+    SaveData(data:GameData) : void
+}
+class GameData {
+    + GameData()
+}
+class "List`1"<T> {
+}
+GameData --> "terrainObjectData<TerrainObjectData>" "List`1"
+GameData --> "gridObjectData<GridObjectData>" "List`1"
+GameData --> "playerPosition" Vector3
+class RunnerBase {
+    + <<override>> OnEnter() : void
+    + <<override>> OnExit() : void
+    + <<override>> OnUpdate() : void
+    + <<override>> OnFixedUpdate() : void
+    + <<override>> OnLateUpdate() : void
+}
+BaseState <|-- RunnerBase
+class PlayState {
+    + <<override>> OnEnter() : void
+    + <<override>> OnExit() : void
+    + <<override>> OnFixedUpdate() : void
+    + <<override>> OnUpdate() : void
+    + <<override>> OnLateUpdate() : void
+    + SwitchToEditState() : void
+}
+class "List`1"<T> {
+}
+class "Queue`1"<T> {
+}
+BaseState <|-- PlayState
+PlayState o-> "runners<RunnerBase>" "List`1"
+PlayState o-> "newRunnesQueue<RunnerBase>" "Queue`1"
+PlayState o-> "removeRunnesQueue<RunnerBase>" "Queue`1"
+PlayState --> "inputCommands" InputCommands
+PlayState --> "playerStateManager" PlayerStateManager
+class MainMenuState {
+    + <<override>> OnEnter() : void
+    + <<override>> OnExit() : void
+    + <<override>> OnFixedUpdate() : void
+    + <<override>> OnUpdate() : void
+    + <<override>> OnLateUpdate() : void
+}
+BaseState <|-- MainMenuState
+class PuzzleGrid {
+    width : int
+    length : int
+    + PuzzleGrid(width:int, length:int, origin:Vector3, materials:Material[])
+    + IncreaseGrid(addWidth:int, addLength:int) : void
+    FindXZ(position:Vector3, x:int, z:int) : void
+    FindXZ(current:Vector3, offset:Vector3) : void
+    + HighlightTile(x:int, z:int) : void
+    + HighlightTile(tileChords:Vector3) : void
+    + UnhighLightCurrentTile() : void
+    + OnSelectTile(tileChords:Vector3) : void
+    + OnDeselectTile(tileChords:Vector3) : void
+    + OnDeleteTile(tileChords:Vector3) : void
+    CheckPlaceableNeighbour(tileChords:Vector3) : bool
+    + MoveTile(tileChords:Vector3, newPos:Vector3) : void
+    UpdateNeighbours(tileChords:Vector3, offsetChords:Vector3, assignEdgeTiles:bool) : void
+    HeightDifference(current:TileInformation, neighbour:TileInformation) : float
+    + GetTile(tileChords:Vector3) : TileInformation
+    + CreateTile(tileChords:Vector3) : void
+    + CreateTile(tileChords:Vector3, tileType:TileType) : void
+    + CreateTile(tileChords:Vector3, tile:TileInformation) : void
+    + OnPlayMode(tileChords:Vector3) : void
+    + OnEditMode(tileChords:Vector3) : void
+}
+class TileInformation {
+    myHeight : float
+    north : float
+    east : float
+    south : float
+    west : float
+    isSelected : bool
+    + TileInformation(myType:TileType, myPosition:Vector3, materials:Material[])
+    + TileInformation(tileToCopy:TileInformation)
+    FlatTileWithEdgeMesh(material:Material) : void
+    FlatFullTileMeshOnZero(material:Material) : void
+    FlatFullTileMesh(material:Material) : void
+    CubeWithoutBottomSmaller(material:Material, north:float, south:float, east:float, west:float) : void
+    CubeWithoutBottom(material:Material, north:float, south:float, east:float, west:float) : void
+    SouthMesh(material:Material, south:float) : void
+    NorthMesh(material:Material, north:float) : void
+    WestMesh(material:Material, west:float) : void
+    EastMesh(material:Material, east:float) : void
+    ParallelNorthSouth(material:Material, north:float, south:float) : void
+    ParallelEastWest(material:Material, east:float, west:float) : void
+    CornerSouthWestMesh(material:Material, south:float, west:float) : void
+    CornerSouthEastMesh(material:Material, south:float, east:float) : void
+    CornerNorthWestMesh(material:Material, north:float, west:float) : void
+    CornerNorthEastMesh(material:Material, north:float, east:float) : void
+    TrippleSouthEastWestMesh(material:Material, south:float, east:float, west:float) : void
+    TrippleNorthSouthWestMesh(material:Material, north:float, south:float, west:float) : void
+    TrippleNorthSouthEastMesh(material:Material, north:float, south:float, east:float) : void
+    TrippleNorthEastWestMesh(material:Material, north:float, east:float, west:float) : void
+    AssignMesh(vertices:Vector3[], uv:Vector2[], triangles:int[], material:Material) : void
+    + SetTileType(newType:TileType) : void
+    + GetTileType() : TileType
+    + SetHeight(newHeight:float) : void
+    + UpdateMesh() : void
+    SetMesh2(material:Material, north:float, east:float, south:float, west:float) : void
+    + OnSelectTile() : void
+    + OnDeselectTile() : void
+    SetMesh(material:Material) : void
+    + Highlight() : void
+    + Unhighlight() : void
+    + AssignGridToObject(grid:PuzzleGrid) : void
+    + GetHeight() : float
+    + SetNorth(newNorth:float) : void
+    + SetEast(newEast:float) : void
+    + SetSouth(newSouth:float) : void
+    + SetWest(newWest:float) : void
+    + Reset() : void
+    + TurnOffMesh() : void
+    + TurnOnMesh() : void
+}
+enum TileType {
+    NONE_TILE= 0,
+    EDGE_TILE= 1,
+    PLACEABLE_TILE= 2,
+}
+PuzzleGrid o-> "negativeOffset" Vector3
+PuzzleGrid --> "currentHighlightedTile" TileInformation
+TileInformation --> "myType" TileType
+TileInformation --> "myGameObject" GameObject
+TileInformation --> "myMesh" Mesh
+TileInformation --> "myMeshRenderer" MeshRenderer
+TileInformation --> "myCollider" MeshCollider
+TileInformation --> "myGridObject" GridObject
+TileInformation o-> "tileOffset" Vector3
+class BackGroundLayerOptions {
+    + OnPointerDown(eventData:PointerEventData) : void
+    + OnPointerUp(eventData:PointerEventData) : void
+    + {static} ClearDropdowns() : void
+    + OpenFloatingDropDown(eventData:PointerEventData) : void
+}
+class "List`1"<T> {
+}
+EditorBase <|-- BackGroundLayerOptions
+IPointerUpHandler <|-- BackGroundLayerOptions
+IPointerDownHandler <|-- BackGroundLayerOptions
+BackGroundLayerOptions o-> "AllDropDownMenus<DropDownMenu>" "List`1"
+BackGroundLayerOptions --> "FloatingDropDownMenu" DropDownMenu
+BackGroundLayerOptions --> "backGroundCanvas" Canvas
+BackGroundLayerOptions --> "leftClickUp" UnityEvent
+BackGroundLayerOptions --> "middleClickUp" UnityEvent
+BackGroundLayerOptions --> "rightClickUp" UnityEvent
+BackGroundLayerOptions --> "leftClickDown" UnityEvent
+BackGroundLayerOptions --> "middleClickDown" UnityEvent
+BackGroundLayerOptions --> "rightClickDown" UnityEvent
+class ClipBoard {
+    + normalName : string
+    + AddToClipBoard() : void
+    + RemoveFromClipBoard() : void
+}
+class "List`1"<T> {
+}
+EditorBase <|-- ClipBoard
+ClipBoard o-> "clipboard<ClipBoard>" "List`1"
+class PuzzleStageEditor {
+    + <<override>> OnUpdate() : void
+    + GetPuzzleGrid() : PuzzleGrid
+    + InitializeNewGrid(maxX:int, maxZ:int, minX:int, minZ:int, locations:Vector3[], tileTypes:TileType[]) : void
+    + InitializeNewGrid(maxX:int, maxZ:int, minX:int, minZ:int) : void
+}
+EditorBase <|-- PuzzleStageEditor
+PuzzleStageEditor --> "puzzleGrid" PuzzleGrid
+PuzzleStageEditor --> "currentGridObject" GridObject
+class InputCommands {
+    maxUndoAmount : int = 10
+    selectionWidth : float
+    isSelecting : bool = false
+    movementToolDistance : float
+    doSmooth : bool
+    isTranslatingPivot : bool = false
+    minTranslateAmp : float = 0
+    maxTranslateAmp : float
+    translateAmp : float
+    isRotatingPivot : bool = false
+    rotateAmp : float
+    cameraOffset : float
+    scrollDistBase : float
+    scrollAmp : float
+    doRelativeSnap : bool
+    doGridSnap : bool
+    + <<override>> OnUpdate() : void
+    + GetCommandManager() : CommandManager
+    CommandManagerUpdater() : void
+    BasicKeys() : void
+    + ToggleGridSnap() : void
+    + ToggleRelativeSnap() : void
+    + {static} AddKeyCommand(keyCode:KeyCode, command:ICommand) : void
+    + {static} ChangeKeyCommandKey(oldKeyCode:KeyCode, newKeyCode:KeyCode) : void
+    + {static} RemoveKeyCommand(keyCode:KeyCode) : void
+    + Undo() : void
+    + Redo() : void
+    + Copy() : void
+    + Paste() : void
+    + Cut() : void
+    + Delete() : void
+    + Duplicate() : void
+    + SelectAllTerrainObjects() : void
+    + DeselectAll() : void
+    SelectionProcess() : void
+    FoundMoveToolArrow(mouseLocation:Vector2) : bool
+    StartSelection(mouseLocation:Vector2) : void
+    FinishSelection() : void
+    MovementTool() : void
+    + OnPointerDown(eventData:PointerEventData) : void
+    + OnPointerMove(eventData:PointerEventData) : void
+    + OnPointerUp(eventData:PointerEventData) : void
+    + OnScroll(eventData:PointerEventData) : void
+    RotatePivot(mouseDelta:Vector2) : void
+    SetPivot(newLocation:Vector3) : void
+    TranslatePivot(mouseDelta:Vector2) : void
+    Zoom(scrollDelta:float) : void
+    + ResetTool() : void
+    + AddExitToListener() : void
+    + ExitTool() : void
+}
+class "Dictionary`2"<T1,T2> {
+}
+class "List`1"<T> {
+}
+EditorBase <|-- InputCommands
+IPointerDownHandler <|-- InputCommands
+IPointerUpHandler <|-- InputCommands
+IPointerMoveHandler <|-- InputCommands
+IScrollHandler <|-- InputCommands
+InputCommands --> "commandManager" CommandManager
+InputCommands o-> "keyCommands<KeyCode,ICommand>" "Dictionary`2"
+InputCommands --> "deleteCommand" DeleteObjectCommand
+InputCommands --> "selectCommand" SelectObjectCommand
+InputCommands --> "deselectCommand" DeselectObjectCommand
+InputCommands --> "copyCommand" CopyObjectCommand
+InputCommands --> "pasteCommand" PasteObjectCommand
+InputCommands --> "cutCommand" CutObjectCommand
+InputCommands --> "overrideSelectCommand" OverrideSelectObjectCommand
+InputCommands --> "flipSelectCommand" FlipSelectionObjectCommand
+InputCommands --> "translateCommand" TranslateObjectCommand
+InputCommands --> "removeSelectionCommand" RemoveSelectionObjectCommand
+InputCommands --> "duplicateCommand" DuplicateObjectCommand
+InputCommands --> "createGridTileCommand" CreateGridTileCommand
+InputCommands --> "mainCanvas" Canvas
+InputCommands --> "selectionLineTop" RectTransform
+InputCommands --> "selectionLineBottom" RectTransform
+InputCommands --> "selectionLineLeft" RectTransform
+InputCommands --> "selectionLineRight" RectTransform
+InputCommands --> "mainCamera" Camera
+InputCommands --> "overlayCamera" Camera
+InputCommands --> "overlayLayer" LayerMask
+InputCommands --> "currentMoveToolArrow" MoveToolArrow
+InputCommands --> "selectionStartingPoint" Vector2
+InputCommands --> "selectionEndingPoint" Vector2
+InputCommands --> "movementToolObject" GameObject
+InputCommands --> "mtUp" GameObject
+InputCommands --> "mtForward" GameObject
+InputCommands --> "mtRight" GameObject
+InputCommands --> "mtCentreSphere" GameObject
+InputCommands --> "centrePoint" Vector3
+InputCommands --> "camerasPivot" Transform
+InputCommands --> "smoothPivot" Vector3
+InputCommands o-> "smoothDampRef" Vector3
+InputCommands o-> "selectedObjects<SceneObject>" "List`1"
+InputCommands --> "floatingObjectsMenu" GameObject
+InputCommands --> "gridSnapToggle" RawImage
+InputCommands --> "relativeSnapToggle" RawImage
+class SceneObject {
+    + <<virtual>> OnCreation() : void
+    + <<virtual>> OnDeletion() : void
+    + OnInvisibe() : void
+    + <<virtual>> OnSelection() : void
+    + <<virtual>> OnDeselection() : void
+    + <<virtual>> MoveTo(newPos:Vector3) : void
+    + <<virtual>> OnStartMove() : void
+    + <<virtual>> OnFinishMove() : void
+    + <<virtual>> SaveObject() : void
+}
+class SceneObjectData {
+    + SceneObjectData()
+}
+EditorBase <|-- SceneObject
+SceneObject --> "myStartPos" Vector3
+SceneObjectData --> "position" Vector3
+class GridObject {
+    + isCreated : bool = false
+    + <<override>> OnSelection() : void
+    + <<override>> OnDeselection() : void
+    + <<override>> OnCreation() : void
+    + <<override>> OnDeletion() : void
+    + OnReCreation() : void
+    + AssignGrid(grid:PuzzleGrid) : void
+    + <<override>> MoveTo(newPos:Vector3) : void
+    + <<override>> SaveObject() : void
+    + OnPlayMode() : void
+    + OnEditMode() : void
+}
+class GridObjectData {
+    + GridObjectData()
+}
+class "List`1"<T> {
+}
+SceneObject <|-- GridObject
+GridObject --> "sharedGrid" PuzzleGrid
+GridObject o-> "gridObjects<GridObject>" "List`1"
+GridObject o-> "lastTileInformation" TileInformation
+GridObject --> "myData" GridObjectData
+SceneObjectData <|-- GridObjectData
+GridObjectData --> "tileType" TileType
+class EditorBase {
+    + <<override>> OnEnter() : void
+    + <<override>> OnExit() : void
+    + <<override>> OnUpdate() : void
+    + <<override>> OnFixedUpdate() : void
+    + <<override>> OnLateUpdate() : void
+}
+BaseState <|-- EditorBase
+class EditorState {
+    + <<override>> OnEnter() : void
+    + <<override>> OnExit() : void
+    + <<override>> OnFixedUpdate() : void
+    + <<override>> OnUpdate() : void
+    + <<override>> OnLateUpdate() : void
+    + SwitchToPlayState() : void
+}
+class "Queue`1"<T> {
+}
+class "List`1"<T> {
+}
+BaseState <|-- EditorState
+EditorState o-> "editorsAddQueue<EditorBase>" "Queue`1"
+EditorState o-> "editorsRemoveQueue<EditorBase>" "Queue`1"
+EditorState o-> "editors<EditorBase>" "List`1"
+EditorState --> "inputCommands" InputCommands
+class MoveToolArrow {
+    arrowsDepth : float
+    forwardDepth : float
+    doRelativeSnap : bool
+    snapSize : float
+    doGridSnap : bool
+    minViewAngle : float
+    doFreeMove : bool
+    doEmission : bool
+    + <<override>> OnUpdate() : void
+    + MouseDown(currentArrowDepth:float, currentToolCentre:Vector3, relativeSnap:bool, gridSnap:bool, snapSize:float) : void
+    + MouseMove() : void
+    + MouseUp() : Vector3
+}
+EditorBase <|-- MoveToolArrow
+MoveToolArrow --> "mainCamera" Camera
+MoveToolArrow --> "toolCentre" Transform
+MoveToolArrow --> "arrows" Transform
+MoveToolArrow --> "startPos" Vector3
+MoveToolArrow --> "offset" Vector3
+MoveToolArrow --> "displacement" Vector3
+MoveToolArrow --> "resultMove" Vector3
+MoveToolArrow --> "gridOffset" Vector3
+MoveToolArrow --> "myMesh" MeshRenderer
+MoveToolArrow --> "myCollider" Collider
+class PlayerObject {
+    + <<override>> SaveObject() : void
+}
+class PlayerObjectData {
+    + PlayerObjectData()
+}
+TerrainObject <|-- PlayerObject
+PlayerObject --> "myData" PlayerObjectData
+TerrainObjectData <|-- PlayerObjectData
+class TerrainObject {
+    + <<override>> OnCreation() : void
+    + <<override>> OnDeletion() : void
+    + <<override>> OnSelection() : void
+    + <<override>> OnDeselection() : void
+    + <<override>> MoveTo(newPos:Vector3) : void
+    + <<override>> SaveObject() : void
+}
+class TerrainObjectData {
+    + name : string
+    + TerrainObjectData()
+}
+class "List`1"<T> {
+}
+SceneObject <|-- TerrainObject
+TerrainObject o-> "terrainObjects<TerrainObject>" "List`1"
+TerrainObject --> "myData" TerrainObjectData
+SceneObjectData <|-- TerrainObjectData
+TerrainObjectData --> "rotation" Quaternion
+class PausedState {
+    + <<override>> OnEnter() : void
+    + <<override>> OnExit() : void
+    + <<override>> OnFixedUpdate() : void
+    + <<override>> OnUpdate() : void
+    + <<override>> OnLateUpdate() : void
+}
+BaseState <|-- PausedState
+class GravityBehaviour {
+    gravityStrenght : float = 9.81f
+    zoneRadius : float = 10
+}
+enum GravityType {
+    STATIC_ZONE= 0,
+    GRAVITY_POINT_PULL= 1,
+    GRAVITY_POINT_PUSH= 2,
+}
+interface IGravity {
+    OnEnterZone() : void
+    SetGravity(direction:Vector3) : void
+    OnExitZone() : void
+    GetPosition() : Vector3
+}
+RunnerBase <|-- GravityBehaviour
+GravityBehaviour o-> "gravityType" GravityType
+GravityBehaviour o-> "gravityDirection" Vector3
+class PlayerStateManager {
+    + <<override>> OnFixedUpdate() : void
+    + <<override>> OnLateUpdate() : void
+    + <<override>> OnUpdate() : void
+    + SwitchState(state:System.Type) : void
+    + OnStopPlayMode() : void
+}
+RunnerBase <|-- PlayerStateManager
+PlayerStateManager --> "startState" BaseState
+PlayerStateManager --> "fsm" FiniteStateMachine
+class GotoNextUI {
+    + OpenMenu(newMenu:GameObject) : void
+    + CloseMe() : void
+    + AddOpenMenuAction(newMenu:GameObject) : void
+}
+MonoBehaviour <|-- GotoNextUI
+class CustomizableMenu {
+    + SetMenuColor(newColor:Color) : void
+}
+EditorBase <|-- CustomizableMenu
+IMenuCustomization <|-- CustomizableMenu
+CustomizableMenu --> "menu" Image
+interface IBorderCustomization {
+    SetBorderColor(newColor:Color) : void
+}
+interface IMenuCustomization {
+    SetMenuColor(newColor:Color) : void
+}
+class BaseMenuWindow {
+    + <<override>> OnUpdate() : void
+    MenuOutline() : void
+    + GetRectTransform() : RectTransform
+}
+EditorBase <|-- BaseMenuWindow
+class UIListener {
+    + InvokeListener() : void
+    + ClearListener() : void
+}
+MonoBehaviour <|-- UIListener
+UIListener --> "listener" Action
+class LoadExistingFiles {
+    + UpdateList() : void
+}
+EditorBase <|-- LoadExistingFiles
+LoadExistingFiles --> "framePrefab" GameObject
+LoadExistingFiles --> "topLevelParent" GameObject
+LoadExistingFiles --> "myRect" RectTransform
+class ExecuteOnlyIf {
+    + InvokeIfSaved() : void
+    + InvokeIfFileDoesntExists() : void
+    + AFileIsOpenened() : void
+}
+MonoBehaviour <|-- ExecuteOnlyIf
+ExecuteOnlyIf --> "ifTrueEvents" UnityEvent
+ExecuteOnlyIf --> "ifFalseEvents" UnityEvent
+ExecuteOnlyIf --> "invokeIfInvalid" UnityEvent
+class Item {
+    + Initialize(commandManager:CommandManager, parent:Transform, spawnPivot:Transform) : void
+    + AddItemToScene() : void
+}
+EditorBase <|-- Item
+Item --> "sprite" Sprite
+Item --> "commandManager" CommandManager
+Item --> "addObject" AddObjectCommand
+class ObjectMenuItemSpace {
+}
+BaseMenuWindow <|-- ObjectMenuItemSpace
+ObjectMenuItemSpace --> "button" Button
+ObjectMenuItemSpace --> "text" TMP_Text
+ObjectMenuItemSpace --> "activeColor" Color
+ObjectMenuItemSpace --> "normalColor" Color
+class CustomizableBorder {
+    + SetBorderColor(newColor:Color) : void
+}
+EditorBase <|-- CustomizableBorder
+IBorderCustomization <|-- CustomizableBorder
+CustomizableBorder --> "outlineTop" Image
+CustomizableBorder --> "outlineBottom" Image
+CustomizableBorder --> "outlineLeft" Image
+CustomizableBorder --> "outlineRight" Image
+class CustomizableMenuManager {
+    UpdateMenu() : void
+    + AddMeToBorders(border:IBorderCustomization) : void
+    + AddMeToMenus(menu:IMenuCustomization) : void
+}
+class "List`1"<T> {
+}
+EditorBase <|-- CustomizableMenuManager
+CustomizableMenuManager --> "currentBorderColor" Color
+CustomizableMenuManager --> "currentMenuColor" Color
+CustomizableMenuManager --> "borders<IBorderCustomization>" "List`1"
+CustomizableMenuManager --> "menus<IMenuCustomization>" "List`1"
+CustomizableMenuManager --> "instance" CustomizableMenuManager
+class ObjectMenu {
+    spaceBetweenItems : float
+    edgeWidthOffset : float
+    edgeHeightOffset : float
+    maxItemsInARow : int
+    currentCategory : int = 0
+    navigator : int = 0
+    + <<override>> OnUpdate() : void
+    UpdateSizeDelta() : void
+    CreateCategoryItems() : void
+    + DisplayCategory(category:int) : void
+}
+class Category <<struct>> {
+    + name : string
+}
+class "List`1"<T> {
+}
+BaseMenuWindow <|-- ObjectMenu
+ObjectMenu --> "objectMenuItemSpacePrefab" ObjectMenuItemSpace
+ObjectMenu --> "categoryButtonPrefab" ObjectMenuItemSpace
+ObjectMenu --> "inputCommands" InputCommands
+ObjectMenu --> "objectListTransform" Transform
+ObjectMenu --> "spawnPivot" Transform
+Category --> "items<Item>" "List`1"
+Category --> "parentObjectTransforms<Transform>" "List`1"
+Category --> "button" ObjectMenuItemSpace
+class IdleState {
+    transitionTime : float = 3f
+    transitionTimer : float = 0
+    + <<override>> OnEnter() : void
+    + <<override>> OnExit() : void
+    + <<override>> OnFixedUpdate() : void
+    + <<override>> OnUpdate() : void
+    + SwitchToMoveState() : void
+    + <<override>> OnLateUpdate() : void
+}
+BaseState <|-- IdleState
+IdleState --> "rb" Rigidbody
+IdleState --> "mainCameraPivot" Transform
+IdleState --> "mainCamera" Transform
+IdleState --> "head" Transform
+IdleState --> "cameraStartPos" Vector3
+IdleState --> "pivotStartPos" Vector3
+IdleState --> "cameraStartRot" Quaternion
+IdleState --> "pivotStartRot" Quaternion
+class MovingPlatform {
+    + <<override>> OnUpdate() : void
+    UpdateDelta() : void
+}
+RunnerBase <|-- MovingPlatform
+MovingPlatform --> "moveVector" Vector3
+MovingPlatform --> "lastPos" Vector3
+MovingPlatform --> "deltaPos" Vector3
+MovingPlatform --> "rotateVector" Vector3
+MovingPlatform --> "lastEuler" Vector3
+MovingPlatform --> "deltaEuler" Vector3
+class MoveState {
+    sensitivity : float
+    slerpSpeed : float
+    + <<override>> OnEnter() : void
+    + <<override>> OnExit() : void
+    + <<override>> OnFixedUpdate() : void
+    + <<override>> OnUpdate() : void
+    + <<override>> OnLateUpdate() : void
+    InputDetection() : void
+    GroundDetection() : void
+    CameraMovement() : void
+    + OnEnterZone() : void
+    + SetGravity(direction:Vector3) : void
+    + OnExitZone() : void
+    + GetPosition() : Vector3
+    RotateTowardsGravity(direction:Vector3) : void
+}
+BaseState <|-- MoveState
+IGravity <|-- MoveState
+MoveState --> "castLayers" LayerMask
+class DuplicateObjectCommand {
+    + <<override>> Execute() : void
+    + <<override>> Undo() : void
+    + <<override>> Redo() : void
+    + <<override>> ClearFirstUndo() : void
+    + <<override>> ClearRedo() : void
+}
+class "LinkedList`1"<T> {
+}
+class "Stack`1"<T> {
+}
+BaseObjectCommands <|-- DuplicateObjectCommand
+DuplicateObjectCommand --> "undoLinkedList<SceneObject[]>" "LinkedList`1"
+DuplicateObjectCommand --> "redoStack<SceneObject[]>" "Stack`1"
+DuplicateObjectCommand --> "prevUndoLinkedList<SceneObject[]>" "LinkedList`1"
+DuplicateObjectCommand --> "prevRedoStack<SceneObject[]>" "Stack`1"
+class DeselectObjectCommand {
+    + <<override>> Execute() : void
+    + <<override>> Undo() : void
+    + <<override>> Redo() : void
+    + <<override>> ClearFirstUndo() : void
+    + <<override>> ClearRedo() : void
+    + InitializePreDeselected(preDeselected:List<SceneObject>) : void
+}
+class "LinkedList`1"<T> {
+}
+class "Stack`1"<T> {
+}
+class "List`1"<T> {
+}
+BaseEditorCommand <|-- DeselectObjectCommand
+DeselectObjectCommand --> "undoLinkedList<SceneObject[]>" "LinkedList`1"
+DeselectObjectCommand --> "redoStack<SceneObject[]>" "Stack`1"
+DeselectObjectCommand --> "preDeselected<SceneObject>" "List`1"
+class DeleteObjectCommand {
+    + <<override>> Execute() : void
+    + <<override>> Undo() : void
+    + <<override>> Redo() : void
+    + <<override>> ClearFirstUndo() : void
+    + <<override>> ClearRedo() : void
+}
+class "Stack`1"<T> {
+}
+class "LinkedList`1"<T> {
+}
+BaseObjectCommands <|-- DeleteObjectCommand
+DeleteObjectCommand --> "redoStack<SceneObject[]>" "Stack`1"
+DeleteObjectCommand --> "undoLinkedList<SceneObject[]>" "LinkedList`1"
+class RemoveSelectionObjectCommand {
+    + <<override>> Execute() : void
+    + <<override>> Undo() : void
+    + <<override>> Redo() : void
+    + <<override>> ClearFirstUndo() : void
+    + <<override>> ClearRedo() : void
+    + InitializePreSelected(currentlySelected:List<SceneObject>, preSelected:List<SceneObject>) : void
+}
+class "LinkedList`1"<T> {
+}
+class "Stack`1"<T> {
+}
+class "List`1"<T> {
+}
+BaseObjectCommands <|-- RemoveSelectionObjectCommand
+RemoveSelectionObjectCommand --> "undoLinkedList<SceneObject[]>" "LinkedList`1"
+RemoveSelectionObjectCommand --> "redoStack<SceneObject[]>" "Stack`1"
+RemoveSelectionObjectCommand o-> "preSelected<SceneObject>" "List`1"
+RemoveSelectionObjectCommand o-> "currentlySelected<SceneObject>" "List`1"
+class FlipSelectionObjectCommand {
+    + <<override>> Execute() : void
+    + <<override>> Undo() : void
+    + <<override>> Redo() : void
+    + <<override>> ClearFirstUndo() : void
+    + <<override>> ClearRedo() : void
+    + InitializePreSelected(currentlySelected:List<SceneObject>, newSelected:List<SceneObject>) : void
+}
+class "List`1"<T> {
+}
+class "LinkedList`1"<T> {
+}
+class "Stack`1"<T> {
+}
+BaseObjectCommands <|-- FlipSelectionObjectCommand
+FlipSelectionObjectCommand o-> "flipSelected<SceneObject>" "List`1"
+FlipSelectionObjectCommand o-> "newSelected<SceneObject>" "List`1"
+FlipSelectionObjectCommand --> "curUndoLinkedList<SceneObject[]>" "LinkedList`1"
+FlipSelectionObjectCommand --> "newUndoLinkedList<SceneObject[]>" "LinkedList`1"
+FlipSelectionObjectCommand --> "curRedoStack<SceneObject[]>" "Stack`1"
+FlipSelectionObjectCommand --> "newRedoStack<SceneObject[]>" "Stack`1"
+class PasteObjectCommand {
+    + <<override>> Execute() : void
+    + <<override>> Undo() : void
+    + <<override>> Redo() : void
+    + <<override>> ClearFirstUndo() : void
+    + <<override>> ClearRedo() : void
+}
+class "LinkedList`1"<T> {
+}
+class "Stack`1"<T> {
+}
+BaseObjectCommands <|-- PasteObjectCommand
+PasteObjectCommand --> "undoLinkedList<SceneObject[]>" "LinkedList`1"
+PasteObjectCommand --> "redoStack<SceneObject[]>" "Stack`1"
+PasteObjectCommand --> "undoPrevSelected<SceneObject[]>" "LinkedList`1"
+PasteObjectCommand --> "redoPrevSelected<SceneObject[]>" "Stack`1"
+class AddObjectCommand {
+    + <<override>> Execute() : void
+    + <<override>> Undo() : void
+    + <<override>> Redo() : void
+    + <<override>> ClearFirstUndo() : void
+    + <<override>> ClearRedo() : void
+    + SetSpawnPivot(pivot:Transform) : void
+}
+class "LinkedList`1"<T> {
+}
+class "Stack`1"<T> {
+}
+BaseObjectCommands <|-- AddObjectCommand
+AddObjectCommand --> "myObjectPrefab" SceneObject
+AddObjectCommand o-> "undoLinkedList<SceneObject>" "LinkedList`1"
+AddObjectCommand o-> "redoStack<SceneObject>" "Stack`1"
+AddObjectCommand --> "spawnPivot" Transform
+class OverrideSelectObjectCommand {
+    + <<override>> Execute() : void
+    + <<override>> Undo() : void
+    + <<override>> Redo() : void
+    + <<override>> ClearFirstUndo() : void
+    + <<override>> ClearRedo() : void
+    + InitializeSelected(currentlySelected:List<SceneObject>, nextSelected:List<SceneObject>) : void
+}
+class "List`1"<T> {
+}
+class "LinkedList`1"<T> {
+}
+class "Stack`1"<T> {
+}
+BaseObjectCommands <|-- OverrideSelectObjectCommand
+OverrideSelectObjectCommand o-> "currentlySelected<SceneObject>" "List`1"
+OverrideSelectObjectCommand o-> "nextSelected<SceneObject>" "List`1"
+OverrideSelectObjectCommand --> "curUndoLinkedList<SceneObject[]>" "LinkedList`1"
+OverrideSelectObjectCommand --> "nextUndoLinkedList<SceneObject[]>" "LinkedList`1"
+OverrideSelectObjectCommand --> "nextRedoStack<SceneObject[]>" "Stack`1"
+OverrideSelectObjectCommand --> "currentRedoStack<SceneObject[]>" "Stack`1"
+class CopyObjectCommand {
+    + <<override>> Execute() : void
+}
+BaseObjectCommands <|-- CopyObjectCommand
+class CutObjectCommand {
+    + <<override>> Execute() : void
+    + <<override>> Undo() : void
+    + <<override>> Redo() : void
+}
+BaseObjectCommands <|-- CutObjectCommand
+CutObjectCommand --> "copyObjectCommand" CopyObjectCommand
+CutObjectCommand --> "deleteObjectCommand" DeleteObjectCommand
+class BaseObjectCommands {
+    + SetParent(parent:Transform) : void
+    + CreateObject(objectToCreate:SceneObject) : SceneObject
+    + CreateInvisible(objectToCreate:SceneObject) : SceneObject
+}
+BaseEditorCommand <|-- BaseObjectCommands
+BaseObjectCommands --> "parent" Transform
+class SelectObjectCommand {
+    + <<override>> Execute() : void
+    + <<override>> Undo() : void
+    + <<override>> Redo() : void
+    + <<override>> ClearFirstUndo() : void
+    + <<override>> ClearRedo() : void
+    + InitializePreSelected(currentlySelected:List<SceneObject>, preSelected:List<SceneObject>) : int
+}
+class "LinkedList`1"<T> {
+}
+class "Stack`1"<T> {
+}
+class "List`1"<T> {
+}
+BaseObjectCommands <|-- SelectObjectCommand
+SelectObjectCommand --> "undoLinkedList<SceneObject[]>" "LinkedList`1"
+SelectObjectCommand --> "redoStack<SceneObject[]>" "Stack`1"
+SelectObjectCommand o-> "preSelected<SceneObject>" "List`1"
+class TranslateObjectCommand {
+    + <<override>> Execute() : void
+    + <<override>> Undo() : void
+    + <<override>> Redo() : void
+    + <<override>> ClearFirstUndo() : void
+    + <<override>> ClearRedo() : void
+    + InitializeNewPostition(newPostition:Vector3) : void
+}
+class "LinkedList`1"<T> {
+}
+class "Stack`1"<T> {
+}
+BaseObjectCommands <|-- TranslateObjectCommand
+TranslateObjectCommand o-> "positionToTranslate" Vector3
+TranslateObjectCommand --> "undoLinkedList<Vector3>" "LinkedList`1"
+TranslateObjectCommand --> "redoStack<Vector3>" "Stack`1"
+class CreateGridTileCommand {
+    + <<override>> Execute() : void
+    + <<override>> Undo() : void
+    + <<override>> Redo() : void
+    + <<override>> ClearFirstUndo() : void
+    + <<override>> ClearRedo() : void
+    + InitializeTiles(tiles:GridObject[]) : void
+}
+class "Stack`1"<T> {
+}
+class "LinkedList`1"<T> {
+}
+BaseEditorCommand <|-- CreateGridTileCommand
+CreateGridTileCommand --> "redoStack<GridObject[]>" "Stack`1"
+CreateGridTileCommand --> "undoLinkedList<GridObject[]>" "LinkedList`1"
+class GroundMovementState {
+    groundMoveForce : float
+    jumpForce : float
+    recoveryTimer : float
+    maxRecoveryTime : float
+    + <<override>> OnEnter() : void
+    + <<override>> OnFixedUpdate() : void
+    + <<override>> OnUpdate() : void
+    + <<override>> OnLateUpdate() : void
+    Jump() : void
+    FollowPlatform() : void
+}
+MoveState <|-- GroundMovementState
+GroundMovementState --> "deltaPos" Vector3
+class AirMovementState {
+    airMoveForce : float
+    jumpDelay : float
+    + <<override>> OnEnter() : void
+    + <<override>> OnFixedUpdate() : void
+    + <<override>> OnUpdate() : void
+}
+MoveState <|-- AirMovementState
+@enduml

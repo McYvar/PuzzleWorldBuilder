@@ -1,0 +1,15 @@
+@startuml
+class CustomizableMenuManager {
+    UpdateMenu() : void
+    + AddMeToBorders(border:IBorderCustomization) : void
+    + AddMeToMenus(menu:IMenuCustomization) : void
+}
+class "List`1"<T> {
+}
+EditorBase <|-- CustomizableMenuManager
+CustomizableMenuManager --> "currentBorderColor" Color
+CustomizableMenuManager --> "currentMenuColor" Color
+CustomizableMenuManager --> "borders<IBorderCustomization>" "List`1"
+CustomizableMenuManager --> "menus<IMenuCustomization>" "List`1"
+CustomizableMenuManager --> "instance" CustomizableMenuManager
+@enduml

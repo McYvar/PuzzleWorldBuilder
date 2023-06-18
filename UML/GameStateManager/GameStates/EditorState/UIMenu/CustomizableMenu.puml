@@ -1,0 +1,8 @@
+@startuml
+class CustomizableMenu {
+    + SetMenuColor(newColor:Color) : void
+}
+EditorBase <|-- CustomizableMenu
+IMenuCustomization <|-- CustomizableMenu
+CustomizableMenu --> "menu" Image
+@enduml

@@ -1,0 +1,11 @@
+@startuml
+class PuzzleStageEditor {
+    + <<override>> OnUpdate() : void
+    + GetPuzzleGrid() : PuzzleGrid
+    + InitializeNewGrid(maxX:int, maxZ:int, minX:int, minZ:int, locations:Vector3[], tileTypes:TileType[]) : void
+    + InitializeNewGrid(maxX:int, maxZ:int, minX:int, minZ:int) : void
+}
+EditorBase <|-- PuzzleStageEditor
+PuzzleStageEditor --> "puzzleGrid" PuzzleGrid
+PuzzleStageEditor --> "currentGridObject" GridObject
+@enduml

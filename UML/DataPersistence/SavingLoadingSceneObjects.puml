@@ -1,0 +1,14 @@
+@startuml
+class SavingLoadingSceneObjects {
+    + NewData() : void
+    ClearObjects() : void
+    + LoadData(data:GameData) : void
+    + SaveData(data:GameData) : void
+}
+MonoBehaviour <|-- SavingLoadingSceneObjects
+IDataPersistence <|-- SavingLoadingSceneObjects
+SavingLoadingSceneObjects --> "inputCommands" InputCommands
+SavingLoadingSceneObjects --> "puzzleStageEditor" PuzzleStageEditor
+SavingLoadingSceneObjects --> "parent" Transform
+SavingLoadingSceneObjects --> "player" GameObject
+@enduml

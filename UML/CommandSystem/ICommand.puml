@@ -1,0 +1,10 @@
+@startuml
+interface ICommand {
+    addToUndo : bool <<get>> <<set>>
+    Execute() : void
+    Undo() : void
+    Redo() : void
+    ClearFirstUndo() : void
+    ClearRedo() : void
+}
+@enduml

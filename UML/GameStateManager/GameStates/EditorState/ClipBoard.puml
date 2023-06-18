@@ -1,0 +1,11 @@
+@startuml
+class ClipBoard {
+    + normalName : string
+    + AddToClipBoard() : void
+    + RemoveFromClipBoard() : void
+}
+class "List`1"<T> {
+}
+EditorBase <|-- ClipBoard
+ClipBoard o-> "clipboard<ClipBoard>" "List`1"
+@enduml

@@ -1,0 +1,31 @@
+@startuml
+class DropDownMenu {
+    buttonWidth : float
+    buttonHeight : float
+    textOffset : float
+    display : bool = false
+    visibleOnEdit : bool = false
+    hideMainButtonText : bool
+    canvasScale : float
+    + DisplayMenu() : void
+    + HideMenu() : void
+    + ToggleMenu() : void
+    + AddButtonToMenu() : void
+    + RemoveButtonFromMenu() : void
+    + ClearButtons() : void
+    + CopyBaseButton(parent:Button, copy:Button) : Button
+    + DisplayDropDownOnLocation(x:float, y:float) : void
+}
+class "List`1"<T> {
+}
+MonoBehaviour <|-- DropDownMenu
+DropDownMenu --> "dropDownObject" GameObject
+DropDownMenu --> "dropDownRect" RectTransform
+DropDownMenu o-> "buttons<Button>" "List`1"
+DropDownMenu --> "dropDownImage" Sprite
+DropDownMenu o-> "buttonTexts<TextMeshProUGUI>" "List`1"
+DropDownMenu --> "rectTransform" RectTransform
+DropDownMenu --> "emptyGameObj" GameObject
+DropDownMenu --> "mainButtonText" TextMeshProUGUI
+DropDownMenu --> "ParentCanvas" Canvas
+@enduml

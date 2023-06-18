@@ -1,0 +1,20 @@
+@startuml
+class GravityBehaviour {
+    gravityStrenght : float = 9.81f
+    zoneRadius : float = 10
+}
+enum GravityType {
+    STATIC_ZONE= 0,
+    GRAVITY_POINT_PULL= 1,
+    GRAVITY_POINT_PUSH= 2,
+}
+interface IGravity {
+    OnEnterZone() : void
+    SetGravity(direction:Vector3) : void
+    OnExitZone() : void
+    GetPosition() : Vector3
+}
+RunnerBase <|-- GravityBehaviour
+GravityBehaviour o-> "gravityType" GravityType
+GravityBehaviour o-> "gravityDirection" Vector3
+@enduml

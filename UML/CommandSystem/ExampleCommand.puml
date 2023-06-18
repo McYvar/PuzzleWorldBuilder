@@ -1,0 +1,14 @@
+@startuml
+class ExampleCommand {
+    addToUndoSystem : bool = true
+    + addToUndo : bool <<get>> <<set>>
+    + Execute() : void
+    + Undo() : void
+    + Redo() : void
+    + ClearFirstUndo() : void
+    + ClearRedo() : void
+}
+EditorBase <|-- ExampleCommand
+ICommand <|-- ExampleCommand
+ExampleCommand --> "exampleKey" KeyCode
+@enduml

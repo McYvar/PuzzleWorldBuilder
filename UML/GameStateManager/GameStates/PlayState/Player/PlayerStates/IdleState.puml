@@ -1,0 +1,21 @@
+@startuml
+class IdleState {
+    transitionTime : float = 3f
+    transitionTimer : float = 0
+    + <<override>> OnEnter() : void
+    + <<override>> OnExit() : void
+    + <<override>> OnFixedUpdate() : void
+    + <<override>> OnUpdate() : void
+    + SwitchToMoveState() : void
+    + <<override>> OnLateUpdate() : void
+}
+BaseState <|-- IdleState
+IdleState --> "rb" Rigidbody
+IdleState --> "mainCameraPivot" Transform
+IdleState --> "mainCamera" Transform
+IdleState --> "head" Transform
+IdleState --> "cameraStartPos" Vector3
+IdleState --> "pivotStartPos" Vector3
+IdleState --> "cameraStartRot" Quaternion
+IdleState --> "pivotStartRot" Quaternion
+@enduml

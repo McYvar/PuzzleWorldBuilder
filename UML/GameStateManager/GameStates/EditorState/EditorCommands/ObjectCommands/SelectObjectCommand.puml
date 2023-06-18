@@ -1,0 +1,20 @@
+@startuml
+class SelectObjectCommand {
+    + <<override>> Execute() : void
+    + <<override>> Undo() : void
+    + <<override>> Redo() : void
+    + <<override>> ClearFirstUndo() : void
+    + <<override>> ClearRedo() : void
+    + InitializePreSelected(currentlySelected:List<SceneObject>, preSelected:List<SceneObject>) : int
+}
+class "LinkedList`1"<T> {
+}
+class "Stack`1"<T> {
+}
+class "List`1"<T> {
+}
+BaseObjectCommands <|-- SelectObjectCommand
+SelectObjectCommand --> "undoLinkedList<SceneObject[]>" "LinkedList`1"
+SelectObjectCommand --> "redoStack<SceneObject[]>" "Stack`1"
+SelectObjectCommand o-> "preSelected<SceneObject>" "List`1"
+@enduml

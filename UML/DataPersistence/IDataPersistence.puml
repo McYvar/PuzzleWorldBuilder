@@ -1,0 +1,7 @@
+@startuml
+interface IDataPersistence {
+    NewData() : void
+    LoadData(data:GameData) : void
+    SaveData(data:GameData) : void
+}
+@enduml

@@ -1,0 +1,9 @@
+@startuml
+class LoadExistingFiles {
+    + UpdateList() : void
+}
+EditorBase <|-- LoadExistingFiles
+LoadExistingFiles --> "framePrefab" GameObject
+LoadExistingFiles --> "topLevelParent" GameObject
+LoadExistingFiles --> "myRect" RectTransform
+@enduml

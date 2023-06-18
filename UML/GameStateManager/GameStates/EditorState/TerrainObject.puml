@@ -1,0 +1,21 @@
+@startuml
+class TerrainObject {
+    + <<override>> OnCreation() : void
+    + <<override>> OnDeletion() : void
+    + <<override>> OnSelection() : void
+    + <<override>> OnDeselection() : void
+    + <<override>> MoveTo(newPos:Vector3) : void
+    + <<override>> SaveObject() : void
+}
+class TerrainObjectData {
+    + name : string
+    + TerrainObjectData()
+}
+class "List`1"<T> {
+}
+SceneObject <|-- TerrainObject
+TerrainObject o-> "terrainObjects<TerrainObject>" "List`1"
+TerrainObject --> "myData" TerrainObjectData
+SceneObjectData <|-- TerrainObjectData
+TerrainObjectData --> "rotation" Quaternion
+@enduml

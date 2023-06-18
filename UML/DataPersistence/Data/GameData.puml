@@ -1,0 +1,10 @@
+@startuml
+class GameData {
+    + GameData()
+}
+class "List`1"<T> {
+}
+GameData --> "terrainObjectData<TerrainObjectData>" "List`1"
+GameData --> "gridObjectData<GridObjectData>" "List`1"
+GameData --> "playerPosition" Vector3
+@enduml

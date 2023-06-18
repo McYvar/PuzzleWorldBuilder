@@ -1,0 +1,22 @@
+@startuml
+class MoveState {
+    sensitivity : float
+    slerpSpeed : float
+    + <<override>> OnEnter() : void
+    + <<override>> OnExit() : void
+    + <<override>> OnFixedUpdate() : void
+    + <<override>> OnUpdate() : void
+    + <<override>> OnLateUpdate() : void
+    InputDetection() : void
+    GroundDetection() : void
+    CameraMovement() : void
+    + OnEnterZone() : void
+    + SetGravity(direction:Vector3) : void
+    + OnExitZone() : void
+    + GetPosition() : Vector3
+    RotateTowardsGravity(direction:Vector3) : void
+}
+BaseState <|-- MoveState
+IGravity <|-- MoveState
+MoveState --> "castLayers" LayerMask
+@enduml

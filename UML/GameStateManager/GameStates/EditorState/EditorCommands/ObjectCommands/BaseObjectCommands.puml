@@ -1,0 +1,9 @@
+@startuml
+class BaseObjectCommands {
+    + SetParent(parent:Transform) : void
+    + CreateObject(objectToCreate:SceneObject) : SceneObject
+    + CreateInvisible(objectToCreate:SceneObject) : SceneObject
+}
+BaseEditorCommand <|-- BaseObjectCommands
+BaseObjectCommands --> "parent" Transform
+@enduml

@@ -1,0 +1,8 @@
+@startuml
+class UIListener {
+    + InvokeListener() : void
+    + ClearListener() : void
+}
+MonoBehaviour <|-- UIListener
+UIListener --> "listener" Action
+@enduml

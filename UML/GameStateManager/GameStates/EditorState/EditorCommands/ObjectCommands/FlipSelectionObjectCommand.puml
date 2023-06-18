@@ -1,0 +1,23 @@
+@startuml
+class FlipSelectionObjectCommand {
+    + <<override>> Execute() : void
+    + <<override>> Undo() : void
+    + <<override>> Redo() : void
+    + <<override>> ClearFirstUndo() : void
+    + <<override>> ClearRedo() : void
+    + InitializePreSelected(currentlySelected:List<SceneObject>, newSelected:List<SceneObject>) : void
+}
+class "List`1"<T> {
+}
+class "LinkedList`1"<T> {
+}
+class "Stack`1"<T> {
+}
+BaseObjectCommands <|-- FlipSelectionObjectCommand
+FlipSelectionObjectCommand o-> "flipSelected<SceneObject>" "List`1"
+FlipSelectionObjectCommand o-> "newSelected<SceneObject>" "List`1"
+FlipSelectionObjectCommand --> "curUndoLinkedList<SceneObject[]>" "LinkedList`1"
+FlipSelectionObjectCommand --> "newUndoLinkedList<SceneObject[]>" "LinkedList`1"
+FlipSelectionObjectCommand --> "curRedoStack<SceneObject[]>" "Stack`1"
+FlipSelectionObjectCommand --> "newRedoStack<SceneObject[]>" "Stack`1"
+@enduml

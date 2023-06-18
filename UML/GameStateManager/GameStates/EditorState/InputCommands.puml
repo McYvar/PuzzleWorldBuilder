@@ -1,0 +1,101 @@
+@startuml
+class InputCommands {
+    maxUndoAmount : int = 10
+    selectionWidth : float
+    isSelecting : bool = false
+    movementToolDistance : float
+    doSmooth : bool
+    isTranslatingPivot : bool = false
+    minTranslateAmp : float = 0
+    maxTranslateAmp : float
+    translateAmp : float
+    isRotatingPivot : bool = false
+    rotateAmp : float
+    cameraOffset : float
+    scrollDistBase : float
+    scrollAmp : float
+    doRelativeSnap : bool
+    doGridSnap : bool
+    + <<override>> OnUpdate() : void
+    + GetCommandManager() : CommandManager
+    CommandManagerUpdater() : void
+    BasicKeys() : void
+    + ToggleGridSnap() : void
+    + ToggleRelativeSnap() : void
+    + {static} AddKeyCommand(keyCode:KeyCode, command:ICommand) : void
+    + {static} ChangeKeyCommandKey(oldKeyCode:KeyCode, newKeyCode:KeyCode) : void
+    + {static} RemoveKeyCommand(keyCode:KeyCode) : void
+    + Undo() : void
+    + Redo() : void
+    + Copy() : void
+    + Paste() : void
+    + Cut() : void
+    + Delete() : void
+    + Duplicate() : void
+    + SelectAllTerrainObjects() : void
+    + DeselectAll() : void
+    SelectionProcess() : void
+    FoundMoveToolArrow(mouseLocation:Vector2) : bool
+    StartSelection(mouseLocation:Vector2) : void
+    FinishSelection() : void
+    MovementTool() : void
+    + OnPointerDown(eventData:PointerEventData) : void
+    + OnPointerMove(eventData:PointerEventData) : void
+    + OnPointerUp(eventData:PointerEventData) : void
+    + OnScroll(eventData:PointerEventData) : void
+    RotatePivot(mouseDelta:Vector2) : void
+    SetPivot(newLocation:Vector3) : void
+    TranslatePivot(mouseDelta:Vector2) : void
+    Zoom(scrollDelta:float) : void
+    + ResetTool() : void
+    + AddExitToListener() : void
+    + ExitTool() : void
+}
+class "Dictionary`2"<T1,T2> {
+}
+class "List`1"<T> {
+}
+EditorBase <|-- InputCommands
+IPointerDownHandler <|-- InputCommands
+IPointerUpHandler <|-- InputCommands
+IPointerMoveHandler <|-- InputCommands
+IScrollHandler <|-- InputCommands
+InputCommands --> "commandManager" CommandManager
+InputCommands o-> "keyCommands<KeyCode,ICommand>" "Dictionary`2"
+InputCommands --> "deleteCommand" DeleteObjectCommand
+InputCommands --> "selectCommand" SelectObjectCommand
+InputCommands --> "deselectCommand" DeselectObjectCommand
+InputCommands --> "copyCommand" CopyObjectCommand
+InputCommands --> "pasteCommand" PasteObjectCommand
+InputCommands --> "cutCommand" CutObjectCommand
+InputCommands --> "overrideSelectCommand" OverrideSelectObjectCommand
+InputCommands --> "flipSelectCommand" FlipSelectionObjectCommand
+InputCommands --> "translateCommand" TranslateObjectCommand
+InputCommands --> "removeSelectionCommand" RemoveSelectionObjectCommand
+InputCommands --> "duplicateCommand" DuplicateObjectCommand
+InputCommands --> "createGridTileCommand" CreateGridTileCommand
+InputCommands --> "mainCanvas" Canvas
+InputCommands --> "selectionLineTop" RectTransform
+InputCommands --> "selectionLineBottom" RectTransform
+InputCommands --> "selectionLineLeft" RectTransform
+InputCommands --> "selectionLineRight" RectTransform
+InputCommands --> "mainCamera" Camera
+InputCommands --> "overlayCamera" Camera
+InputCommands --> "overlayLayer" LayerMask
+InputCommands --> "currentMoveToolArrow" MoveToolArrow
+InputCommands --> "selectionStartingPoint" Vector2
+InputCommands --> "selectionEndingPoint" Vector2
+InputCommands --> "movementToolObject" GameObject
+InputCommands --> "mtUp" GameObject
+InputCommands --> "mtForward" GameObject
+InputCommands --> "mtRight" GameObject
+InputCommands --> "mtCentreSphere" GameObject
+InputCommands --> "centrePoint" Vector3
+InputCommands --> "camerasPivot" Transform
+InputCommands --> "smoothPivot" Vector3
+InputCommands o-> "smoothDampRef" Vector3
+InputCommands o-> "selectedObjects<SceneObject>" "List`1"
+InputCommands --> "floatingObjectsMenu" GameObject
+InputCommands --> "gridSnapToggle" RawImage
+InputCommands --> "relativeSnapToggle" RawImage
+@enduml

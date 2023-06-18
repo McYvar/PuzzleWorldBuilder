@@ -1,0 +1,13 @@
+@startuml
+class MovingPlatform {
+    + <<override>> OnUpdate() : void
+    UpdateDelta() : void
+}
+RunnerBase <|-- MovingPlatform
+MovingPlatform --> "moveVector" Vector3
+MovingPlatform --> "lastPos" Vector3
+MovingPlatform --> "deltaPos" Vector3
+MovingPlatform --> "rotateVector" Vector3
+MovingPlatform --> "lastEuler" Vector3
+MovingPlatform --> "deltaEuler" Vector3
+@enduml

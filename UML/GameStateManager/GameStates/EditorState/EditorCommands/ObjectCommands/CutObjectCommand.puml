@@ -1,0 +1,10 @@
+@startuml
+class CutObjectCommand {
+    + <<override>> Execute() : void
+    + <<override>> Undo() : void
+    + <<override>> Redo() : void
+}
+BaseObjectCommands <|-- CutObjectCommand
+CutObjectCommand --> "copyObjectCommand" CopyObjectCommand
+CutObjectCommand --> "deleteObjectCommand" DeleteObjectCommand
+@enduml

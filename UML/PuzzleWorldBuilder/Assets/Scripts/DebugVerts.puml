@@ -1,0 +1,7 @@
+@startuml
+class DebugVerts {
+}
+MonoBehaviour <|-- DebugVerts
+DebugVerts --> "mesh" MeshFilter
+DebugVerts o-> "offset" Vector3
+@enduml
