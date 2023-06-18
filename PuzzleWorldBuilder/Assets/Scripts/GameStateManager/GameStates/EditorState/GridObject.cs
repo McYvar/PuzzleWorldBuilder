@@ -19,11 +19,6 @@ public class GridObject : SceneObject
         myData = new GridObjectData();
     }
 
-    protected override void OnDisable()
-    {
-        base.OnDisable();
-    }
-
     public override void OnSelection()
     {
         base.OnSelection();
@@ -75,12 +70,12 @@ public class GridObject : SceneObject
 
     public void OnPlayMode()
     {
-        sharedGrid.MakeNonPlayInvisible(transform.position);
+        sharedGrid.OnPlayMode(transform.position);
     }
 
     public void OnEditMode()
     {
-        sharedGrid.MakeNonPlayVisable(transform.position);
+        sharedGrid.OnEditMode(transform.position);
     }
 }
 

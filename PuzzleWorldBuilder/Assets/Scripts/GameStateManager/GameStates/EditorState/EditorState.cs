@@ -5,24 +5,11 @@ using UnityEngine;
 
 public class EditorState : BaseState
 {
-    public static List<AbstractGameEditor> editors = new List<AbstractGameEditor>();
-    public static Queue<AbstractGameEditor> newEditorsQueue = new Queue<AbstractGameEditor>();
-    public static Queue<AbstractGameEditor> removeEditorsQueue = new Queue<AbstractGameEditor>();
+    public static Queue<EditorBase> editorsAddQueue = new Queue<EditorBase>();
+    public static Queue<EditorBase> editorsRemoveQueue = new Queue<EditorBase>();
+    public static List<EditorBase> editors = new List<EditorBase>();
 
-    List<AbstractGameEditor> addedEditors;
     [SerializeField] InputCommands inputCommands;
-
-    public override void OnAwake()
-    {
-        Editor();
-        EditorsOnAwake();
-    }
-
-    public override void OnStart()
-    {
-        EditorsOnStart();
-        addedEditors.Clear();
-    }
 
     public override void OnEnter()
     {
@@ -36,53 +23,37 @@ public class EditorState : BaseState
     {
     }
 
-    public override void OnFixedUpdate() { }
+    public override void OnFixedUpdate()
+    {
+        foreach (EditorBase editor in editors)
+        {
+            editor.OnFixedUpdate();
+        }
+    }
 
     public override void OnUpdate()
     {
-        Editor();
-        EditorsOnAwake();
-        EditorsOnStart();
-        addedEditors.Clear();
-        foreach (AbstractGameEditor editor in editors)
+        foreach (EditorBase editor in editors)
         {
-            editor.EditorUpdate();
+            editor.OnUpdate();
+        }
+
+        while (editorsAddQueue.Count > 0)
+        {
+            editors.Add(editorsAddQueue.Dequeue());
+        }
+
+        while (editorsRemoveQueue.Count > 0)
+        {
+            editors.Remove(editorsRemoveQueue.Dequeue());
         }
     }
 
-    void Editor()
+    public override void OnLateUpdate()
     {
-        addedEditors = new List<AbstractGameEditor>();
-        while (newEditorsQueue.Count > 0)
+        foreach (EditorBase editor in editors)
         {
-            AbstractGameEditor editor = newEditorsQueue.Dequeue();
-            addedEditors.Add(editor);
-            editors.Add(editor);
-        }
-
-        while (removeEditorsQueue.Count > 0)
-        {
-            AbstractGameEditor editor = removeEditorsQueue.Dequeue();
-            if (editor != null)
-                if (editors.Contains(editor))
-                    editors.Remove(editor);
-        }
-
-    }
-
-    void EditorsOnAwake()
-    {
-        foreach (AbstractGameEditor editor in addedEditors)
-        {
-            editor.EditorAwake();
-        }
-    }
-
-    void EditorsOnStart()
-    {
-        foreach (AbstractGameEditor editor in addedEditors)
-        {
-            editor.EditorStart();
+            editor.OnLateUpdate();
         }
     }
 
@@ -90,9 +61,5 @@ public class EditorState : BaseState
     {
         // code for saving the current level and then play it!
         stateManager.SwitchState(typeof(PlayState));
-    }
-
-    public override void OnLateUpdate()
-    {
     }
 }

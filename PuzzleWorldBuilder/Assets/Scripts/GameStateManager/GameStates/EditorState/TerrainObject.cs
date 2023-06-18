@@ -13,9 +13,8 @@ public class TerrainObject : SceneObject
         myData = new TerrainObjectData();
     }
 
-    public override void EditorStart()
+    protected void Start()
     {
-        base.EditorStart();
         SaveObject();
     }
 

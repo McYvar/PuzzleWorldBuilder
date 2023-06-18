@@ -28,21 +28,16 @@ public class ObjectMenu : BaseMenuWindow
 
     [SerializeField] Transform spawnPivot;
 
-    public override void EditorStart()
+    protected void Start()
     {
-        base.EditorStart();
         CreateCategoryItems();
         UpdateSizeDelta();
         DisplayCategory(currentCategory);
     }
 
-    protected override void Update()
+    public override void OnUpdate()
     {
-        base.Update();
-    }
-    
-    public override void EditorUpdate()
-    {
+        base.OnUpdate();
         if (navigator >= categories.Length)
         {
             navigator = 0;

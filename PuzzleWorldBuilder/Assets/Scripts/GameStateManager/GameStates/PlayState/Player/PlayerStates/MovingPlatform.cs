@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class MovingPlatform : AbstractGameRunner
+public class MovingPlatform : RunnerBase
 {
     [SerializeField] Vector3 moveVector;
     Vector3 lastPos;
@@ -12,18 +12,15 @@ public class MovingPlatform : AbstractGameRunner
     Vector3 lastEuler;
     [HideInInspector] public Vector3 deltaEuler;
 
-    public override void RunnerAwake()
-    {
-    }
-
-    public override void RunnerStart()
+    private void Start()
     {
         lastPos = transform.position;
         lastEuler = transform.eulerAngles;
     }
 
-    public override void RunnerUpdate()
+    public override void OnUpdate()
     {
+        base.OnUpdate();
         UpdateDelta();
 
         if (Input.GetKey(KeyCode.E))
@@ -34,14 +31,6 @@ public class MovingPlatform : AbstractGameRunner
         {
             transform.eulerAngles += rotateVector * Time.deltaTime;
         }
-    }
-
-    public override void RunnerFixedUpdate()
-    {
-    }
-
-    public override void RunnerLateUpdate()
-    {
     }
 
     void UpdateDelta()

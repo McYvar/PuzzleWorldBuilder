@@ -16,6 +16,7 @@ public class GotoNextUI : MonoBehaviour
 
     public void AddOpenMenuAction(GameObject newMenu)
     {
-        UIListener.listener += () => newMenu.SetActive(true);
+        UIListener.listener = null;
+        UIListener.listener = () => newMenu.SetActive(true);
     }
 }

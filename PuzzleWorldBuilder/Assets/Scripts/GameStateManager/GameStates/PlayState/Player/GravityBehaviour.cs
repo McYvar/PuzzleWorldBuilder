@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class GravityBehaviour : AbstractGameRunner
+public class GravityBehaviour : RunnerBase
 {
     /// <summary>
     /// Date: 08/04/23, By: Yvar
@@ -18,32 +18,12 @@ public class GravityBehaviour : AbstractGameRunner
 
     [Space(10), Header("zone radius only applied when gravity point"), SerializeField] float zoneRadius = 10;
 
-    public override void RunnerAwake()
-    {
-
-    }
-
-    public override void RunnerStart()
+    private void Start()
     {
         if (gravityType != GravityType.STATIC_ZONE)
         {
             GetComponent<SphereCollider>().radius = zoneRadius;
         }
-    }
-
-    public override void RunnerUpdate()
-    {
-
-    }
-
-    public override void RunnerFixedUpdate()
-    {
-
-    }
-
-    public override void RunnerLateUpdate()
-    {
-
     }
 
     private void OnTriggerEnter(Collider other)

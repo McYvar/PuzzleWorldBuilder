@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PlayerStateManager : AbstractGameRunner
+public class PlayerStateManager : RunnerBase
 {
     /// <summary>
     /// Date: 04/02/23, By: Yvar Toorop
@@ -22,31 +22,28 @@ public class PlayerStateManager : AbstractGameRunner
     [SerializeField] BaseState startState;
     FiniteStateMachine fsm;
 
-    public override void RunnerAwake() 
-    { 
+    private void Start()
+    {
         BaseState[] states = GetComponents<BaseState>();
         fsm = new FiniteStateMachine(startState.GetType(), states);
     }
 
-    public override void RunnerStart() 
+    public override void OnFixedUpdate()
     {
-        fsm?.OnStart();
-    }
-
-    public override void RunnerFixedUpdate()
-    {
+        base.OnFixedUpdate();
         fsm?.OnFixedUpdate();
     }
 
-    public override void RunnerLateUpdate()
+    public override void OnLateUpdate()
     {
+        base.OnLateUpdate();
         fsm?.OnLateUpdate();
     }
 
-    public override void RunnerUpdate()
+    public override void OnUpdate()
     {
+        base.OnUpdate();
         fsm?.OnUpdate();
-        fsm?.DebugCurrentState();
     }
 
     public void SwitchState(System.Type state)

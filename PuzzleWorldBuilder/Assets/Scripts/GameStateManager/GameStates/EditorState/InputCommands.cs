@@ -1,9 +1,10 @@
 using System.Collections.Generic;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.EventSystems;
-using UnityEngine.UIElements;
+using UnityEngine.UI;
 
-public class InputCommands : AbstractGameEditor, IPointerDownHandler, IPointerUpHandler, IPointerMoveHandler, IScrollHandler
+public class InputCommands : EditorBase, IPointerDownHandler, IPointerUpHandler, IPointerMoveHandler, IScrollHandler
 {
     /// <summary>
     /// Date: 03/08/2023, By: Yvar
@@ -83,6 +84,8 @@ public class InputCommands : AbstractGameEditor, IPointerDownHandler, IPointerUp
     public static List<SceneObject> selectedObjects = new List<SceneObject>();
 
     [SerializeField] GameObject floatingObjectsMenu;
+    [SerializeField] RawImage gridSnapToggle;
+    [SerializeField] RawImage relativeSnapToggle;
 
     protected override void OnEnable()
     {
@@ -92,18 +95,19 @@ public class InputCommands : AbstractGameEditor, IPointerDownHandler, IPointerUp
         Zoom(0);
     }
 
-    public override void EditorAwake()
+    protected void Awake()
     {
         commandManager = new CommandManager(maxUndoAmount);
     }
 
-    public override void EditorStart()
+    protected void Start()
     {
         doSmooth = true;
     }
 
-    public override void EditorUpdate()
+    public override void OnUpdate()
     {
+        base.OnUpdate();
         CommandManagerUpdater();
         BasicKeys();
         SelectionProcess();
@@ -235,16 +239,34 @@ public class InputCommands : AbstractGameEditor, IPointerDownHandler, IPointerUp
         }
     }
 
-    void ToggleGridSnap()
+    public void ToggleGridSnap()
     {
-        // later add visual
-        doGridSnap = !doGridSnap;
+        if (doGridSnap)
+        {
+            doGridSnap = false;
+            gridSnapToggle.color = new Color(gridSnapToggle.color.r, gridSnapToggle.color.g, gridSnapToggle.color.b, 0);
+        }
+        else
+        {
+            if (doRelativeSnap) ToggleRelativeSnap();
+            doGridSnap = true;
+            gridSnapToggle.color = new Color(gridSnapToggle.color.r, gridSnapToggle.color.g, gridSnapToggle.color.b, 0.5f);
+        }
     }
 
-    void ToggleRelativeSnap()
+    public void ToggleRelativeSnap()
     {
-        // later add visual
-        doRelativeSnap = !doRelativeSnap;
+        if (doRelativeSnap)
+        {
+            doRelativeSnap = false;
+            relativeSnapToggle.color = new Color(relativeSnapToggle.color.r, relativeSnapToggle.color.g, relativeSnapToggle.color.b, 0);
+        }
+        else
+        {
+            if (doGridSnap) ToggleGridSnap();
+            doRelativeSnap = true;
+            relativeSnapToggle.color = new Color(relativeSnapToggle.color.r, relativeSnapToggle.color.g, relativeSnapToggle.color.b, 0.5f);
+        }
     }
 
     public static void AddKeyCommand(KeyCode keyCode, ICommand command)
@@ -403,6 +425,7 @@ public class InputCommands : AbstractGameEditor, IPointerDownHandler, IPointerUp
         }
         return false;
     }
+
     void StartSelection(Vector2 mouseLocation)
     {
         selectionStartingPoint = mouseLocation;
@@ -723,5 +746,20 @@ public class InputCommands : AbstractGameEditor, IPointerDownHandler, IPointerUp
         camerasPivot.transform.rotation = Quaternion.Euler(45, 0, 0);
         mainCamera.transform.localPosition = new Vector3(0, 0, -10);
         mainCamera.transform.localRotation = Quaternion.identity;
+    }
+
+    public void AddExitToListener()
+    {
+        UIListener.listener = null;
+        UIListener.listener = ExitTool;
+    }
+
+    public void ExitTool()
+    {
+#if UNITY_EDITOR
+        EditorApplication.isPlaying = false;
+#else
+        Application.Quit();
+#endif
     }
 }

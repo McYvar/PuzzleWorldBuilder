@@ -4,14 +4,6 @@ using UnityEngine;
 
 public class MainMenuState : BaseState
 {
-    public override void OnAwake()
-    {
-    }
-
-    public override void OnStart()
-    {
-    }
-
     public override void OnEnter()
     {
     }

@@ -2,7 +2,7 @@
 using UnityEngine;
 using UnityEngine.UIElements;
 
-public class SceneObject : AbstractGameEditor
+public class SceneObject : EditorBase
 {
     // static list of all objects visible in the scene
     [HideInInspector] public Vector3 myStartPos;
@@ -50,18 +50,6 @@ public class SceneObject : AbstractGameEditor
     }
 
     public virtual void OnFinishMove()
-    {
-    }
-
-    public override void EditorAwake()
-    {
-    }
-
-    public override void EditorStart()
-    {
-    }
-
-    public override void EditorUpdate()
     {
     }
 

@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
 
-public class BackGroundLayerOptions : AbstractGameEditor, IPointerUpHandler, IPointerDownHandler
+public class BackGroundLayerOptions : EditorBase, IPointerUpHandler, IPointerDownHandler
 {
     public static List<DropDownMenu> AllDropDownMenus = new List<DropDownMenu>();
     [SerializeField] DropDownMenu FloatingDropDownMenu;
@@ -62,17 +62,6 @@ public class BackGroundLayerOptions : AbstractGameEditor, IPointerUpHandler, IPo
     public void OpenFloatingDropDown(PointerEventData eventData)
     {
         FloatingDropDownMenu.DisplayDropDownOnLocation(eventData.position.x, eventData.position.y);
-    }
-    public override void EditorAwake()
-    {
-    }
-
-    public override void EditorStart()
-    {
-    }
-
-    public override void EditorUpdate()
-    {
     }
 
 }

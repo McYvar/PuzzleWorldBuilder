@@ -105,6 +105,11 @@ public class PuzzleGrid
         currentHighlightedTile.Highlight();
     }
 
+    public void UnhighLightCurrentTile()
+    {
+        currentHighlightedTile?.Unhighlight();
+    }
+
     public void OnSelectTile(Vector3 tileChords)
     {
         Vector3 offsetChords;
@@ -256,15 +261,17 @@ public class PuzzleGrid
         UpdateNeighbours(tileChords, offsetChords);
     }
 
-    public void MakeNonPlayInvisible(Vector3 tileChords)
+    public void OnPlayMode(Vector3 tileChords)
     {
         Vector3 offsetChords;
         FindXZ(tileChords, out offsetChords);
         if (tileInformation[(int)offsetChords.x, (int)offsetChords.z].GetTileType() == TileType.NONE_TILE)
             tileInformation[(int)offsetChords.x, (int)offsetChords.z].TurnOffMesh();
+
+        UnhighLightCurrentTile();
     }
 
-    public void MakeNonPlayVisable(Vector3 tileChords)
+    public void OnEditMode(Vector3 tileChords)
     {
         Vector3 offsetChords;
         FindXZ(tileChords, out offsetChords);

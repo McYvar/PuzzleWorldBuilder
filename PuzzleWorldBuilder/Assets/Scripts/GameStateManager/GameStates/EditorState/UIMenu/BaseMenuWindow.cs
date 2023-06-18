@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 
-public class BaseMenuWindow : AbstractGameEditor
+public class BaseMenuWindow : EditorBase
 {
     [SerializeField] protected RectTransform outlineTop;
     [SerializeField] protected RectTransform outlineBottom;
@@ -16,20 +16,7 @@ public class BaseMenuWindow : AbstractGameEditor
         rectTransform = GetComponent<RectTransform>();
     }
 
-    protected virtual void Update()
-    {
-        MenuOutline();
-    }
-
-    public override void EditorAwake()
-    {
-    }
-
-    public override void EditorStart()
-    {
-    }
-
-    public override void EditorUpdate()
+    public override void OnUpdate()
     {
         MenuOutline();
     }

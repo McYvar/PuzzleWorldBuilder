@@ -9,17 +9,12 @@ public class GameStateManager : MonoBehaviour
 
     public static GameStateManager Instance;
 
-    private void Awake()
+    private void Start()
     {
         Instance = this;
         DontDestroyOnLoad(this);
         BaseState[] states = GetComponents<BaseState>();
         fsm = new FiniteStateMachine(startState.GetType(), states);
-    }
-
-    private void Start()
-    {
-        fsm?.OnStart();
     }
 
     private void Update()
