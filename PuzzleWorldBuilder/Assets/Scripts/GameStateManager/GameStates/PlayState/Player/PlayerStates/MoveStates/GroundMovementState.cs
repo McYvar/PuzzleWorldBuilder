@@ -65,8 +65,8 @@ public class GroundMovementState : MoveState
             Mathf.Cos(Vector3.Angle(-transform.up, rb.velocity) * Mathf.Deg2Rad);
         rb.velocity += transform.up * nearVectorLenght;
         rb.AddForce(transform.up * jumpForce, ForceMode.VelocityChange);
-        stateManager.SwitchState(typeof(AirMovementState));
         groundObjectVelocity = deltaPos / Time.deltaTime;
+        stateManager.SwitchState(typeof(AirMovementState));
     }
 
     void FollowPlatform()
